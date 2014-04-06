@@ -8,7 +8,7 @@ var database = {}
 
 database.init = function() {
 
-	if(!MySQL) {
+	if(!db.mysql) {
 		db.mysql = MySQL.createPool({
 			host : config['mysql_auth'].host,
 			port : config['mysql_auth'].port,
@@ -17,12 +17,10 @@ database.init = function() {
 			password : config['mysql_auth'].password
 		});
 	}
-	else
-		console.error('unable to connect - mysqldb');
 
-	if(!MongoDB) {
+	if(!db.mongo) {
 		var	server = new Server(config['mongodb_auth'].host, config['mongodb_auth'].port, config['mongodb_auth']['server_options']);
-		db.mongo = new database(config['mongodb_auth'].database, server, config['database_options']);
+		db.mongo = new database(config['mongodb_auth'].database, server, config['mongodb_auth']['database_options']);
 
 		db.mongo.open(function(error, db) {
 			if(!error)
