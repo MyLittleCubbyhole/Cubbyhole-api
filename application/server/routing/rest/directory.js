@@ -1,18 +1,18 @@
-var provider 	= require('../../database/collection/fs/directory.js')
-,	directory 	= { get : {}, post : {}, put : {}, delete : {} };
+var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	directory = { get : {}, post : {}, put : {}, delete : {} };
 
 
 /********************************[  GET   ]********************************/
 
 directory.get.all 		= function(request, response){
-	provider.find(function(error, data){
+	provider.get.directory(function(error, data){
 		response.send( (!error ? data : error ) );
 	})
 };
 
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
-	provider.findByOwner(params[0], function(error, data){
+	provider.find.byOwner(params[0], function(error, data){
 		response.send( (!error ? data : error ) );
 	})
 };
@@ -24,7 +24,7 @@ directory.get.byPath	= function(request, response){
 	,	url		= request.url;
 	params[1] && params[1].slice(-1) == '/' && path.push('/');
 
-	provider.findPath({ "userId" : userId, "path" : path }, function(error, data){
+	provider.find.byPath({ "userId" : userId, "path" : path }, function(error, data){
 		response.send( (!error ? data : error ) );
 	})
 }
@@ -33,7 +33,7 @@ directory.get.byPath	= function(request, response){
 
 directory.post.init	= function(request, response){
 	var userId = request.params[0];
-	provider.createDirectory(userId, function(error, data){
+	provider.create.directory(userId, function(error, data){
 		response.send({'information': (!error ? 'directory created' : 'An error has occurred - ' + error) });
 	})
 }
@@ -50,7 +50,7 @@ directory.post.create = function(request, response){
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - folder name must be defined', 'params' : parameters });
 	else
-		provider.createFolder(parameters, function(error, data){
+		provider.create.folder(parameters, function(error, data){
 			parameters.path.pop();
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
 		})
@@ -66,7 +66,7 @@ directory.post.upload = function(request, response){
 
 	data.owner = params[0];
 
-	provider.createFile(data, function(error){
+	provider.create.file(data, function(error){
 		response.send( (!error ? 'file uploaded' : error ) );
 	})
 
@@ -89,7 +89,7 @@ directory.put.rename = function(request, response){
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });
     else
-        provider.updateName(parameters, function(error, data) {
+        provider.update.name(parameters, function(error, data) {
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
         });
 
@@ -99,7 +99,7 @@ directory.put.rename = function(request, response){
 
 directory.delete.byOwner 	= function(request, response){
 	var userId = request.params[0];
-	provider.deleteByOwner(userId, function(error, data){
+	provider.delete.byOwner(userId, function(error, data){
 		response.send({'information': (!error ? 'directory deleted' : 'An error has occurred - ' + error) });
 	})
 }
@@ -115,7 +115,7 @@ directory.delete.byPath		= function(request, response){
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
 	else
-		provider.deleteByPath(parameters, function(error, data){
+		provider.delete.byPath(parameters, function(error, data){
 			response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
 		})
 }

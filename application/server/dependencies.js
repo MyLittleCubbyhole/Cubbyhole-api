@@ -1,8 +1,11 @@
- var Dependency = function(app, server){
+var dependencies;
 
-	require('./routing/core')(app);
-	require('./socket/core')(server);
+dependencies = function(server, app) {
+
+	require(global.paths.server + '/database/core').init();
+	require(global.paths.server + '/routing/core').init(app);
+	require(global.paths.server + '/websockets/core').init(server);
 
 }
 
-module.exports = Dependency;
+module.exports = dependencies;

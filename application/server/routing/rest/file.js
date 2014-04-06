@@ -1,4 +1,4 @@
-var provider 	= require('../../database/collection/gridfs/file.js')
+var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 
 file.get.download = function(request, response){
@@ -19,7 +19,8 @@ file.get.download = function(request, response){
 	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 
-	provider.findByPath(data, function(error, download){
+	//@TODO modifier flux streaming pour rendre fonctionnel sur tous les navigateurs
+	provider.find.byPath(data, function(error, download){
 		header["Content-Type"]	= download.type;
 		header["Accept-Ranges"] = "bytes";
 		var total 	= download.length;

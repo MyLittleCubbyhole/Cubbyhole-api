@@ -1,13 +1,9 @@
-var file				= require('./rest/file')
-,	directory			= require('./rest/directory')
-,	connectMultiparty 	= require('connect-multiparty')
-,	routing;
-var multipartDecoder 	= connectMultiparty();
+var file = require(global.paths.server + '/routing/rest/file')
+,	directory = require(global.paths.server + '/routing/rest/directory')
+,	multipartDecoder = require('connect-multiparty')()
+,	routing = {};
 
-routing = function(app){
-
-	/*just for dev*/app.get('/', function(request, response){response.render('index')})
-
+routing.init = function(app) {
 
 	app.get('/api/browse', directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, directory.get.byOwner);
@@ -23,5 +19,7 @@ routing = function(app){
 	app.delete(/^\/api\/browse\/([0-9]+)$/, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, directory.delete.byPath);
 }
+
+
 
 module.exports = routing;
