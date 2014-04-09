@@ -12,7 +12,7 @@ directory.get.all 		= function(request, response){
 
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
-	provider.find.byOwner(params[0], function(error, data){
+	provider.get.byOwner(params[0], function(error, data){
 		response.send( (!error ? data : error ) );
 	})
 };
@@ -24,7 +24,7 @@ directory.get.byPath	= function(request, response){
 	,	url		= request.url;
 	params[1] && params[1].slice(-1) == '/' && path.push('/');
 
-	provider.find.byPath({ "userId" : userId, "path" : path }, function(error, data){
+	provider.get.byPath({ "userId" : userId, "path" : path }, function(error, data){
 		response.send( (!error ? data : error ) );
 	})
 }
