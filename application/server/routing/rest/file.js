@@ -20,7 +20,6 @@ file.get.download = function(request, response){
 	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 
-	//@TODO modifier flux streaming pour rendre fonctionnel sur tous les navigateurs
 	provider.get.byPath(data, function(error, download){
 		if(!error && download) {
 

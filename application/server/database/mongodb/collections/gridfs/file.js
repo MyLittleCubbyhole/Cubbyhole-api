@@ -66,7 +66,7 @@ provider.update.fileName = function(data, callback) {
     });
 }
 
-/********************************[ OTHER ]********************************/
+/********************************[ OTHERS ]********************************/
 
 provider.upload = function(params, callback){
 	var mode = params.mode || 'w';

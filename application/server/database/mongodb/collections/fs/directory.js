@@ -87,7 +87,7 @@ provider.create.file = function(params, callback){
 		collection.findOne({"ownerId":parseInt(params.owner,10)}, function(error, data){
 			if(!error && data){
 
-				params.id = params.id || new ObjectID();
+				params.id = new ObjectID();
 				var file = {
 					name : params.name 
 				,	type : 'file'
