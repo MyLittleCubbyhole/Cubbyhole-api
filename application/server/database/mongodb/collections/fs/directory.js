@@ -5,6 +5,10 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,	mongo = MongoProvider.db
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 
+provider.init = function() {
+	if(!fileProvider)
+	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+}
 
 /********************************[  GET   ]********************************/
 
@@ -22,7 +26,10 @@ provider.get.byOwner = function(userId, callback){
 
 provider.get.byPath = function(params, callback){
 	provider.get.byOwner(params.userId, function(error, data){
-		data = tools.browse(params.path, data.root);
+		if(!error && data)
+			data = tools.browse(params.path, data.root);
+		else
+			error = 'user repository not found or offline database';
 		callback.call(this, error, data);
 	})
 }
@@ -79,7 +86,8 @@ provider.create.file = function(params, callback){
 	mongo.collection('directories', function(error, collection){
 		collection.findOne({"ownerId":parseInt(params.owner,10)}, function(error, data){
 			if(!error && data){
-				params.id = new ObjectID();
+
+				params.id = params.id || new ObjectID();
 				var file = {
 					name : params.name 
 				,	type : 'file'
@@ -87,12 +95,14 @@ provider.create.file = function(params, callback){
 				,	sharing : []
 				};
 				try {
-					var dir = params.lPath.length > 1 ? tools.browse(params.lPath, data.root, true) : data.root;
+					var dir = params.logicPath.length > 1 ? tools.browse(params.logicPath, data.root, true) : data.root;
 					for(var i in dir)
 						if(dir[i].name == params.name)
 							throw "file already exist";
 
-					fileProvider.upload(params, function(error, createdFile){
+					fileProvider.upload(params, function(error){
+						if(error)
+							throw 'error during upload - '+error;
 						dir.push(file);
 						collection.save( data, { safe : true }, callback);
 					})

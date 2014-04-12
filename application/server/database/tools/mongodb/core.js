@@ -1,3 +1,5 @@
+var mongoTools = {};
+
 /**
  * [RECURSION] browse directory and return wanted file/folder
  * @param  {array} path
@@ -5,7 +7,7 @@
  * @param  {boolean} targetOnly
  * @return {json object | array}
  */
-exports.browse = function(path, root, targetOnly){
+mongoTools.browse = function(path, root, targetOnly){
 	for(var id in root)
 		if(path[0] && path[0] == root[id].name){
 			path = path.slice(1);
@@ -17,7 +19,7 @@ exports.browse = function(path, root, targetOnly){
 	return root;
 }
 
-exports.browseAndGetProperties = function(root, data, properties){
+mongoTools.browseAndGetProperties = function(root, data, properties){
 	properties 	= properties || ['name'];
 	var property;
 
@@ -34,3 +36,6 @@ exports.browseAndGetProperties = function(root, data, properties){
 				data.push(property);
 		}
 }
+
+
+module.exports = mongoTools;

@@ -26,7 +26,6 @@
     "mysql": "~2.1.1",
     "express": "~3.5.1",
     "socket.io": "~0.9.16",
-    "gridfs-stream": "~0.4.1",
     "mongodb": "~1.4.0",
     "connect-multiparty": "~1.0.3"
   }

@@ -1,5 +1,6 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
+provider.init();
 
 file.get.download = function(request, response){
 	var params 	= request.params
@@ -20,32 +21,37 @@ file.get.download = function(request, response){
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 
 	//@TODO modifier flux streaming pour rendre fonctionnel sur tous les navigateurs
-	provider.find.byPath(data, function(error, download){
-		header["Content-Type"]	= download.type;
-		header["Accept-Ranges"] = "bytes";
-		var total 	= download.length;
+	provider.get.byPath(data, function(error, download){
+		if(!error && download) {
 
-		if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined')
-		{
-			
-			var start 	= parseInt(partialstart, 10)
-			,	end 	= partialend ? parseInt(partialend, 10) : total-1;
- 
-			header["Content-Range"] 	= "bytes " + start + "-" + end + "/" + (total);
-			header["Content-Length"]	= (end-start)+1;
-			header['Transfer-Encoding'] = 'chunked';
-			header["Connection"] 		= "close";
-			response.writeHead(206, header); 
-			response.write(download.data.slice(start, end), "binary");
+			header["Content-Type"] = download.type;
+			header["Accept-Ranges"] = "bytes";
+			var total 	= download.length;
+
+
+			if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined')
+			{
+				
+				var start 	= parseInt(partialstart, 10)
+				,	end 	= partialend ? parseInt(partialend, 10) : total-1;
+
+				header["Content-Range"] 	= "bytes " + start + "-" + end + "/" + (total);
+				header["Content-Length"]	= (end-start)+1;
+				header['Transfer-Encoding'] = 'chunked';
+				header["Connection"] 		= "close";
+				response.writeHead(206, header); 
+				response.write(download.data.slice(start, end), "binary");
+			}
+			else
+			{
+				header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
+				header["Content-Length"]		= total;
+				response.writeHead(200, header );
+				response.write(download.data, "binary");
+			}
 		}
 		else
-		{
-			header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
-			header["Content-Length"]		= total;
-			response.writeHead(200, header );
-			response.write(download.data, "binary");
-		}
- 
+			console.error('unable to download file -', error);
 		response.end();
 	})
 	

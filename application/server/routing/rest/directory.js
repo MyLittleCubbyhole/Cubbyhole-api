@@ -1,6 +1,6 @@
 var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
-
+provider.init();
 
 /********************************[  GET   ]********************************/
 
@@ -61,8 +61,8 @@ directory.post.upload = function(request, response){
 	//request body si c'est du server to server // a modifier par la suite quand on fera de l'upload par socket
 	var data 	= request.files ? request.files.file : request.body
 	,	params 	= request.params;
-	data.lPath 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
-	data.lPath.push('/');
+	data.logicPath 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
+	data.logicPath.push('/');
 
 	data.owner = params[0];
 

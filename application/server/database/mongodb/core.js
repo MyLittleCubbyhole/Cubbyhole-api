@@ -4,6 +4,6 @@ var db = require(global.paths.server + '/database/core').get().mongo
 ,	ObjectID = MongoDB.ObjectID
 ,	mongodb = {};
 
-mongodb.get = function() { return { db: db, gridStore: GridStore, objectID: ObjectID }; };
+mongodb.get = function() { return { db: db, gridStore: GridStore, objectId: ObjectID }; };
 
 module.exports = mongodb;
