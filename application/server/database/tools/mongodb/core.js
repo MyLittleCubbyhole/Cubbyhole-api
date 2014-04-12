@@ -11,7 +11,7 @@ mongoTools.browse = function(path, root, targetOnly){
 	for(var id in root)
 		if(path[0] && path[0] == root[id].name){
 			path = path.slice(1);
-			return path.length>0 && root[id].type == 'folder' ? exports.browse(path, root[id].content) : root[id];
+			return path.length>0 && root[id].type == 'folder' ? mongoTools.browse(path, root[id].content) : root[id];
 		}
 
 	if(targetOnly === true && path[0] != '/')
@@ -28,9 +28,9 @@ mongoTools.browseAndGetProperties = function(root, data, properties){
 
 	for(var id in root)
 		if(root[id].type == 'folder')
-			exports.browseAndGetProperties(root[id].content, data, properties);
+			mongoTools.browseAndGetProperties(root[id].content, data, properties);
 		else{
-			property	= {};
+			property = {};
 			for(var i in properties)
 				property[properties[i]] = root[id][properties[i]];
 				data.push(property);

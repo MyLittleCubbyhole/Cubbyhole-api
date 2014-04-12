@@ -31,11 +31,11 @@ user.post.create = function(request, response){
 		lastname: body.lastname,
 		email: body.email,
 		birthdate: body.birthdate,
-		roleId: body.role
+		roleId: body.roleId
 	};
 
 	for(var i in user)
-		witness = !user[i] ? true : witness;
+		witness = typeof user[i] == 'undefined' ? true : witness;
 
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
@@ -43,6 +43,7 @@ user.post.create = function(request, response){
 		userProvider.create.user(user, function(error, data){
 			if(data)
 				user.id = data.insertId;
+			console.log(error)
 			response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user' : user });
 		})
 
@@ -50,5 +51,7 @@ user.post.create = function(request, response){
 
 /********************************[  PUT   ]********************************/
 /********************************[ DELETE ]********************************/
+
+
 
 module.exports = user;

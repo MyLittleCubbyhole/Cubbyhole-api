@@ -25,11 +25,27 @@ provider.get.byEmail = function(email, callback) {
 
 provider.create.user = function(user, callback) {
 
-	var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `ROLEID`) values (';
-	tools.generatePassword(user.password, function(data) {
+	provider.get.byUsername(user.username, function(error, data) {
 
-		query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", ' + user.roleId + ')';
-		Mysql.query(query, callback);
+		if(!data || data.length == 0)
+			provider.get.byEmail(user.email, function(error, data) {
+				if(!data || data.length == 0) {
+					try {
+						var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `ROLEID`) values (';
+						tools.generatePassword(user.password, function(data) {
+
+							query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", ' + user.roleId + ')';
+							Mysql.query(query, callback);
+						})
+					}
+					catch(exception) { callback.call(this, 'user creation failed - ' + exception); }
+				}
+				else
+					callback.call(this, 'user already exist');
+			})
+		else
+			callback.call(this, 'user already exist');
+
 	})
 
 }

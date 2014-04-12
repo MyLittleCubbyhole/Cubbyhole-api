@@ -16,6 +16,7 @@ routing.init = function(app) {
 	app.post(/^\/api\/browse\/([0-9]+)$/, directory.post.init);
 	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, directory.post.create);
 	app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
+	app.post('/api/users', user.post.create);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, directory.put.rename);
 

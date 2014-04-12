@@ -10,7 +10,7 @@ mysql.query = function(query, callback) {
 					if(!error) {
 						data = rows.length == 1 ? rows[0] : rows;
 
-						callback && callback(data);
+						callback.call(this, error, data);
 					}
 					else
 						throw 'error when querying the database'+error;
@@ -22,6 +22,7 @@ mysql.query = function(query, callback) {
 				throw 'error when connecting to the database '+error;
 		}
 		catch(exception) {
+			callback.call('unable to execute query - '+exception);
 			console.error('database: '+query+' - ',exception);
 			self.release()
 		}

@@ -13,8 +13,8 @@ function encrypt(string, salt) {
 mysqlTools.generatePassword = function(password, callback){
 	var data = {};
 
-	if(!password || password.length<8)
-		throw 'invalid password';
+	if(!password || password.length<=8)
+		throw 'invalid password - password length must be greater than 8';
 
 	crypto.randomBytes(256, function(exception, salt) {
 		if(exception)
