@@ -7,14 +7,20 @@ uploader.init = function(socket) {
 
 	socket.on('upload_init', function (data) {
 
-		var name = data.name;
+		var path = data.path
+		,	logicPath = typeof path != 'undefined' && path != '/' ? path.match(/[^\/\\]+/g) : []
+		,	name = data.name;
+		
+		logicPath.push('/');
+
 		files[name] = {
 			owner: data.owner,
 			size : data.size,
 			type: data.type,
-			logicPath: ['/'],
+			logicPath: logicPath,
 			downloaded : 0
 		}
+
 		var chunk = 0;
 		socket.emit('upload_next', { 'chunk' : chunk, percent : 0 });
 	});
@@ -45,13 +51,11 @@ uploader.init = function(socket) {
 			files[name].id = parameters.id;
 			if(files[name]['downloaded'] == files[name]['size']){
 				files[name].id = null;
-				console.log('upload_done')
-				socket.emit('upload_end');
+				socket.emit('upload_done');
 			}
 			else {
 				var chunk = files[name]['downloaded'] / 524288;
 				var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
-				console.log('upload_next')
 				socket.emit('upload_next', { 'chunk' : chunk, 'percent' :  percent});
 			}
 		}
