@@ -104,6 +104,7 @@ provider.create.file = function(params, callback){
 						if(error)
 							throw 'error during upload - '+error;
 						dir.push(file);
+						
 						collection.save( data, { safe : true }, callback);
 					})
 				}
