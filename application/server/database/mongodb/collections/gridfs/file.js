@@ -1,15 +1,17 @@
 var MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
-,	tools = require(global.paths.server + '/database/tools/mongodb/core')
 ,	GridStorage = MongoProvider.gridStore
 ,	ObjectID = MongoProvider.objectId
 ,	mongo = MongoProvider.db
+,	tools
 ,	directoryProvider
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 
 
 provider.init = function() {
+	if(!tools)
+		tools = require(global.paths.server + '/database/tools/mongodb/core');
 	if(!directoryProvider)
-	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory');
+		directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory');
 }
 
 /********************************[  GET   ]********************************/
@@ -113,6 +115,19 @@ provider.download = function(data, callback){
 		else
 			callback('file not found '+error)
 	});
+}
+
+provider.zip = function(data, callback) {
+
+	directoryProvider.get.byPath(data, function(error, data){
+		if(!error) {
+
+			tools.zipFolder(data, callback);
+		}
+		else
+			callback.call(this,'path not found');
+	})
+
 }
 
 module.exports = provider;

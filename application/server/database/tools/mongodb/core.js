@@ -1,4 +1,6 @@
-var mongoTools = {};
+var mongoTools = {}
+,	nodeZip = new require('node-zip')
+,	provider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
 
 /**
  * [RECURSION] browse directory and return wanted file/folder
@@ -34,6 +36,43 @@ mongoTools.browseAndGetProperties = function(root, data, properties){
 			for(var i in properties)
 				property[properties[i]] = root[id][properties[i]];
 				data.push(property);
+		}
+}
+
+mongoTools.zipFolder = function(folder, callback) {
+	var filesCounter = 0
+	,	self = this
+	,	archiver = nodeZip();
+
+	function start() { filesCounter++; }
+
+	function stop() {
+		filesCounter--;
+		if(filesCounter<=0)
+			success.call(self);
+	}
+
+	function success() {
+		data = archiver.generate({base64:false,compression:'DEFLATE'});
+		callback.call(self, data);
+	}
+
+	mongoTools.dirtyBrowse(folder, archiver, start, stop);
+
+}
+
+mongoTools.dirtyBrowse = function(root, archiver, start, stop){
+
+	for(var id in root)
+		if(root[id].type == 'folder') 
+			mongoTools.dirtyBrowse( root[id].content, archiver.folder(root[id].name), start, stop );
+
+		else {
+			start();
+			provider.download({id : root[id].id, range : 0}, function(error, download) {
+				archiver.file(download.metadata.name, download.data);
+				stop();
+			});
 		}
 }
 

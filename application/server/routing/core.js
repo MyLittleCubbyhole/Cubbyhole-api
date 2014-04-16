@@ -9,6 +9,7 @@ routing.init = function(app) {
 	app.get('/api/browse', directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, directory.get.byOwner);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, directory.get.byPath);
+	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)*\/$/, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, file.get.download);
 	app.get('/api/users', user.get.all);
 	app.get('/api/users/:id', user.get.byId);
@@ -22,6 +23,8 @@ routing.init = function(app) {
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, directory.delete.byPath);
+
+
 }
 
 

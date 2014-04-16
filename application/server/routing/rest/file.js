@@ -56,4 +56,24 @@ file.get.download = function(request, response){
 	
 }
 
+file.get.zip = function(request, response) {	
+	
+	var params 	= request.params;
+	var data = {};
+	data.userId = params[0];
+	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
+	data.range 	= 0;
+	data.path.push('/');
+		
+	provider.zip(data, function(data) {
+
+		response.write(data, "binary");
+		response.end();
+	});
+		
+		
+}
+
+
+
 module.exports = file;
