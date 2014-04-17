@@ -2,11 +2,12 @@ var file = require(global.paths.server + '/routing/rest/file')
 ,	directory = require(global.paths.server + '/routing/rest/directory')
 ,	user = require(global.paths.server + '/routing/rest/user')
 ,	multipartDecoder = require('connect-multiparty')()
+,	filters = require(global.paths.server + '/routing/filters/core')
 ,	routing = {};
 
 routing.init = function(app) {
 
-	app.get('/api/browse', directory.get.all);
+	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, directory.get.byOwner);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, directory.get.byPath);
 	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)*\/$/, file.get.zip);
@@ -23,7 +24,6 @@ routing.init = function(app) {
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, directory.delete.byPath);
-
 
 }
 

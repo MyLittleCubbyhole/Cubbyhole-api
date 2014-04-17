@@ -20,7 +20,7 @@ file.get.download = function(request, response){
 	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 
-	provider.get.byPath(data, function(error, download){
+	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {
 
 			header["Content-Type"] = download.type;
@@ -28,8 +28,7 @@ file.get.download = function(request, response){
 			var total 	= download.length;
 
 
-			if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined')
-			{
+			if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined') {
 				
 				var start 	= parseInt(partialstart, 10)
 				,	end 	= partialend ? parseInt(partialend, 10) : total-1;
@@ -41,8 +40,7 @@ file.get.download = function(request, response){
 				response.writeHead(206, header); 
 				response.write(download.data.slice(start, end), "binary");
 			}
-			else
-			{
+			else {
 				header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
 				header["Content-Length"]		= total;
 				response.writeHead(200, header );
@@ -66,7 +64,7 @@ file.get.zip = function(request, response) {
 	data.path.push('/');
 		
 	provider.zip(data, function(data) {
-
+		header["Content-Disposition"] 	= 'attachment; filename="' + download.metadata.name + '"';
 		response.write(data, "binary");
 		response.end();
 	});

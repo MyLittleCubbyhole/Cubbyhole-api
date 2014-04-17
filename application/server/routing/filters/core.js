@@ -9,7 +9,9 @@ filters.tokenInterceptor = function(request, response, next) {
 
 
 	if(witness)
-		next()
+		next();
 	else
 		console.error('invalid access token');
 } 
+
+module.exports = filters;

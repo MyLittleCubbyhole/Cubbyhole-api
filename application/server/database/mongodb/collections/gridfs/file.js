@@ -59,9 +59,9 @@ provider.delete.file = function(id, callback){
 /********************************[ UPDATE ]********************************/
 
 provider.update.fileName = function(data, callback) {
-
-    mongo.collection('fs.files', function(error, collection){
-        collection.findOne({ "id" : data._id}, function(error, file) {
+	var id = data.id;
+    mongo.collection('fs.files', function(error, collection) {
+        collection.findOne({ "_id" : id}, function(error, file) {
             file.metadata.name = data.name;
             collection.save(file, { safe : true }, callback);
         });
@@ -119,6 +119,7 @@ provider.download = function(data, callback){
 
 provider.zip = function(data, callback) {
 
+	console.log(data)
 	directoryProvider.get.byPath(data, function(error, data){
 		if(!error) {
 
