@@ -4,9 +4,12 @@ var path    = require('path')
 ,   app     = express()
 ,   server  = http.createServer(app)
 ,   environment = ( typeof process.argv[2] != 'undefined' ? process.argv[2] : 'dev')
-,   link = {'prod':'config-prod.json', 'dev':'config-dev.json'};
+,   developer = ( typeof process.argv[3] != 'undefined' ? process.argv[3] : '')
+,   link = {'prod':'config-prod.json', 'dev':'config-dev.json', 'julien': 'config-julien.json', 'nicolas': 'config-nicolas.json'};
 
-global.configFile = typeof link[environment] != 'undefined' ? link[environment] : link['dev'];
+global.configFile = {};
+global.configFile.env = typeof link[environment] != 'undefined' ? link[environment] : link['dev'];
+global.configFile.developer = typeof link[developer] != 'undefined' ? link[developer] : '';
 global.paths = { app: __dirname, server: __dirname + '/application/server' };
 
 module.exports = { app: app, server: server };
@@ -31,5 +34,5 @@ require(global.paths.server + '/dependencies')(server, app);
 
 if (!module.parent)
     server.listen(config['node_config'].port, function () {
-        console.log('WebService server listening on port %d in %s mode - [%s]', this.address().port, app.settings.env, environment);
+        console.log('WebService server listening on port %d in %s mode - [%s] - [%s]', this.address().port, app.settings.env, environment, developer);
     });
