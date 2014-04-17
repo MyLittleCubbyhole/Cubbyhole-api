@@ -193,10 +193,10 @@ provider.update.name = function(params, callback){
 		collection.findOne({"ownerId":parseInt(params.userId,10)}, function(error, data){
 			if(!error){
 				try {
-                    var notOnRoot 		= params.path.length > 0
-                        ,	dir 			= notOnRoot ? tools.browse(params.path, data.root, true) : {type:'folder', content:data.root}
-                        ,	index 			= -1
-                        ,	target			= {};
+                    var notOnRoot	= params.path.length > 0
+                    ,	dir			= notOnRoot ? tools.browse(params.path, data.root, true) : {type:'folder', content:data.root}
+                    ,	index		= -1
+                    ,	target		= {};
 
                     if(dir.type != 'folder')
                         throw "invalid path";
@@ -206,6 +206,10 @@ provider.update.name = function(params, callback){
                             target = dir.content[i];
                             index = i;
                         }
+                        else
+							if(dir.content[i].name == params.newName)
+								throw "file or folder already exist";
+
 
                     if(index == -1)
                         throw "target not found"

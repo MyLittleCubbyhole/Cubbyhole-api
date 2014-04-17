@@ -84,6 +84,7 @@ directory.put.rename = function(request, response){
     parameters.userId 	= params[0]
     parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
     parameters.currentName = parameters.path.pop();
+    console.log(body)
     parameters.newName 	= body.name;
 
     if(!parameters.newName)
