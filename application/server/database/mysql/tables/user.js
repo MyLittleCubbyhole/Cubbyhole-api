@@ -31,10 +31,10 @@ provider.create.user = function(user, callback) {
 			provider.get.byEmail(user.email, function(error, data) {
 				if(!data || data.length == 0) {
 					try {
-						var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `ROLEID`) values (';
+						var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `COUNTRY`, `ROLEID`) values (';
 						tools.generatePassword(user.password, function(data) {
 
-							query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", ' + user.roleId + ')';
+							query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", ' + user.country + '", "' + user.roleId + ')';
 							Mysql.query(query, callback);
 						})
 					}
