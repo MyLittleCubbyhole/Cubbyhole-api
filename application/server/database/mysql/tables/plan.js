@@ -16,7 +16,7 @@ provider.get.byId = function(id, callback) {
 
 provider.create.plan = function(plan, callback) {
 	var query = 'insert into `plan` (`PRICE`,`NAME`,`STORAGE`,`DURATION`,`UPLOADBANDWIDTH`,`DOWNLOADBANDWIDTH`,`QUOTA`) values (';
-	query += plan.price + ',"' + data.name + '",' + parseInt(data.storage, 10) + ',' + parseInt(plan.duration, 10) + ',' + parseInt(plan.uploadBandWidth, 10) + ',' + parseInt(plan.downloadBandWidth,10) + ', ' + parseInt(plan.quota, 10) + ')';
+	query += plan.price + ',"' + plan.name + '",' + parseInt(plan.storage, 10) + ',' + parseInt(plan.duration, 10) + ',' + parseInt(plan.uploadBandWidth, 10) + ',' + parseInt(plan.downloadBandWidth,10) + ', ' + parseInt(plan.quota, 10) + ')';
 	Mysql.query(query, callback);
 
 }
@@ -30,7 +30,7 @@ provider.delete.byId = function(id, callback) {
 /********************************[  UPDATE   ]********************************/
 
 provider.update.price = function(plan, callback) {
-	Mysql.query('update `plan` set `PRICE`=' + data.price + ' where `ID`=' + parseInt(plan.id, 10) + ';', callback);
+	Mysql.query('update `plan` set `PRICE`=' + plan.price + ' where `ID`=' + parseInt(plan.id, 10) + ';', callback);
 }
 
 provider.update.storage = function(plan, callback) {
