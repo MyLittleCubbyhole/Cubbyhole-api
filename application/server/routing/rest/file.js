@@ -21,6 +21,8 @@ file.get.download = function(request, response){
 	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 
+	routingTools.addAccessControlHeaders(response);
+
 	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {
 
@@ -48,7 +50,6 @@ file.get.download = function(request, response){
 		}
 		else
 			console.error('unable to download file -', error);
-		routingTools.addAccessControlHeaders(response);
 		response.end();
 	})
 
