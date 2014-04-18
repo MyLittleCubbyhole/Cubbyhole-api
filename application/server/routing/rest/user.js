@@ -1,6 +1,5 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
-,	routingTools = require(global.paths.server + '/routing/tools/core')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
 
@@ -38,8 +37,6 @@ user.post.create = function(request, response){
 		roleId: body.roleId
 	};
 
-	routingTools.addAccessControlHeaders(response);
-
 	for(var i in user)
 		witness = typeof user[i] == 'undefined' ? true : witness;
 
@@ -59,8 +56,6 @@ user.post.authenticate = function(request, response) {
 	var params = request.params
 	,	body = request.body
 	,	witness = true;
-
-	routingTools.addAccessControlHeaders(response);
 
 	witness = body.email && body.password ? witness : false;
 

@@ -1,6 +1,6 @@
 var filters = {}
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
-,   routingTools = require(global.paths.server + '/routing/tools/core');
+,   config = require(global.paths.server + '/config/core').get();;
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
@@ -20,8 +20,6 @@ filters.tokenInterceptor = function(request, response, next) {
             }
         }
 
-        routingTools.addAccessControlHeaders(response);
-
         if(witness)
             next();
         else {
@@ -30,6 +28,16 @@ filters.tokenInterceptor = function(request, response, next) {
             response.end();
         }
     });
+};
+
+filters.headersInterceptor = function(request, response, next) {
+
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Access-Control-Allow-Methods', config['headersAccessControl'].allowMethods);
+    response.setHeader('Access-Control-Allow-Headers', config['headersAccessControl'].allowHeaders);
+
+    next();
+
 };
 
 module.exports = filters;
