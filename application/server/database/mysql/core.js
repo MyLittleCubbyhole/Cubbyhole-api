@@ -15,7 +15,7 @@ mysql.query = function(query, callback) {
 					else
 						throw 'error when querying the database'+error;
 
-					self.release()					
+					self.release()
 				});
 			}
 			else

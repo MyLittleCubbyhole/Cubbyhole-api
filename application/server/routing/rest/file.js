@@ -1,4 +1,5 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+,	routingTools = require(global.paths.server + '/routing/tools/core')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
@@ -30,7 +31,7 @@ file.get.download = function(request, response){
 
 			if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined')
 			{
-				
+
 				var start 	= parseInt(partialstart, 10)
 				,	end 	= partialend ? parseInt(partialend, 10) : total-1;
 
@@ -38,7 +39,7 @@ file.get.download = function(request, response){
 				header["Content-Length"]	= (end-start)+1;
 				header['Transfer-Encoding'] = 'chunked';
 				header["Connection"] 		= "close";
-				response.writeHead(206, header); 
+				response.writeHead(206, header);
 				response.write(download.data.slice(start, end), "binary");
 			}
 			else
@@ -51,27 +52,30 @@ file.get.download = function(request, response){
 		}
 		else
 			console.error('unable to download file -', error);
+		routingTools.addAccessControlHeaders(response);
 		response.end();
 	})
-	
+
 }
 
-file.get.zip = function(request, response) {	
-	
+file.get.zip = function(request, response) {
+
 	var params 	= request.params;
 	var data = {};
 	data.userId = params[0];
 	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= 0;
 	data.path.push('/');
-		
+
+	routingTools.addAccessControlHeaders(response);
+
 	provider.zip(data, function(data) {
 
 		response.write(data, "binary");
 		response.end();
 	});
-		
-		
+
+
 }
 
 
