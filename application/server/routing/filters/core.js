@@ -3,14 +3,16 @@ var filters = {},
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
-    ,   witness = true;
+    ,   witness = false;
 
-    var token = parseInt(query.token, 10) || 0;
+    var token = query.token || 0;
 
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
-            if(data.EXPIRATIONDATE >= Date.now()) {
+            if((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) {
                 witness = true;
+            } else {
+                tokenProvider.delete.byId(token, function(error, data) {});
             }
         }
 
@@ -21,6 +23,6 @@ filters.tokenInterceptor = function(request, response, next) {
             response.end();
         }
     });
-}
+};
 
 module.exports = filters;

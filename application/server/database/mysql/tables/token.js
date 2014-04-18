@@ -8,7 +8,7 @@ provider.get.all = function(callback) {
 }
 
 provider.get.byId = function(id, callback) {
-	Mysql.query('select * from `token` where `ID` = '+ parseInt(id, 10) +';', callback);
+	Mysql.query('select * from `token` where `ID` = "'+ id +'";', callback);
 }
 
 /********************************[  CREATE   ]********************************/
@@ -23,7 +23,7 @@ provider.create.token = function(token, callback) {
 /********************************[  DELETE   ]********************************/
 
 provider.delete.byId = function(id, callback) {
-	Mysql.query('delete from `token` where `ID`='+ parseInt(id, 10) + ';', callback);
+	Mysql.query('delete from `token` where `ID`= "'+ id + '";', callback);
 }
 
 /********************************[  UPDATE   ]********************************/
