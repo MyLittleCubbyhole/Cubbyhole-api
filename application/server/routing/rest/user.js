@@ -34,7 +34,7 @@ user.post.create = function(request, response){
 		email: body.email,
 		birthdate: body.birthdate,
 		country: body.country,
-		roleId: body.roleId
+		roleId: 1
 	};
 
 	for(var i in user)
@@ -46,7 +46,8 @@ user.post.create = function(request, response){
 		userProvider.create.user(user, function(error, data){
 			if(data)
 				user.id = data.insertId;
-			console.log(error)
+			else
+				console.log(error)
 			response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user' : user });
 		})
 
@@ -65,6 +66,7 @@ user.post.authenticate = function(request, response) {
 		userProvider.connect(body.email, body.password, function(error, data) {
 			if(data) {
 				mysqlTools.generateRandomBytes(32, function(tokenId) {
+					tokenId = encodeURIComponent(tokenId);
 					var token = {
 						id: tokenId,
 						expirationDate: new Date(Date.now() + 86400000).toISOString().slice(0, 19).replace('T', ' '),

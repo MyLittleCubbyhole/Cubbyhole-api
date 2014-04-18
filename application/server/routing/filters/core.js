@@ -4,12 +4,14 @@ var filters = {}
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
-    ,   witness = true;
+    ,   witness = false;
 
     var token = query.token || 0;
+    token = encodeURIComponent(token);
 
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
+            console.log(data);
             if((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) {
                 witness = true;
             } else {
@@ -23,7 +25,6 @@ filters.tokenInterceptor = function(request, response, next) {
         if(witness)
             next();
         else {
-
             response.writeHead(401, {});
             response.end();
         }
