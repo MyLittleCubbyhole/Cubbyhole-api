@@ -44,6 +44,8 @@ mongoTools.zipFolder = function(folder, callback) {
 	,	self = this
 	,	archiver = nodeZip();
 
+	archiver.file('read.me', 'powered by cubbyhole, \n cordialement, \n le trou du cube');
+
 	function start() { filesCounter++; }
 
 	function stop() {
@@ -53,20 +55,21 @@ mongoTools.zipFolder = function(folder, callback) {
 	}
 
 	function success() {
-		data = archiver.generate({base64:false,compression:'DEFLATE'});
-		callback.call(self, data);
+		var zipFile = {name: folder.name, data: null};
+		zipFile.data = archiver.generate({base64:false,compression:'DEFLATE'});
+		callback.call(self, zipFile);
 	}
 
-	mongoTools.dirtyBrowse(folder, archiver, start, stop);
+	mongoTools.dirtyBrowse(folder.data, archiver, start, stop);
 
 }
 
 mongoTools.dirtyBrowse = function(root, archiver, start, stop){
 
+	start()
 	for(var id in root)
 		if(root[id].type == 'folder') 
 			mongoTools.dirtyBrowse( root[id].content, archiver.folder(root[id].name), start, stop );
-
 		else {
 			start();
 			provider.download({id : root[id].id, range : 0}, function(error, download) {
@@ -74,6 +77,7 @@ mongoTools.dirtyBrowse = function(root, archiver, start, stop){
 				stop();
 			});
 		}
+	stop();
 }
 
 

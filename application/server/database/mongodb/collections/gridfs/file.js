@@ -119,11 +119,11 @@ provider.download = function(data, callback){
 
 provider.zip = function(data, callback) {
 
-	console.log(data)
+	var name = data.path.length >  1 ? data.path[data.path.length - 2] : data.path[data.path.length - 1];
 	directoryProvider.get.byPath(data, function(error, data){
 		if(!error) {
 
-			tools.zipFolder(data, callback);
+			tools.zipFolder({name: name, data:data}, callback);
 		}
 		else
 			callback.call(this,'path not found');

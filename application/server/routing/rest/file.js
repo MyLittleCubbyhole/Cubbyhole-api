@@ -56,16 +56,18 @@ file.get.download = function(request, response){
 
 file.get.zip = function(request, response) {	
 	
-	var params 	= request.params;
-	var data = {};
+	var params 	= request.params
+	,	header = {}
+	,	data = {};
 	data.userId = params[0];
 	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= 0;
 	data.path.push('/');
 		
-	provider.zip(data, function(data) {
-		header["Content-Disposition"] 	= 'attachment; filename="' + download.metadata.name + '"';
-		response.write(data, "binary");
+	provider.zip(data, function(zipFile) {
+		header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
+		response.writeHead(200, header);
+		response.write(zipFile.data, "binary");
 		response.end();
 	});
 		
