@@ -1,5 +1,4 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
-,	routingTools = require(global.paths.server + '/routing/tools/core')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
@@ -20,8 +19,6 @@ file.get.download = function(request, response){
 	data.userId = params[0];
 	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
-
-	routingTools.addAccessControlHeaders(response);
 
 	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {
@@ -63,8 +60,6 @@ file.get.zip = function(request, response) {
 	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= 0;
 	data.path.push('/');
-
-	routingTools.addAccessControlHeaders(response);
 
 	provider.zip(data, function(data) {
 		header["Content-Disposition"] 	= 'attachment; filename="' + download.metadata.name + '"';

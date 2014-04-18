@@ -10,7 +10,6 @@ var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 user.get.all = function(request, response) {
 
 	userProvider.get.all(function(error, data){
-		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? data : error ) );
 	})
 }
@@ -18,7 +17,6 @@ user.get.all = function(request, response) {
 user.get.byId = function(request, response) {
 	var params 	= request.params;
 	userProvider.get.byId(params.id, function(error, data){
-		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? data : error ) );
 	})
 }

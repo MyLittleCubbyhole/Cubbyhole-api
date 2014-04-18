@@ -1,9 +1,10 @@
-var filters = {},
-    tokenProvider = require(global.paths.server + '/database/mysql/tables/token');
+var filters = {}
+,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
+,   routingTools = require(global.paths.server + '/routing/tools/core');
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
-    ,   witness = false;
+    ,   witness = true;
 
     var token = query.token || 0;
 
@@ -12,13 +13,19 @@ filters.tokenInterceptor = function(request, response, next) {
             if((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) {
                 witness = true;
             } else {
-                tokenProvider.delete.byId(token, function(error, data) {});
+                tokenProvider.delete.byId(token, function(error, data) {
+                    if(error)
+                        console.log(error);
+                });
             }
         }
+
+        routingTools.addAccessControlHeaders(response);
 
         if(witness)
             next();
         else {
+
             response.writeHead(401, {});
             response.end();
         }
