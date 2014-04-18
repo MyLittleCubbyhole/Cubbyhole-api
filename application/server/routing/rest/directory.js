@@ -1,4 +1,5 @@
 var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	routingTools = require(global.paths.server + '/routing/tools/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
@@ -6,6 +7,7 @@ provider.init();
 
 directory.get.all 		= function(request, response){
 	provider.get.directory(function(error, data){
+		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? data : error ) );
 	})
 };
@@ -13,6 +15,7 @@ directory.get.all 		= function(request, response){
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
 	provider.get.byOwner(params[0], function(error, data){
+		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? data : error ) );
 	})
 };
@@ -25,6 +28,7 @@ directory.get.byPath	= function(request, response){
 	params[1] && params[1].slice(-1) == '/' && path.push('/');
 
 	provider.get.byPath({ "userId" : userId, "path" : path }, function(error, data){
+		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? data : error ) );
 	})
 }
@@ -34,6 +38,7 @@ directory.get.byPath	= function(request, response){
 directory.post.init	= function(request, response){
 	var userId = request.params[0];
 	provider.create.directory(userId, function(error, data){
+		routingTools.addAccessControlHeaders(response);
 		response.send({'information': (!error ? 'directory created' : 'An error has occurred - ' + error) });
 	})
 }
@@ -46,6 +51,8 @@ directory.post.create = function(request, response){
 	parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
 	parameters.name 	= body.name;
 	parameters.path.push('/');
+
+	routingTools.addAccessControlHeaders(response);
 
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - folder name must be defined', 'params' : parameters });
@@ -67,6 +74,7 @@ directory.post.upload = function(request, response){
 	data.owner = params[0];
 
 	provider.create.file(data, function(error){
+		routingTools.addAccessControlHeaders(response);
 		response.send( (!error ? 'file uploaded' : error ) );
 	})
 
@@ -87,6 +95,8 @@ directory.put.rename = function(request, response){
     console.log(body)
     parameters.newName 	= body.name;
 
+    routingTools.addAccessControlHeaders(response);
+
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });
     else
@@ -101,6 +111,7 @@ directory.put.rename = function(request, response){
 directory.delete.byOwner 	= function(request, response){
 	var userId = request.params[0];
 	provider.delete.byOwner(userId, function(error, data){
+		routingTools.addAccessControlHeaders(response);
 		response.send({'information': (!error ? 'directory deleted' : 'An error has occurred - ' + error) });
 	})
 }
@@ -112,6 +123,8 @@ directory.delete.byPath		= function(request, response){
 	parameters.userId 	= params[0]
 	parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
 	parameters.name 	= parameters.path.pop();
+
+	routingTools.addAccessControlHeaders(response);
 
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
