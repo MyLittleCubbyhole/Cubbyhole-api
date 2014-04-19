@@ -12,13 +12,28 @@ global.configFile.env = typeof link[environment] != 'undefined' ? link[environme
 global.configFile.developer = typeof link[developer] != 'undefined' ? link[developer] : '';
 global.paths = { app: __dirname, server: __dirname + '/application/server' };
 
+var config = require(global.paths.server + '/config/core').get();
+
 module.exports = { app: app, server: server };
+
+var allowCorssDomain = function(request, response, next) {
+
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Access-Control-Allow-Methods', config['headersAccessControl'].allowMethods);
+    response.setHeader('Access-Control-Allow-Headers', config['headersAccessControl'].allowHeaders);
+
+    if(request.method == 'OPTIONS')
+        response.send(200);
+    else
+        next();
+};
 
 app.configure(function(){
     app.use(express.json());
     app.use(express.urlencoded());
     app.use(express.methodOverride());
     app.use(express.cookieParser());
+    app.use(allowCorssDomain);
 });
 
 app.configure('production', function () {
