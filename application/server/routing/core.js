@@ -18,7 +18,7 @@ routing.init = function(app) {
 	app.get('/api/logout', user.get.logout);
 
 	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
-	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)\/$/, filters.tokenInterceptor, directory.post.create);
+	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, directory.post.create);
 	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);
