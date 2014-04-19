@@ -21,11 +21,18 @@ user.get.byId = function(request, response) {
 	})
 }
 
+user.get.checkToken = function(request, response) {
+    response.writeHead(200);
+    response.end();
+};
+
 user.get.logout = function(request, response) {
     var query  = request.query;
     if(query.token) {
         var token = encodeURIComponent(query.token);
+        console.log(token);
         tokenProvider.delete.byId(token, function(error, data) {
+            console.log(data);
             if(data && data.affectedRows && data.affectedRows >= 1)
                 response.writeHead(200);
             else

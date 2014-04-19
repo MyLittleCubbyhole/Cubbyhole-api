@@ -24,7 +24,8 @@ filters.tokenInterceptor = function(request, response, next) {
         if(witness)
             next();
         else {
-            response.writeHead(401, {});
+            response.writeHead(401);
+            response.write("You must be authentified to request the API");
             response.end();
         }
     });
