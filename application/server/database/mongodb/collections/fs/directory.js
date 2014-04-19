@@ -85,7 +85,7 @@ provider.create.folder = function(params, callback){
 provider.create.file = function(params, callback){
 	mongo.collection('directories', function(error, collection){
 		collection.findOne({"ownerId":parseInt(params.owner,10)}, function(error, data){
-			if(!error && data){
+			if(!error && data) {
 
 				params.id = new ObjectID();
 				var file = {
@@ -104,7 +104,7 @@ provider.create.file = function(params, callback){
 						if(error)
 							throw 'error during upload - '+error;
 						dir.push(file);
-						
+						console.log('uploaded - ', params.id)
 						collection.save( data, { safe : true }, callback);
 					})
 				}

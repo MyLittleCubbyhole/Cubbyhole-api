@@ -27,9 +27,7 @@ file.get.download = function(request, response){
 			header["Accept-Ranges"] = "bytes";
 			var total 	= download.length;
 
-
 			if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined') {
-				
 				var start 	= parseInt(partialstart, 10)
 				,	end 	= partialend ? parseInt(partialend, 10) : total-1;
 
@@ -37,7 +35,7 @@ file.get.download = function(request, response){
 				header["Content-Length"]	= (end-start)+1;
 				header['Transfer-Encoding'] = 'chunked';
 				header["Connection"] 		= "close";
-				response.writeHead(206, header); 
+				response.writeHead(206, header);
 				response.write(download.data.slice(start, end), "binary");
 			}
 			else {
@@ -51,11 +49,10 @@ file.get.download = function(request, response){
 			console.error('unable to download file -', error);
 		response.end();
 	})
-	
+
 }
 
-file.get.zip = function(request, response) {	
-	
+file.get.zip = function(request, response) {
 	var params 	= request.params
 	,	header = {}
 	,	data = {};
@@ -70,8 +67,8 @@ file.get.zip = function(request, response) {
 		response.write(zipFile.data, "binary");
 		response.end();
 	});
-		
-		
+
+
 }
 
 

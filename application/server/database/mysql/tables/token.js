@@ -8,7 +8,7 @@ provider.get.all = function(callback) {
 }
 
 provider.get.byId = function(id, callback) {
-	Mysql.query('select * from `token` where `ID` = '+ parseInt(id, 10) +';', callback);
+	Mysql.query('select * from `token` where `ID` = "'+ id +'";', callback);
 }
 
 /********************************[  CREATE   ]********************************/
@@ -16,17 +16,17 @@ provider.get.byId = function(id, callback) {
 
 provider.create.token = function(token, callback) {
 	var query = 'insert into `token` (`ID`, `EXPIRATIONDATE`,`ORIGIN`,`USERID`) values (';
-	query += parseInt(token.id, 10) + ',"' + token.expirationDate + '",' + token.origin + ',' + parseInt(token.userId, 10) + ')';
+	query += '"' + token.id + '","' + token.expirationDate + '","' + token.origin + '",' + parseInt(token.userId, 10) + ')';
 	Mysql.query(query, callback);
 }
 
 /********************************[  DELETE   ]********************************/
 
 provider.delete.byId = function(id, callback) {
-	Mysql.query('delete from `token` where `ID`='+ parseInt(id, 10) + ';', callback);
+	Mysql.query('delete from `token` where `ID`= "'+ id + '";', callback);
 }
 
-/********************************[  UPDATE   ]********************************/s
+/********************************[  UPDATE   ]********************************/
 
 
 module.exports = provider;
