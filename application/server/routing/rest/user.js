@@ -1,4 +1,5 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
@@ -19,6 +20,26 @@ user.get.byId = function(request, response) {
 		response.send( (!error ? data : error ) );
 	})
 }
+
+user.get.logout = function(request, response) {
+    var query  = request.query;
+    if(query.token) {
+        var token = encodeURIComponent(query.token);
+        tokenProvider.delete.byId(token, function(error, data) {
+            if(data && data.affectedRows && data.affectedRows >= 1)
+                response.writeHead(200);
+            else
+                response.writeHead(500);
+
+            response.end();
+        });
+    }
+    else {
+        response.writeHead(500);
+        response.end();
+    }
+
+};
 
 /********************************[  POST  ]********************************/
 
@@ -44,11 +65,17 @@ user.post.create = function(request, response){
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
 	else
 		userProvider.create.user(user, function(error, data){
-			if(data)
+			if(data) {
 				user.id = data.insertId;
-			else
-				console.log(error)
-			response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user' : user });
+				directoryProvider.create.directory(user.id, function(error, dataDirectory){
+                    response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+                })
+			}
+			else {
+				console.log(error);
+				response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+			}
+
 		})
 
 }
