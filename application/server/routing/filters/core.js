@@ -11,7 +11,6 @@ filters.tokenInterceptor = function(request, response, next) {
 
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
-            console.log(data);
             if((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) {
                 witness = true;
             } else {
