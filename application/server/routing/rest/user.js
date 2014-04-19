@@ -63,19 +63,22 @@ user.post.authenticate = function(request, response) {
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'email' : body.email, 'password' : bodu.password });
 	else
-		userProvider.connect(body.email, body.password, function(error, data) {
-			if(data) {
+		userProvider.connect(body.email, body.password, function(error, dataUser) {
+			if(dataUser) {
 				mysqlTools.generateRandomBytes(32, function(tokenId) {
 					tokenId = encodeURIComponent(tokenId);
 					var token = {
 						id: tokenId,
 						expirationDate: new Date(Date.now() + 86400000).toISOString().slice(0, 19).replace('T', ' '),
 						origin: request.header("User-Agent"),
-						userId: data.ID
+						userId: dataUser.ID
 					};
-					tokenProvider.create.token(token, function(error, data) {
+					tokenProvider.create.token(token, function(error, dataToken) {
 						if(!error) {
-							response.send({"token" : tokenId});
+							dataUser.TOKEN = tokenId;
+							delete(dataUser.PASSWORD);
+							delete(dataUser.SALT);
+							response.send({'user' : dataUser});
 						} else
 							response.send({'information' : 'An error has occurred - ' + error});
 					});
