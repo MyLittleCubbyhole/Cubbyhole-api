@@ -9,14 +9,14 @@ routing.init = function(app) {
 
 	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.get.byOwner);
-	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor, directory.get.byPath);
-	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)*\/$/, filters.tokenInterceptor, file.get.zip);
+	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)/, filters.tokenInterceptor, directory.get.byPath);
+	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.download);
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 
 	app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
-	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, directory.post.create);
+	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)\/$/, filters.tokenInterceptor, directory.post.create);
 	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);

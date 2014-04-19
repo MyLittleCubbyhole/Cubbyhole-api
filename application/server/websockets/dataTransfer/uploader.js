@@ -12,7 +12,6 @@ uploader.init = function(socket) {
 		,	name = data.name;
 		
 		logicPath.push('/');
-
 		files[name] = {
 			owner: data.owner,
 			size : data.size,
@@ -21,16 +20,16 @@ uploader.init = function(socket) {
 			downloaded : 0,
 			clientSideId: data.id
 		}
+		console.log('init - ', name)
 
 		var chunk = 0;
 		socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId  });
 	});
 
 	socket.on('upload', function(data) {
-
 		var name = data.name;
 		files[name]['downloaded'] += data.data.length;
-
+		console.log('upload - '+ files[name] + '  -  ' + files[name].clientSideId)
 		var parameters = {
 			name: name, 
 			type: files[name].type, 
@@ -48,9 +47,9 @@ uploader.init = function(socket) {
 			directoryProvider.create.file(parameters, uploadCallback)
 
 		function uploadCallback(error){
-
 			files[name].id = parameters.id;
-			if(files[name]['downloaded'] == files[name]['size']){
+			console.log(error, files[name].id)
+			if(files[name]['downloaded'] >= files[name]['size']){
 				files[name].id = null;
 				socket.emit('upload_done', { id: files[name].clientSideId });
 				delete files[name];
