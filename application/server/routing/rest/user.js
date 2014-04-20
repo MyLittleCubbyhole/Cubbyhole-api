@@ -139,7 +139,7 @@ user.post.create = function(request, response){
                             };
                             tokenProvider.create.token(token, function(error, dataToken) {
                                 if(!error) {
-                                    mailer.sendActivationMail(user.email, tokenId);
+                                    mailer.sendActivationMail(user.email, user.username, tokenId);
                                 } else
                                     console.log(error);
                             });
