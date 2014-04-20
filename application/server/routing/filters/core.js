@@ -1,6 +1,5 @@
 var filters = {}
-,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
-,   config = require(global.paths.server + '/config/core').get();
+,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token');
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
@@ -11,9 +10,9 @@ filters.tokenInterceptor = function(request, response, next) {
 
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
-            if((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) {
+            if(((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) && data.TYPE == 'AUTHENTICATION')  {
                 witness = true;
-            } else {
+            } else if(data.TYPE == 'AUTHENTICATION'){
                 tokenProvider.delete.byId(token, function(error, data) {
                     if(error)
                         console.log(error);
@@ -24,7 +23,8 @@ filters.tokenInterceptor = function(request, response, next) {
         if(witness)
             next();
         else {
-            response.writeHead(401, {});
+            response.writeHead(401);
+            response.write("You must be authentified to request the API");
             response.end();
         }
     });
