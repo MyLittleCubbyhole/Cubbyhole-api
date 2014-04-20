@@ -9,7 +9,7 @@ routing.init = function(app) {
 
 	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.get.byOwner);
-	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)/, filters.tokenInterceptor, directory.get.byPath);
+	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor, directory.get.byPath);
 	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.download);
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
