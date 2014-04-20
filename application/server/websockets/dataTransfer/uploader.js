@@ -29,7 +29,6 @@ uploader.init = function(socket) {
 	socket.on('upload', function(data) {
 		var name = data.name;
 		files[name]['downloaded'] += data.data.length;
-		console.log('upload - '+ files[name] + '  -  ' + files[name].clientSideId)
 		var parameters = {
 			name: name, 
 			type: files[name].type, 
@@ -48,7 +47,6 @@ uploader.init = function(socket) {
 
 		function uploadCallback(error){
 			files[name].id = parameters.id;
-			console.log(error, files[name].id)
 			if(files[name]['downloaded'] >= files[name]['size']){
 				files[name].id = null;
 				socket.emit('upload_done', { id: files[name].clientSideId });
