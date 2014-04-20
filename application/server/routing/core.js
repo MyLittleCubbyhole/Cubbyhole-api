@@ -14,6 +14,7 @@ routing.init = function(app) {
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.download);
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
+	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);
 

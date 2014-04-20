@@ -12,15 +12,15 @@ global.configFile.env = typeof link[environment] != 'undefined' ? link[environme
 global.configFile.developer = typeof link[developer] != 'undefined' ? link[developer] : '';
 global.paths = { app: __dirname, server: __dirname + '/application/server' };
 
-var config = require(global.paths.server + '/config/core').get();
+var config = require(global.paths.server + '/config/core').init();
 
 module.exports = { app: app, server: server };
 
 var allowCorssDomain = function(request, response, next) {
 
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', config['headersAccessControl'].allowMethods);
-    response.setHeader('Access-Control-Allow-Headers', config['headersAccessControl'].allowHeaders);
+    response.setHeader('Access-Control-Allow-Methods', config['headers_access_control'].allow_methods);
+    response.setHeader('Access-Control-Allow-Headers', config['headers_access_control'].allow_headers);
 
     if(request.method == 'OPTIONS')
         response.send(200);
@@ -44,7 +44,6 @@ app.configure('development', function () {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-var config = require(global.paths.server + '/config/core').init();
 require(global.paths.server + '/dependencies')(server, app);
 
 if (!module.parent)

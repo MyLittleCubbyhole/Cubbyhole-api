@@ -15,8 +15,8 @@ provider.get.byId = function(id, callback) {
 
 
 provider.create.token = function(token, callback) {
-	var query = 'insert into `token` (`ID`, `EXPIRATIONDATE`,`ORIGIN`,`USERID`) values (';
-	query += '"' + token.id + '","' + token.expirationDate + '","' + token.origin + '",' + parseInt(token.userId, 10) + ')';
+	var query = 'insert into `token` (`ID`, `EXPIRATIONDATE`, `TYPE`, `ORIGIN`,`USERID`) values (';
+	query += '"' + token.id + '","' + token.expirationDate + '","' + token.type + '","' + token.origin + '",' + parseInt(token.userId, 10) + ')';
 	Mysql.query(query, callback);
 }
 

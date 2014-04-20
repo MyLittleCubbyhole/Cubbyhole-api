@@ -27,6 +27,7 @@
     "express": "~3.5.1",
     "socket.io": "~0.9.16",
     "mongodb": "~1.4.0",
-    "connect-multiparty": "~1.0.3"
+    "connect-multiparty": "~1.0.3",
+    "nodemailer": "~0.6.3"
   }
 }
