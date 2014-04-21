@@ -14,19 +14,22 @@ directory.get.all 		= function(request, response){
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
 	provider.get.byOwner(params[0], function(error, data){		
-		response.send( (!error ? mongoTools.format(data) : error ) );
+		response.send( (!error && data ? mongoTools.format(data) : error ) );
 	})
 };
 
 directory.get.byPath	= function(request, response){
-	var params 	= request.params;
-	var userId 	= params[0]
-	,	path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : []
-	,	url		= request.url;
-	params[1] && params[1].slice(-1) == '/' && path.push('/');
+	var params 	= request.params
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] ? params[1].slice(0, -1) : '/' ;
+	parameters.arrayPath = params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : []
+	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
 
-	provider.get.byPath({ "userId" : userId, "path" : path }, function(error, data){
-		response.send( (!error ? mongoTools.format(data) : error ) );
+	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
+
+	provider.get.byOwner(parameters.ownerId, function(error, data) {
+		response.send( (!error && data ?  mongoTools.browse(parameters.arrayPath, mongoTools.format(data)) : error ) );
 	})
 }
 
