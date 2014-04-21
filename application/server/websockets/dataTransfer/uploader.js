@@ -8,8 +8,8 @@ uploader.init = function(socket) {
 	socket.on('upload_init', function (data) {
 
 		var path = data.path
-		//,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
-		, logicPath = "/dossier/"
+		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
+		// , logicPath = "/dossier/"
 		,	name = data.name;
 
 		files[name] = {

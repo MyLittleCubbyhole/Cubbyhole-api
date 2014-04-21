@@ -8,6 +8,7 @@ provider.init();
 directory.get.all 		= function(request, response){
 	provider.get.directory(function(error, data){
 		response.send( (!error ? data : error ) );
+		response.end();
 	})
 };
 
@@ -15,6 +16,7 @@ directory.get.byOwner 	= function(request, response){
 	var params = request.params;
 	provider.get.byOwner(params[0], function(error, data){		
 		response.send( (!error && data ? mongoTools.format(data) : error ) );
+		response.end();
 	})
 };
 
@@ -30,6 +32,7 @@ directory.get.byPath	= function(request, response){
 
 	provider.get.byOwner(parameters.ownerId, function(error, data) {
 		response.send( (!error && data ?  mongoTools.browse(parameters.arrayPath, mongoTools.format(data)) : error ) );
+		response.end();
 	})
 }
 
@@ -47,7 +50,8 @@ directory.post.create = function(request, response){
 	,	body 		= request.body
 	,	parameters 	= {};
 	parameters.ownerId 	= params[0]
-	parameters.path = params[1] ? params[1] : '/' ;
+	parameters.path = params[1] ? params[1] + '/' : '/' ;
+
 	parameters.name = body.name;
 	parameters.fullPath = parameters.ownerId + parameters.path + parameters.name;
 
