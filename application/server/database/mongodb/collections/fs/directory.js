@@ -5,6 +5,10 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   mongo = MongoProvider.db
 ,   provider = { get: {}, create: {}, delete: {}, update: {} };
 
+provider.init = function() {
+    if(!fileProvider)
+    fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+}
 
 provider.init = function() {
 	if(!fileProvider)
@@ -24,7 +28,6 @@ provider.get.byPath = function(fullPath, callback){
         collection.findOne({"_id":fullPath}, callback);
 	})
 }
-
 
 /********************************[ CREATE ]********************************/
 
@@ -62,9 +65,9 @@ provider.create.folder = function(params, callback){
 provider.create.file = function(params, callback){
     mongo.collection('directories', function(error, collection){
         collection.findOne({"_id":params.fullPath}, function(error, data){
-            if(error && !data) {
+            if(!data) {
 
-                var folderPath = (params.path == '/') ? params.path : (params.ownerId + params.path).slice(0, -1);
+                var folderPath = (params.path == '/') ? params.path : (params.owner + params.path).slice(0, -1);
 
                 try {
 
@@ -82,29 +85,29 @@ provider.create.file = function(params, callback){
 
                         var directoryFile = {
                             _id: params.fullPath,
-                            ownerId: params.ownerId,
+                            ownerId: params.owner,
                             path: params.path,
                             name: params.name,
                             type: 'file',
-                            size: 0,
+                            size: params.size,
                             itemId: params.id
                         };
 
-                        fileProvider.upload(params, function(error, fileLength){
+                        fileProvider.upload(params, function(error){
                             if(error)
                                 throw 'error during upload - '+error;
 
                             console.log('uploaded - ', params.id);
 
-                            fileProvider.get.metadata(params.id, function(error, metadata) {
+                            fileProvider.get.MD5(params.id, function(error, fileMd5) {
                                 if(error)
-                                    throw 'error retrieving file metadata - ' + error;
+                                    throw 'error retrieving file created - '+error;
 
-                                directoryFile.md5 = metadata.md5;
+                                directoryFile.md5 = fileMd5;
 
-                                collection.save(directoryFile, { safe : true }, function(error) {
+                                collection.insert(directoryFile, { safe : true }, function(error) {
                                     if(folderPath != "/")
-                                        provider.get.byPath(folderPath, function(error, directory ) {
+                                        provider.get.byPath(folderPath, function(error, directory) {
                                             directory.children.push(params.fullPath);
 
                                             collection.save(directory, { safe : true }, callback);
@@ -113,7 +116,7 @@ provider.create.file = function(params, callback){
                                         callback.call(this, error);
 
                                 });
-                            })
+                            });
                         })
                     });
                 }

@@ -33,6 +33,15 @@ provider.get.byMD5 = function(data, callback){
 	})
 }
 
+provider.get.MD5 = function(id, callback){
+
+	mongo.collection('fs.files', function(error, collection){
+		collection.findOne({ "_id" : id}, function (error, data) {
+			callback.call(this, error, data.md5);
+		});
+	})
+}
+
 provider.get.metadata = function(id, callback){
 
 	var gridFS = new GridStorage(mongo, id, 'r' );
@@ -90,7 +99,7 @@ provider.upload = function(params, callback){
 		gridStore.write(new Buffer(params.data, 'binary'), function(error, gridStore) {
 			gridStore.close(function(error, result) {
 				GridStorage.read(mongo, params.id, function(error, file) {
-					callback.call(this, error, file.length);
+					callback.call(this, error);
 				});
 			});
 		});
