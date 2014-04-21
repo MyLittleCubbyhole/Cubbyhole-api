@@ -1,4 +1,5 @@
 var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	mongoTools = require(global.paths.server + '/database/tools/mongodb/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
@@ -12,8 +13,8 @@ directory.get.all 		= function(request, response){
 
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
-	provider.get.byOwner(params[0], function(error, data){
-		response.send( (!error ? data : error ) );
+	provider.get.byOwner(params[0], function(error, data){		
+		response.send( (!error ? mongoTools.format(data) : error ) );
 	})
 };
 
@@ -25,7 +26,7 @@ directory.get.byPath	= function(request, response){
 	params[1] && params[1].slice(-1) == '/' && path.push('/');
 
 	provider.get.byPath({ "userId" : userId, "path" : path }, function(error, data){
-		response.send( (!error ? data : error ) );
+		response.send( (!error ? mongoTools.format(data) : error ) );
 	})
 }
 

@@ -39,6 +39,61 @@ mongoTools.browseAndGetProperties = function(root, data, properties){
 		}
 }
 
+mongoTools.format = function(rows) {
+
+	var formatedObject = []
+	,	path = []
+	,	witness = false
+	,	index = -1;
+	
+	for(var i = 0; i<rows.length; i++) {
+		path = rows[i].path.split('/');
+		path.splice(0,1);
+		path.splice(-1, 1);
+
+		var current = formatedObject;
+		if(path.length>0)
+			for(var j = 0; j<path.length; j++) {
+				witness = false;
+				for(var k = 0; k<current.length; k++)
+					if(current[k].name == path[j]) {
+						witness = true;
+						index = k;
+						break;
+					}
+
+				if(!witness)
+					index = current.push({
+						name: path[j],
+						content: []
+					}) - 1;
+				current = current[index].content;
+			}
+
+		var item = rows[i];
+		witness = false;
+		for(var j = 0; j<current.length; j++)
+			if(current[j].name == item.name) {
+				witness = true;
+				index = k;
+				break;
+			}
+
+		if(!witness) {
+			if(rows[i].type == 'folder')
+				item.content = [];
+			current.push(item)
+		}
+		else 
+			for(var i in item) 
+				if(i != 'content')
+				current[index][i] = item[i];
+	}
+
+	return formatedObject;
+
+}
+
 mongoTools.zipFolder = function(folder, callback) {
 	var filesCounter = 0
 	,	self = this

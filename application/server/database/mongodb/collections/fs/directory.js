@@ -10,16 +10,17 @@ provider.init = function() {
     fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
 }
 
-provider.init = function() {
-	if(!fileProvider)
-	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
-}
-
 /********************************[  GET   ]********************************/
 
-provider.get.byOwner = function(userId, callback){
+provider.get.directory = function(callback){
 	mongo.collection('directories', function(error, collection) {
-        collection.findOne({"ownerId":parseInt(userId,10)}, callback);
+		collection.find().toArray(callback);
+    });
+}
+
+provider.get.byOwner = function(ownerId, callback){
+	mongo.collection('directories', function(error, collection) {
+        collection.find({"ownerId":parseInt(ownerId,10)}).toArray(callback);
     });
 };
 
@@ -35,26 +36,31 @@ provider.create.folder = function(params, callback){
 	var folderPath = params.path != '/' ? params.ownerId + params.path : params.path;
 	provider.checkExist(folderPath, function(error, exist) {
 		try {
-				if(exist)
-					mongo.collection('directories', function(error, collection){
-						collection.findOne({"_id": params.fullPath }, function(error, data) {
-							if(!data && !error) {
-								collection.insert({
-									"_id": params.fullPath,
-									"ownerId": params.ownerId,
-									"path": params.path,
-									"name": params.name,
-									"type": "folder",
-									"size": 0,
-									"children": [],
-									"sharing": []
-								}, { safe : true }, callback)
-							}
+			if(exist)
+				mongo.collection('directories', function(error, collection){
+					collection.findOne({"_id": params.fullPath }, function(error, data) {
+						if(!data && !error) {
+							collection.insert({
+								"_id": params.fullPath,
+								"ownerId": parseInt(params.ownerId, 10),
+								"path": params.path,
+								"name": params.name,
+								"type": "folder",
+								"size": 0,
+								"children": [],
+								"sharing": []
+							}, { safe : true }, function() {
+								provider.get.byPath(folderPath, function(error, directory) {
+								    directory.children.push(params.fullPath);
+								    collection.save(directory, { safe : true }, callback);
+								});
+							})
+						}
 
-						})
 					})
-				else
-					throw 'folder doesnt exist';
+				})
+			else
+				throw 'folder doesnt exist';
 		}
 		catch(exception) {
 			callback.call(this, exception)
@@ -67,7 +73,7 @@ provider.create.file = function(params, callback){
         collection.findOne({"_id":params.fullPath}, function(error, data){
             if(!data) {
 
-                var folderPath = (params.path == '/') ? params.path : (params.owner + params.path).slice(0, -1);
+                var folderPath = params.path == '/' ? params.path : (params.owner + params.path).slice(0, -1);
 
                 try {
 
@@ -85,7 +91,7 @@ provider.create.file = function(params, callback){
 
                         var directoryFile = {
                             _id: params.fullPath,
-                            ownerId: params.owner,
+                            ownerId: parseInt(params.owner, 10),
                             path: params.path,
                             name: params.name,
                             type: 'file',
@@ -143,20 +149,17 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 	collection.findOne({"_id":fullPath}, function(error, data) {
 
 		if(!error && data) {
-			if(data.type == 'folder') {
+			if(data.type == 'folder')
 				for(var i = 0; i< data.children.length; i++) {
 					start();
 					provider.delete.item(collection, data.children[i], start, stop);
 				}
-				collection.remove({"_id":fullPath}, function(error,data) { console.log('folder deleted', error, data); stop() });
-			}
-			else {
+			else
 				fileProvider.delete.file(data.itemId, function(error) {
 					if(error)
 						throw 'problem occured during deleting file '+error;
 				})
-				collection.remove({"_id":fullPath}, function(error,data) { console.log('file deleted', error, data); stop() });
-			}
+			collection.remove({"_id":fullPath}, function(error,data) { console.log('file deleted', error, data); stop() });
 		}
 		else
 			stop('not found');
@@ -166,7 +169,8 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 
 provider.delete.byPath = function( fullPath, callback){
 
-	var started = 0;
+	var started = 0
+	,	folderPath = '/';
 
 	function start() {
 		started++;
@@ -176,13 +180,22 @@ provider.delete.byPath = function( fullPath, callback){
 			end();
 	};
 	function end() {
-		callback.call(this);
+		provider.get.byPath(folderPath, function(error, directory) {
+			var index = directory.children.indexOf(fullPath)
+
+			if(index != -1)
+				directory.children.splice(index);
+
+			collection.save(directory, { safe : true }, callback);
+		});
 	};
 
 
 	mongo.collection('directories', function(error, collection) {
 		collection.findOne({"_id": fullPath}, function(error, data) {
 			start();
+			folderPath = data.path == '/' ? params.path : (data.owner + data.path).slice(0, -1);
+
 			provider.delete.item(collection,  fullPath, start, stop);
 		});
     });
