@@ -45,7 +45,7 @@ directory.post.create = function(request, response){
 	parameters.ownerId 	= params[0]
 	parameters.path = params[1] ? params[1] : '/' ;
 	parameters.name = body.name;
-	parameters.fullpath = parameters.ownerId + parameters.path + parameters.name;
+	parameters.fullPath = parameters.ownerId + parameters.path + parameters.name;
 
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - folder name must be defined', 'params' : parameters });
@@ -108,14 +108,17 @@ directory.delete.byPath		= function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
 	,	parameters 	= {};
-	parameters.userId 	= params[0]
-	parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
-	parameters.name 	= parameters.path.pop();
+	// parameters.userId 	= params[0]
+	// parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
+	// parameters.name 	= parameters.path.pop();
 
-	if(!parameters.name)
+	var fullPath = params[0] + '/' + params[1];
+	console.log('delete ', fullPath)
+
+	if(!params[1])
 		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
 	else
-		provider.delete.byPath(parameters, function(error, data){
+		provider.delete.byPath(fullPath, function(error, data){
 			response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
 		})
 }
