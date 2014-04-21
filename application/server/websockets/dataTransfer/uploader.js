@@ -27,6 +27,7 @@ uploader.init = function(socket) {
 	});
 
 	socket.on('upload', function(data) {
+		console.log('upload')
 		var name = data.name;
 		files[name]['downloaded'] += data.data.length;
 		var parameters = {
@@ -47,12 +48,15 @@ uploader.init = function(socket) {
 
 		function uploadCallback(error){
 			files[name].id = parameters.id;
+			console.log('passage')
 			if(files[name]['downloaded'] >= files[name]['size']){
+		console.log('file uploaded');
 				files[name].id = null;
 				socket.emit('upload_done', { id: files[name].clientSideId });
 				delete files[name];
 			}
 			else {
+		console.log('chunk uploaded');
 				var chunk = files[name]['downloaded'] / 524288;
 				var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
 				socket.emit('upload_next', { 'chunk' : chunk, 'percent' :  percent, 'id': files[name].clientSideId });

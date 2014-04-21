@@ -51,8 +51,9 @@ provider.delete.file = function(id, callback){
 
 	var gridFS = new GridStorage(mongo, id, 'r' );
 
-	gridFS.open(function(err, collection) {
-		collection.unlink(callback);
+	gridFS.open(function(error, collection) {
+		if(!error)
+			collection.unlink(callback);
 	});
 }
 

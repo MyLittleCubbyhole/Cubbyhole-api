@@ -104,7 +104,6 @@ provider.create.file = function(params, callback){
 						if(error)
 							throw 'error during upload - '+error;
 						dir.push(file);
-						console.log('uploaded - ', params.id)
 						collection.save( data, { safe : true }, callback);
 					})
 				}
@@ -156,6 +155,8 @@ provider.delete.byPath = function(params, callback){
 								dir.content.splice(index, 1);
 								collection.save( data, { safe : true }, callback);
 							}
+							else
+								callback.call(this, error);
 						})
 					else{
 						var properties = [];
