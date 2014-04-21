@@ -3,7 +3,7 @@ var filters = {}
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
-    ,   witness = false;
+    ,   witness = true;
 
     var token = query.token || 0;
     token = encodeURIComponent(token);

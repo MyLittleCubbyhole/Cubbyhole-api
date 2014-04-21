@@ -38,7 +38,7 @@ provider.get.metadata = function(id, callback){
 	var gridFS = new GridStorage(mongo, id, 'r' );
 
 	gridFS.open(function(err, collection) {
-		callback.call(this, collection.metadata);
+		callback.call(this, err, collection.metadata);
 	});
 }
 
@@ -74,15 +74,15 @@ provider.update.fileName = function(data, callback) {
 provider.upload = function(params, callback){
 	var mode = params.mode || 'w';
 
-	var gridStore = new GridStorage(mongo, params.id, mode, { 
-		content_type : params.type, 
-		metadata : { 
-			type : params.type, 
-			name : params.name, 
-			owner : parseInt(params.owner, 10) 
-		} 
+	var gridStore = new GridStorage(mongo, params.id, mode, {
+		content_type : params.type,
+		metadata : {
+			type : params.type,
+			name : params.name,
+			owner : parseInt(params.owner, 10)
+		}
 	});
-	
+
 
 	params.data = params.data != '' ? params.data : ' ';
 
@@ -90,7 +90,7 @@ provider.upload = function(params, callback){
 		gridStore.write(new Buffer(params.data, 'binary'), function(error, gridStore) {
 			gridStore.close(function(error, result) {
 				GridStorage.read(mongo, params.id, function(error, file) {
-					callback.call(this, error);
+					callback.call(this, error, file.length);
 				});
 			});
 		});

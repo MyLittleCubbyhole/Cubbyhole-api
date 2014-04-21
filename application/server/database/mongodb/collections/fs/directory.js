@@ -1,22 +1,12 @@
 var MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
-,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
-,	tools = require(global.paths.server + '/database/tools/mongodb/core')
-,	ObjectID = MongoProvider.objectId
-,	mongo = MongoProvider.db
-,	provider = { get: {}, create: {}, delete: {}, update: {} };
+,   fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+,   tools = require(global.paths.server + '/database/tools/mongodb/core')
+,   ObjectID = MongoProvider.objectId
+,   mongo = MongoProvider.db
+,   provider = { get: {}, create: {}, delete: {}, update: {} };
 
-provider.init = function() {
-	if(!fileProvider)
-	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
-}
 
 /********************************[  GET   ]********************************/
-
-provider.get.directory = function(callback){
-	mongo.collection('directories', function(error, collection) {
-		collection.find().toArray(callback);
-    });
-}
 
 provider.get.byOwner = function(userId, callback){
 	mongo.collection('directories', function(error, collection) {
@@ -25,13 +15,6 @@ provider.get.byOwner = function(userId, callback){
 };
 
 provider.get.byPath = function(fullpath, callback){
-	// provider.get.byOwner(params.userId, function(error, data){
-	// 	if(!error && data)
-	// 		data = tools.browse(params.path, data.root);
-	// 	else
-	// 		error = 'user repository not found or offline database';
-	// 	callback.call(this, error, data);
-	// })
 	mongo.collection('directories', function(error, collection) {
         collection.findOne({"_id":fullpath}, callback);
 	})
@@ -39,23 +22,6 @@ provider.get.byPath = function(fullpath, callback){
 
 
 /********************************[ CREATE ]********************************/
-
-// provider.create.directory = function(userId, callback){
-// 	mongo.collection('directories', function(error, collection){
-
-// 		provider.get.byOwner(userId, function(error, data){
-// 			if(!data && !error)
-// 				collection.insert({
-// 					ownerId : parseInt(userId,10)
-// 				,	lastUpdate : new Date()
-// 				,	sharing : []
-// 				,	root : []
-// 				}, { safe : true }, callback)
-// 			else
-// 				callback.call(this, 'id already used or offline database');
-// 		})
-// 	})
-// }
 
 provider.create.folder = function(params, callback){
 	var folderPath = params.path != '/' ? params.ownerId + params.path : params.path;
@@ -89,38 +55,71 @@ provider.create.folder = function(params, callback){
 }
 
 provider.create.file = function(params, callback){
-	mongo.collection('directories', function(error, collection){
-		collection.findOne({"ownerId":parseInt(params.owner,10)}, function(error, data){
-			if(!error && data) {
+    mongo.collection('directories', function(error, collection){
+        collection.findOne({"_id":params.fullPath}, function(error, data){
+            if(error && !data) {
 
-				params.id = new ObjectID();
-				var file = {
-					name : params.name 
-				,	type : 'file'
-				,	id 	 : params.id
-				,	sharing : []
-				};
-				try {
-					var dir = params.logicPath.length > 1 ? tools.browse(params.logicPath, data.root, true) : data.root;
-					for(var i in dir)
-						if(dir[i].name == params.name)
-							throw "file already exist";
+                var folderPath = (params.path == '/') ? params.path : (params.ownerId + params.path).slice(0, -1);
 
-					fileProvider.upload(params, function(error){
-						if(error)
-							throw 'error during upload - '+error;
-						dir.push(file);
-						collection.save( data, { safe : true }, callback);
-					})
-				}
-				catch(exception){
-					callback.call(this, exception);
-				}
-			}
-			else
-				callback.call(this, 'user repository not found');
-		})
-	})
+                try {
+
+                    provider.checkExist(folderPath, function(error, exist) {
+                        if(!exist)
+                            throw 'folder does not exist - '+error;
+
+                        params.id = new ObjectID();
+                        var file = {
+                            name : params.name
+                        ,   type : 'file'
+                        ,   id   : params.id
+                        ,   sharing : []
+                        };
+
+                        var directoryFile = {
+                            _id: params.fullPath,
+                            ownerId: params.ownerId,
+                            path: params.path,
+                            name: params.name,
+                            type: 'file',
+                            size: 0,
+                            itemId: params.id
+                        };
+
+                        fileProvider.upload(params, function(error, fileLength){
+                            if(error)
+                                throw 'error during upload - '+error;
+
+                            console.log('uploaded - ', params.id);
+
+                            fileProvider.get.metadata(params.id, function(error, metadata) {
+                                if(error)
+                                    throw 'error retrieving file metadata - ' + error;
+
+                                directoryFile.md5 = metadata.md5;
+
+                                collection.save(directoryFile, { safe : true }, function(error) {
+                                    if(folderPath != "/")
+                                        provider.get.byPath(folderPath, function(error, directory, ) {
+                                            directory.children.push(params.fullPath);
+
+                                            collection.save(directory, { safe : true }, callback);
+                                        });
+                                    else
+                                        callback.call(this, error);
+
+                                });
+                            })
+                        })
+                    });
+                }
+                catch(exception){
+                    callback.call(this, exception);
+                }
+            }
+            else
+                callback.call(this, 'file already exist');
+        })
+    })
 }
 
 
@@ -188,58 +187,13 @@ provider.delete.byPath = function(params, callback){
             }
 			else
 				callback.call(this, 'user repository not found');
-			
+
 		});
     });
 }
 
 /********************************[ UPDATE ]********************************/
 
-provider.update.name = function(params, callback){
-	mongo.collection('directories', function(error, collection){
-		collection.findOne({"ownerId":parseInt(params.userId,10)}, function(error, data){
-			if(!error){
-				try {
-                    var notOnRoot	= params.path.length > 0
-                    ,	dir			= notOnRoot ? tools.browse(params.path, data.root, true) : {type:'folder', content:data.root}
-                    ,	index		= -1
-                    ,	target		= {};
-
-                    if(dir.type != 'folder')
-                        throw "invalid path";
-
-                    for(var i in dir.content)
-                        if(dir.content[i].name == params.currentName){
-                            target = dir.content[i];
-                            index = i;
-                        }
-                        else
-							if(dir.content[i].name == params.newName)
-								throw "file or folder already exist";
-
-
-                    if(index == -1)
-                        throw "target not found"
-
-                    target.name = params.newName;
-
-					if(target.type == 'file') {
-                        fileProvider.update.fileName(target, function(error) {
-                            collection.save(data, { safe : true }, callback);
-                        });
-                    }
-                    else {
-                        collection.save(data, { safe : true }, callback);
-                    }
-
-				}
-				catch(exception){
-					callback.call(this, exception);
-				}
-			}
-		});
-	});
-}
 
 /********************************[ UPDATE ]********************************/
 
