@@ -42,16 +42,15 @@ directory.post.create = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
 	,	parameters 	= {};
-	parameters.userId 	= params[0]
-	parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
-	parameters.name 	= body.name;
-	parameters.path.push('/');
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] ? params[1] : '/' ;
+	parameters.name = body.name;
+	parameters.fullpath = parameters.ownerId + parameters.path + parameters.name;
 
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - folder name must be defined', 'params' : parameters });
 	else
-		provider.create.folder(parameters, function(error, data){
-			parameters.path.pop();
+		provider.create.folder(parameters, function(error, data) {
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
 		})
 

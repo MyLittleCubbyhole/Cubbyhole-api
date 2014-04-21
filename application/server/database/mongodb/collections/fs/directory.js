@@ -24,61 +24,67 @@ provider.get.byOwner = function(userId, callback){
     });
 };
 
-provider.get.byPath = function(params, callback){
-	provider.get.byOwner(params.userId, function(error, data){
-		if(!error && data)
-			data = tools.browse(params.path, data.root);
-		else
-			error = 'user repository not found or offline database';
-		callback.call(this, error, data);
+provider.get.byPath = function(fullpath, callback){
+	// provider.get.byOwner(params.userId, function(error, data){
+	// 	if(!error && data)
+	// 		data = tools.browse(params.path, data.root);
+	// 	else
+	// 		error = 'user repository not found or offline database';
+	// 	callback.call(this, error, data);
+	// })
+	mongo.collection('directories', function(error, collection) {
+        collection.findOne({"_id":fullpath}, callback);
 	})
 }
 
 
 /********************************[ CREATE ]********************************/
 
-provider.create.directory = function(userId, callback){
-	mongo.collection('directories', function(error, collection){
+// provider.create.directory = function(userId, callback){
+// 	mongo.collection('directories', function(error, collection){
 
-		provider.get.byOwner(userId, function(error, data){
-			if(!data && !error)
-				collection.insert({
-					ownerId : parseInt(userId,10)
-				,	lastUpdate : new Date()
-				,	sharing : []
-				,	root : []
-				}, { safe : true }, callback)
-			else
-				callback.call(this, 'id already used or offline database');
-		})
-	})
-}
+// 		provider.get.byOwner(userId, function(error, data){
+// 			if(!data && !error)
+// 				collection.insert({
+// 					ownerId : parseInt(userId,10)
+// 				,	lastUpdate : new Date()
+// 				,	sharing : []
+// 				,	root : []
+// 				}, { safe : true }, callback)
+// 			else
+// 				callback.call(this, 'id already used or offline database');
+// 		})
+// 	})
+// }
 
 provider.create.folder = function(params, callback){
-	mongo.collection('directories', function(error, collection){
-		collection.findOne({"ownerId":parseInt(params.userId,10)}, function(error, data){
-			if(!error && data){
-				var folder = {
-					name : params.name 
-				,	type : 'folder'
-				,	content : []
-				,	sharing : []
-				};
-				try {
-					var dir = params.path.length > 1 ? tools.browse(params.path, data.root, true) : data.root;
-					for(var i in dir)
-						if(dir[i].name == params.name)
-							throw "folder already exist";
-					dir.push(folder);
-					collection.save( data, { safe : true }, callback);
-				}
-				catch(exception){
-					callback.call(this, exception);
-				}
-			}
-			else
-				callback.call(this, 'user repository not found');
-		})
+	var folderPath = params.path != '/' ? params.ownerId + params.path : params.path;
+	provider.checkExist(folderPath, function(error, exist) {
+		try {
+				if(exist)
+					mongo.collection('directories', function(error, collection){
+						collection.findOne({"_id": params.fullpath }, function(error, data) {
+							if(!data && !error) {
+								collection.insert({
+									"_id": params.fullpath,
+									"ownerId": params.ownerId,
+									"path": params.path,
+									"name": params.name,
+									"type": "folder",
+									"size": 0,
+									"children": [],
+									"sharing": []
+								}, { safe : true }, callback)
+							}
+
+						})
+					})
+				else
+					throw 'folder doesnt exist';
+		}
+		catch(exception) {
+			callback.call(this, exception)
+		}
 	})
 }
 
@@ -233,6 +239,21 @@ provider.update.name = function(params, callback){
 			}
 		});
 	});
+}
+
+/********************************[ UPDATE ]********************************/
+
+provider.checkExist = function(fullpath, callback) {
+
+	if(fullpath == '/')
+		callback.call(this, null, true);
+	else
+		mongo.collection('directories', function(error, collection){
+			collection.findOne({"_id": fullpath }, function(error, data) {
+				callback.call(this, error, (!error && data));
+			})
+		})
+
 }
 
 module.exports = provider;
