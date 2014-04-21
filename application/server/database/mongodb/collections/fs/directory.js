@@ -50,6 +50,7 @@ provider.create.folder = function(params, callback){
 								"children": [],
 								"sharing": []
 							}, { safe : true }, function() {
+								if(folderPath != '/')
 								provider.get.byPath(folderPath, function(error, directory) {
 								    directory.children.push(params.fullPath);
 								    collection.save(directory, { safe : true }, callback);
