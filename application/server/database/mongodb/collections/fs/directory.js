@@ -95,7 +95,7 @@ provider.create.file = function(params, callback){
                             path: params.path,
                             name: params.name,
                             type: 'file',
-                            size: params.size,
+                            size: parseInt(params.size, 10),
                             itemId: params.id
                         };
 
@@ -112,11 +112,24 @@ provider.create.file = function(params, callback){
                                 directoryFile.md5 = fileMd5;
 
                                 collection.insert(directoryFile, { safe : true }, function(error) {
+                                    if(error)
+                                        throw 'error creating collection - '+error;
+
                                     if(folderPath != "/")
                                         provider.get.byPath(folderPath, function(error, directory) {
+                                            if(error)
+                                                throw 'error getting folder - '+error;
+
                                             directory.children.push(params.fullPath);
 
-                                            collection.save(directory, { safe : true }, callback);
+                                            collection.save(directory, { safe : true }, function(error) {
+                                                if(error)
+                                                    throw 'error updating children - '+error;
+
+                                                provider.update.size(folderPath, directoryFile.size, function(error) {
+                                                    callback.call(this, error);
+                                                });
+                                            });
                                         });
                                     else
                                         callback.call(this, error);
@@ -202,6 +215,51 @@ provider.delete.byPath = function( fullPath, callback){
 }
 
 /********************************[ UPDATE ]********************************/
+
+provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
+
+    if(fullFolderPath == '/' || fullFolderPath.length == 2)
+        callback.call(this, null);
+    else {
+        var paths = fullFolderPath.split("/");
+
+        var nbFolders = paths.length - 1;
+
+        var started = 0;
+
+        for(var i = 0; i < nbFolders; i++) {
+            var path = "";
+            for(var j = 0; j < paths.length; j++) {
+                path += "/" + paths[j];
+            }
+
+            path = path.substring(1);
+            paths.pop();
+
+            provider.get.byPath(path, function(error, directory) {
+
+                directory.size += parseInt(sizeUpdate, 10);
+
+                try {
+                    mongo.collection('directories', function(error, collection) {
+                        started++;
+                        collection.save(directory, { safe : true }, function(error) {
+                            started--;
+                            if(error)
+                                throw 'error updating size - ' + error;
+
+                            if(started <= 0 && i == nbFolders)
+                                callback.call(this, null);
+                        });
+                    });
+                }
+                catch(exception){
+                    callback.call(this, exception);
+                }
+            });
+        }
+    }
+}
 
 
 /********************************[ UPDATE ]********************************/
