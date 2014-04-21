@@ -8,10 +8,10 @@ uploader.init = function(socket) {
 	socket.on('upload_init', function (data) {
 
 		var path = data.path
-		,	logicPath = typeof path != 'undefined' && path != '/' ? path.match(/[^\/\\]+/g) : []
+		//,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
+		, logicPath = "/dossier/"
 		,	name = data.name;
-		
-		logicPath.push('/');
+
 		files[name] = {
 			owner: data.owner,
 			size : data.size,
@@ -31,10 +31,12 @@ uploader.init = function(socket) {
 		var name = data.name;
 		files[name]['downloaded'] += data.data.length;
 		var parameters = {
-			name: name, 
-			type: files[name].type, 
-			data: data.data, 
-			logicPath: files[name].logicPath, 
+			name: name,
+			type: files[name].type,
+			data: data.data,
+			size: files[name].size,
+			path: files[name].logicPath,
+			fullPath: files[name].owner + files[name].logicPath + name,
 			owner: files[name].owner
 		};
 
@@ -47,16 +49,18 @@ uploader.init = function(socket) {
 			directoryProvider.create.file(parameters, uploadCallback)
 
 		function uploadCallback(error){
+			if(error)
+				console.log(error);
 			files[name].id = parameters.id;
 			console.log('passage')
 			if(files[name]['downloaded'] >= files[name]['size']){
-		console.log('file uploaded');
+				console.log('file uploaded');
 				files[name].id = null;
 				socket.emit('upload_done', { id: files[name].clientSideId });
 				delete files[name];
 			}
 			else {
-		console.log('chunk uploaded');
+				console.log('chunk uploaded');
 				var chunk = files[name]['downloaded'] / 524288;
 				var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
 				socket.emit('upload_next', { 'chunk' : chunk, 'percent' :  percent, 'id': files[name].clientSideId });
