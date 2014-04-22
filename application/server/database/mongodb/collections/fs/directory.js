@@ -33,7 +33,7 @@ provider.get.byPath = function(fullPath, callback){
 /********************************[ CREATE ]********************************/
 
 provider.create.folder = function(params, callback){
-	var folderPath = params.path != '/' ? params.ownerId + params.path : params.path;
+	var folderPath = params.path != '/' ? params.ownerId + params.path.slice(0, -1) : params.path;
 	provider.checkExist(folderPath, function(error, exist) {
 		try {
 			if(exist)
@@ -47,21 +47,29 @@ provider.create.folder = function(params, callback){
 								"name": params.name,
 								"type": "folder",
 								"size": 0,
+								"lastUpdate": new Date(),
 								"children": [],
 								"sharing": []
 							}, { safe : true }, function() {
 								if(folderPath != '/')
-								provider.get.byPath(folderPath, function(error, directory) {
-								    directory.children.push(params.fullPath);
-								    collection.save(directory, { safe : true }, callback);
-								});
+									provider.get.byPath(folderPath, function(error, directory) {
+									    directory.children.push(params.fullPath);
+									    collection.save(directory, { safe : true }, callback);
+									});
+								else {
+									console.log('bouh')
+									callback.call(this);
+								}
 							})
 						}
+						else
+							throw 'folder already exist'
 
 					})
 				})
-			else
-				throw 'folder doesnt exist';
+			else {
+				throw 'parent doesnt exist';
+			}
 		}
 		catch(exception) {
 			callback.call(this, exception)
@@ -83,12 +91,6 @@ provider.create.file = function(params, callback){
                             throw 'folder does not exist - '+error;
 
                         params.id = new ObjectID();
-                        var file = {
-                            name : params.name
-                        ,   type : 'file'
-                        ,   id   : params.id
-                        ,   sharing : []
-                        };
 
                         var directoryFile = {
                             _id: params.fullPath,
@@ -103,8 +105,6 @@ provider.create.file = function(params, callback){
                         fileProvider.upload(params, function(error){
                             if(error)
                                 throw 'error during upload - '+error;
-
-                            console.log('uploaded - ', params.id);
 
                             fileProvider.get.MD5(params.id, function(error, fileMd5) {
                                 if(error)

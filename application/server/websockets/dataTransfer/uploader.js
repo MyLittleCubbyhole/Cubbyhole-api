@@ -9,7 +9,7 @@ uploader.init = function(socket) {
 
 		var path = data.path
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
-		//, logicPath = "/dossier/dossier 2/"
+		// , logicPath = "/dossier/"
 		,	name = data.name;
 
 		files[name] = {
