@@ -45,7 +45,7 @@ mongoTools.format = function(rows) {
 	,	path = []
 	,	witness = false
 	,	index = -1;
-	
+
 	for(var i = 0; i<rows.length; i++) {
 		path = rows[i].path.split('/');
 		path.splice(0,1);
@@ -85,9 +85,9 @@ mongoTools.format = function(rows) {
 			current.push(item)
 		}
 		else 
-			for(var i in item) 
-				if(i != 'content')
-				current[index][i] = item[i];
+			for(var attribute in item) 
+				if(attribute != 'content')
+				current[index][attribute] = item[attribute];
 	}
 
 	return formatedObject;
