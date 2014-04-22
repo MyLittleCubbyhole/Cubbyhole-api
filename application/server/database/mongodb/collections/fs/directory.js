@@ -56,10 +56,8 @@ provider.create.folder = function(params, callback){
 									    directory.children.push(params.fullPath);
 									    collection.save(directory, { safe : true }, callback);
 									});
-								else {
-									console.log('bouh')
+								else
 									callback.call(this);
-								}
 							})
 						}
 						else
@@ -184,33 +182,46 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 provider.delete.byPath = function( fullPath, callback){
 
 	var started = 0
+	,	size = 0
 	,	folderPath = '/';
 
-	function start() {
-		started++;
-	};
-	function stop(error) {
-		if(--started <= 0)
-			end();
-	};
-	function end() {
-		provider.get.byPath(folderPath, function(error, directory) {
-			var index = directory.children.indexOf(fullPath)
-
-			if(index != -1)
-				directory.children.splice(index);
-
-			collection.save(directory, { safe : true }, callback);
-		});
-	};
-
-
 	mongo.collection('directories', function(error, collection) {
-		collection.findOne({"_id": fullPath}, function(error, data) {
-			start();
-			folderPath = data.path == '/' ? params.path : (data.owner + data.path).slice(0, -1);
 
-			provider.delete.item(collection,  fullPath, start, stop);
+		function start() {
+			started++;
+		};
+		function stop(error) {
+			if(--started <= 0)
+				end();
+		};
+		function end() {
+			if(folderPath != '/')
+				provider.update.size(folderPath, size, function() {
+					provider.get.byPath(folderPath, function(error, directory) {
+						if(!error && directory) {
+							var index = directory.children.indexOf(fullPath)
+
+							if(index != -1)
+								directory.children.splice(index);
+							collection.save(directory, { safe : true }, callback);
+						}
+						else					
+							callback.call(this, error);
+					});
+				})
+			else
+				callback.call(this);
+		};
+
+		collection.findOne({"_id": fullPath}, function(error, data) {
+			if(!error && data) {
+				start();
+				folderPath = data.path == '/' ? data.path : (data.ownerId + data.path).slice(0, -1);
+				size = data.size*-1;
+				provider.delete.item(collection,  fullPath, start, stop);
+			}
+			else
+				callback.call(this, error);
 		});
     });
 }

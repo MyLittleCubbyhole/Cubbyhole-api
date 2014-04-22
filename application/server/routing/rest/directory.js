@@ -122,7 +122,9 @@ directory.delete.byPath		= function(request, response){
 	// parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
 	// parameters.name 	= parameters.path.pop();
 
-	var fullPath = params[0] + '/' + params[1];
+	var fullPath = params[0] + params[1];
+	fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
+
 	console.log('delete ', fullPath)
 
 	if(!params[1])
