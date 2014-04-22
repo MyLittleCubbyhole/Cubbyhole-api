@@ -75,7 +75,7 @@ mongoTools.format = function(rows) {
 		for(var j = 0; j<current.length; j++)
 			if(current[j].name == item.name) {
 				witness = true;
-				index = k;
+				index = j;
 				break;
 			}
 
