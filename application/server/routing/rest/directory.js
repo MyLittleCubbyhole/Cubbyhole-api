@@ -31,11 +31,8 @@ directory.get.byPath	= function(request, response){
 	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
 
 	provider.get.byOwner(parameters.ownerId, function(error, data) {
-		console.log(data)
 		var items = mongoTools.format(data);
-		console.log(data.length, parameters.arrayPath)
 		items = mongoTools.browse(parameters.arrayPath, items);
-		console.log(items)
 		response.send( (!error && data ? items  : error ) );
 		response.end();
 	})

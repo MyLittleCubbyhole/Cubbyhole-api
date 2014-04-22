@@ -17,9 +17,9 @@ file.get.download = function(request, response){
 	}
 
 	data.userId = params[0];
-	data.path 	= params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
+	data.path 	= params[1];// && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
-
+	data.fullPath = data.userId + '/' + data.path;
 	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {
 

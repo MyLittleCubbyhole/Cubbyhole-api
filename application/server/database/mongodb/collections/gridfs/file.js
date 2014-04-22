@@ -18,9 +18,9 @@ provider.init = function() {
 
 provider.get.byPath = function(data, callback){
 	var range = data.range;
-	directoryProvider.get.byPath(data,function(error, data){
-		if(data.type == 'file' && !error)
-			provider.download({id : data.id, range : range}, callback);
+	directoryProvider.get.byPath(data.fullPath,function(error, data){
+		if(data && data.type == 'file' && !error)
+			provider.download({id : data.itemId, range : range}, callback);
 		else
 			callback.call(this,'file not found');
 	})

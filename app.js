@@ -16,7 +16,7 @@ var config = require(global.paths.server + '/config/core').init();
 
 module.exports = { app: app, server: server };
 
-var allowCorssDomain = function(request, response, next) {
+var allowCrossDomain = function(request, response, next) {
 
     response.setHeader('Access-Control-Allow-Origin', '*');
     response.setHeader('Access-Control-Allow-Methods', config['headers_access_control'].allow_methods);
@@ -33,7 +33,7 @@ app.configure(function(){
     app.use(express.urlencoded());
     app.use(express.methodOverride());
     app.use(express.cookieParser());
-    app.use(allowCorssDomain);
+    app.use(allowCrossDomain);
 });
 
 app.configure('production', function () {
