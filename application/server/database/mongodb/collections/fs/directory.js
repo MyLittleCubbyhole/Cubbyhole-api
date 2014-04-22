@@ -239,21 +239,21 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
 
         var started = 0;
 
-        for(var i = 0; i < nbFolders; i++) {
-            var path = "";
-            for(var j = 0; j < paths.length; j++) {
-                path += "/" + paths[j];
-            }
+        mongo.collection('directories', function(error, collection) {
+            for(var i = 0; i < nbFolders; i++) {
+                var path = "";
+                for(var j = 0; j < paths.length; j++) {
+                    path += "/" + paths[j];
+                }
 
-            path = path.substring(1);
-            paths.pop();
+                path = path.substring(1);
+                paths.pop();
 
-            provider.get.byPath(path, function(error, directory) {
+                provider.get.byPath(path, function(error, directory) {
 
-                directory.size += parseInt(sizeUpdate, 10);
+                    directory.size += parseInt(sizeUpdate, 10);
 
-                try {
-                    mongo.collection('directories', function(error, collection) {
+                    try {
                         started++;
                         collection.save(directory, { safe : true }, function(error) {
                             started--;
@@ -263,18 +263,79 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                             if(started <= 0 && i == nbFolders)
                                 callback.call(this, null);
                         });
-                    });
-                }
-                catch(exception){
-                    callback.call(this, exception);
-                }
-            });
-        }
+
+                    }
+                    catch(exception){
+                        callback.call(this, exception);
+                    }
+                });
+            }
+        });
     }
 }
 
+provider.update.name = function(params, callback){
+    mongo.collection('directories', function(error, collection){
+        try {
+            collection.findOne({"_id":params.fullPath}, function(error, itemToUpdate){
+                if(error)
+                    throw "invalid path";
+
+                var newFullPath = itemToUpdate.ownerId + itemToUpdate.path + params.newName;
+
+                collection.findOne({"_id":newFullPath}, function(error, newdata){
+                    if(newdata)
+                        throw "file or folder already exist";
+
+                    itemToUpdate._id = newFullPath;
+                    itemToUpdate.name = params.newName;
+
+                    collection.remove({"_id":params.fullPath}, function(error, data) {
+                        if(error)
+                            throw "error removing file to update _id";
+
+                        collection.save(itemToUpdate, { safe : true }, function(error) {
+                            if(error)
+                                throw "error saving directory with new name"
+
+                            if(itemToUpdate.type == 'file')
+                                fileProvider.update.fileName(itemToUpdate, callback);
+                            else
+                                callback.call(this, null);
+                        });
+                    });
+                });
+            });
+        }
+        catch(exception){
+            callback.call(this, exception);
+        }
+    });
+};
+
 
 /********************************[ UPDATE ]********************************/
+
+/**
+ * [copy copy or move an item]
+ * @param  {document}   item        item to copy
+ * @param  {document}   updatedItem new item to create if you want to process a rename
+ * @param  {string}     targetPath  estination of the item
+ * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
+ * @param  {Function} callback
+ */
+provider.copy = function(item, updatedItem, targetPath, move, callback) {
+    mongo.collection('directories', function(error, collection) {
+        try {
+
+
+
+        }
+        catch(exception){
+            callback.call(this, exception);
+        }
+    });
+};
 
 provider.checkExist = function(fullPath, callback) {
 

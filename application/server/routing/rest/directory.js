@@ -14,7 +14,7 @@ directory.get.all 		= function(request, response){
 
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
-	provider.get.byOwner(params[0], function(error, data){		
+	provider.get.byOwner(params[0], function(error, data){
 		response.send( (!error && data ? mongoTools.format(data) : error ) );
 		response.end();
 	})
@@ -93,8 +93,10 @@ directory.put.rename = function(request, response){
     parameters.userId 	= params[0]
     parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
     parameters.currentName = parameters.path.pop();
-    console.log(body)
     parameters.newName 	= body.name;
+
+    parameters.fullPath = parameters.userId + "/" + (parameters.path.length ? parameters.path + "/" : "") + parameters.currentName;
+    debugger;
 
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });
