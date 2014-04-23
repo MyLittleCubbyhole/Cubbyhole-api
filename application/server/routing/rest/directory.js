@@ -66,6 +66,24 @@ directory.post.create = function(request, response){
 
 }
 
+directory.post.copy = function(request, response){
+	var params 		= request.params
+	,	body 		= request.body
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] || '/' ;
+
+	parameters.targetPath = body.path;
+
+	if(!parameters.path)
+		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
+	else
+		provider.copy(parameters.ownerId + parameters.path, null, parameters.targetPath, false,  function(error) {
+			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
+		})
+
+}
+
 directory.post.upload = function(request, response){
 	//request body si c'est du server to server // a modifier par la suite quand on fera de l'upload par socket
 	var data 	= request.files ? request.files.file : request.body

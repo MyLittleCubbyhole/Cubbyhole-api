@@ -1,6 +1,7 @@
 var MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
 ,   fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 ,   tools = require(global.paths.server + '/database/tools/mongodb/core')
+,   _ = require('lodash')
 ,   ObjectID = MongoProvider.objectId
 ,   mongo = MongoProvider.db
 ,   provider = { get: {}, create: {}, delete: {}, update: {} };
@@ -41,15 +42,15 @@ provider.create.folder = function(params, callback){
 					collection.findOne({"_id": params.fullPath }, function(error, data) {
 						if(!data && !error) {
 							collection.insert({
-								"_id": params.fullPath,
-								"ownerId": parseInt(params.ownerId, 10),
-								"path": params.path,
-								"name": params.name,
-								"type": "folder",
-								"size": 0,
-								"lastUpdate": new Date(),
-								"children": [],
-								"sharing": []
+								_id: params.fullPath,
+								ownerId: parseInt(params.ownerId, 10),
+								path: params.path,
+								name: params.name,
+								type: "folder",
+								size: 0,
+								lastUpdate: new Date(),
+								children: [],
+								sharing: []
 							}, { safe : true }, function() {
 								if(folderPath != '/')
 									provider.get.byPath(folderPath, function(error, directory) {
@@ -96,6 +97,7 @@ provider.create.file = function(params, callback){
                             path: params.path,
                             name: params.name,
                             type: 'file',
+                            lastUpdate: new Date(),
                             size: parseInt(params.size, 10),
                             itemId: params.id
                         };
@@ -205,7 +207,7 @@ provider.delete.byPath = function( fullPath, callback){
 								directory.children.splice(index);
 							collection.save(directory, { safe : true }, callback);
 						}
-						else					
+						else
 							callback.call(this, error);
 					});
 				})
@@ -324,18 +326,69 @@ provider.update.name = function(params, callback){
  * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
  * @param  {Function} callback
  */
-provider.copy = function(item, updatedItem, targetPath, move, callback) {
-    mongo.collection('directories', function(error, collection) {
-        try {
+provider.copyItem = function(collection, item, updatedItem, targetPath, move, start, stop) {
+    try {
+        updatedItem = updatedItem || {};
 
+        var newItem = {};
+        _.extend(newItem, item, updatedItem);
 
+        newItem.name += '_1';
+        newItem.path = targetPath;
+        newItem._id = newItem.ownerId + newItem.path + newItem.name;
+        newItem.lastUpdate = new Date();
 
-        }
-        catch(exception){
-            callback.call(this, exception);
-        }
-    });
+        collection.save(newItem, { safe : true }, function(error) {
+            if(error)
+                throw error;
+
+            if(item.type == 'folder') {
+                for(var i = 0; i < item.children.length; i++) {
+
+                    var path = newItem.path + newItem.name + "/";
+                    collection.findOne({'_id': item.children[i]}, function(error, data) {
+                        if(error)
+                            throw 'item not found';
+                        start();
+                        provider.copyItem(collection, data, null, path, false, start, stop);
+                    });
+                }
+            }
+            stop();
+        });
+
+    }
+    catch(exception){
+        stop(exception);
+    }
 };
+
+provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
+    var started = 0;
+
+    mongo.collection('directories', function(error, collection) {
+
+        function start() {
+            started++;
+        };
+        function stop(error) {
+            if(--started <= 0)
+                end();
+        };
+        function end() {
+            callback.call(this);
+        };
+
+        collection.findOne({"_id": fullPath}, function(error, item) {
+            if(!error && item) {
+                start();
+                provider.copyItem(collection, item, null, targetPath, move, start, stop);
+            }
+            else
+                callback.call(this, error);
+        });
+    });
+}
 
 provider.checkExist = function(fullPath, callback) {
 
