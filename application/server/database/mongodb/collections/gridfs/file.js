@@ -92,7 +92,7 @@ provider.upload = function(params, callback){
 		metadata : {
 			type : params.type,
 			name : params.name,
-			owner : parseInt(params.owner, 10)
+			owner : parseInt(params.ownerId, 10)
 		}
 	});
 

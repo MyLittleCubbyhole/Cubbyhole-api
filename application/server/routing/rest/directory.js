@@ -72,19 +72,25 @@ directory.post.copy = function(request, response){
 	,	parameters 	= {};
 	parameters.ownerId 	= params[0]
 	parameters.path = params[1] || '/' ;
+	parameters.move = params.move || false;
 
 	parameters.targetPath = body.path;
 
 	if(!parameters.path)
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
-		provider.copy(parameters.ownerId + parameters.path, null, parameters.targetPath, false,  function(error) {
+		provider.copy(parameters.ownerId + parameters.path, null, parameters.targetPath, parameters.move,  function(error) {
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
 		})
 
 }
 
-directory.post.upload = function(request, response){
+directory.post.move = function(request, response) {
+	request.params.move = true;
+	directory.post.copy(request, response);
+}
+
+/*directory.post.upload = function(request, response){
 	//request body si c'est du server to server // a modifier par la suite quand on fera de l'upload par socket
 	var data 	= request.files ? request.files.file : request.body
 	,	params 	= request.params;
@@ -98,7 +104,7 @@ directory.post.upload = function(request, response){
 	})
 
 
-}
+}*/
 
 /********************************[  PUT   ]********************************/
 
@@ -114,7 +120,6 @@ directory.put.rename = function(request, response){
     parameters.newName 	= body.name;
 
     parameters.fullPath = parameters.userId + "/" + (parameters.path.length ? parameters.path + "/" : "") + parameters.currentName;
-    debugger;
 
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });

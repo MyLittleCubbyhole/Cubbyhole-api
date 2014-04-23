@@ -37,7 +37,7 @@ uploader.init = function(socket) {
 			size: files[name].size,
 			path: files[name].logicPath,
 			fullPath: files[name].owner + files[name].logicPath + name,
-			owner: files[name].owner
+			ownerId: files[name].owner
 		};
 
 		if(files[name].id) {
