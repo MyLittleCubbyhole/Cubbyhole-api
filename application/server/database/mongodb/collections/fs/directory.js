@@ -58,6 +58,7 @@ provider.create.folder = function(params, callback){
 									});
 								else
 									callback.call(this);
+								
 							})
 						}
 						else
