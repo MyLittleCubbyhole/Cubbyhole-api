@@ -32,7 +32,7 @@ directory.get.byPath	= function(request, response){
 
 	provider.get.byOwner(parameters.ownerId, function(error, data) {
 		var items = mongoTools.format(data);
-		items = mongoTools.browse(parameters.arrayPath, items);
+		items = mongoTools.browse(parameters.arrayPath, items);		
 		response.send( (!error && data ? items  : error ) );
 		response.end();
 	})
