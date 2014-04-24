@@ -36,11 +36,11 @@ user.get.activateAccount = function(request, response) {
 
     tokenProvider.get.byId(token, function(error, dataToken) {
         if(dataToken) {
-            if(dataToken.TYPE == 'ACTIVATION')  {
-                userProvider.get.byId(dataToken.USERID, function(error, dataUser) {
+            if(dataToken.type == 'ACTIVATION')  {
+                userProvider.get.byId(dataToken.userid, function(error, dataUser) {
                     if(!error) {
                         dataUser.activated = true;
-                        dataUser.id = dataUser.ID;
+                        dataUser.id = dataUser.id;
                         userProvider.update.activated(dataUser, function(error, dataUserUpdated) {
                             if(!error) {
                                 response.writeHead(200);
@@ -66,10 +66,12 @@ user.get.activateAccount = function(request, response) {
                 });
 
             } else {
+                console.log('Token sended is not an activation token');
                 response.writeHead(401);
                 response.end();
             }
         } else {
+            console.log('Token not found ' + token);
             response.writeHead(401);
             response.end();
         }
@@ -173,7 +175,7 @@ user.post.authenticate = function(request, response) {
 						expirationDate: new Date(Date.now() + 86400000).toISOString().slice(0, 19).replace('T', ' '),
                         type: 'AUTHENTICATION',
 						origin: request.header("User-Agent"),
-						userId: dataUser.ID
+						userId: dataUser.id
 					};
 					tokenProvider.create.token(token, function(error, dataToken) {
 						if(!error) {
