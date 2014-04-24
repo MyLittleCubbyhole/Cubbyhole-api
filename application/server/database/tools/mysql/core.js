@@ -28,6 +28,7 @@ mysqlTools.generatePassword = function(password, callback){
 
     mysqlTools.generateRandomBytes(256, function(salt) {
         data.salt = salt;
+        console.log(salt)
 
         data.password = encrypt(password, data.salt);
 
