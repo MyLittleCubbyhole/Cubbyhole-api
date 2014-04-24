@@ -24,19 +24,22 @@ provider.get.byEmail = function(email, callback) {
 
 
 provider.create.user = function(user, callback) {
-
+	console.log('user - create - init');
 	provider.get.byUsername(user.username, function(error, data) {
+		console.log('user - test exist - username');
 
 		if(!data || data.length == 0)
 			provider.get.byEmail(user.email, function(error, data) {
+				console.log('user - test exist - email');
 				if(!data || data.length == 0) {
 					try {
 						var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `COUNTRY`, `ACTIVATED`, `ROLEID`) values (';
 						tools.generatePassword(user.password, function(data) {
-
+							console.log('generatePassword');
 							query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 							Mysql.query(query, callback);
 						})
+						console.log(query);
 					}
 					catch(exception) { callback.call(this, 'user creation failed - ' + exception); }
 				}
