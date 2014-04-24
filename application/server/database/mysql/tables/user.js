@@ -70,7 +70,7 @@ provider.update.activated = function(user, callback) {
 
 provider.connect = function(email, password, callback) {
 	provider.get.byEmail(email, function(error, user) {
-		var goodPassword = user.password ? tools.checkPassword(password, user.password, user.SALT) : false;
+		var goodPassword = user.password ? tools.checkPassword(password, user.password, user.salt) : false;
 		var userResult = (user.activated && goodPassword) ? user : null;
 		callback(error, userResult);
 	});

@@ -30,6 +30,7 @@ mysqlTools.generatePassword = function(password, callback){
     if(!password || password.length<8)
         throw 'invalid password - password length must be greater than 8';
 
+    console.log('(-)')
     mysqlTools.generateRandomBytes(256, function(salt) {
         data.salt = salt;
         console.log(salt)
