@@ -4,7 +4,6 @@ var crypto = require('crypto')
 function encrypt(string, salt) {
     var hash = crypto.createHash('sha512');
 
-    console.log(string, salt, hash);
     hash.update(string);
     hash.update(salt);
 
@@ -16,10 +15,6 @@ mysqlTools.generateRandomBytes = function(numberOfBytes, callback) {
         if(exception)
             throw exception;
 
-        console.log(bytes.toString('base64'));
-        console.log('------')
-        console.log(bytes);
-        console.log('passage');
         callback(bytes.toString('base64'));
     });
 }
@@ -30,10 +25,8 @@ mysqlTools.generatePassword = function(password, callback){
     if(!password || password.length<8)
         throw 'invalid password - password length must be greater than 8';
 
-    console.log('(-)')
     mysqlTools.generateRandomBytes(256, function(salt) {
         data.salt = salt;
-        console.log(salt)
 
         data.password = encrypt(password, data.salt);
 
