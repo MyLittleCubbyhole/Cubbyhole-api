@@ -124,28 +124,26 @@ user.post.create = function(request, response){
 		userProvider.create.user(user, function(error, data){
 			if(data) {
 				user.id = data.insertId;
-				directoryProvider.create.directory(user.id, function(error, dataDirectory){
-                    response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+                response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
 
-                    if(!error) {
-                        mysqlTools.generateRandomBytes(32, function(tokenId) {
-                            tokenId = encodeURIComponent(tokenId);
-                            var token = {
-                                id: tokenId,
-                                expirationDate: new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '),
-                                type: 'ACTIVATION',
-                                origin: request.header("User-Agent"),
-                                userId: user.id
-                            };
-                            tokenProvider.create.token(token, function(error, dataToken) {
-                                if(!error) {
-                                    mailer.sendActivationMail(user.email, user.username, tokenId);
-                                } else
-                                    console.log(error);
-                            });
+                if(!error) {
+                    mysqlTools.generateRandomBytes(32, function(tokenId) {
+                        tokenId = encodeURIComponent(tokenId);
+                        var token = {
+                            id: tokenId,
+                            expirationDate: new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '),
+                            type: 'ACTIVATION',
+                            origin: request.header("User-Agent"),
+                            userId: user.id
+                        };
+                        tokenProvider.create.token(token, function(error, dataToken) {
+                            if(!error) {
+                                mailer.sendActivationMail(user.email, user.username, tokenId);
+                            } else
+                                console.log(error);
                         });
-                    }
-                })
+                    });
+                }
 			}
 			else {
 				console.log(error);
