@@ -179,9 +179,9 @@ user.post.authenticate = function(request, response) {
 					};
 					tokenProvider.create.token(token, function(error, dataToken) {
 						if(!error) {
-							dataUser.TOKEN = tokenId;
-							delete(dataUser.PASSWORD);
-							delete(dataUser.SALT);
+							dataUser.token = tokenId;
+							delete(dataUser.password);
+							delete(dataUser.salt);
 							response.send({'user' : dataUser});
 						} else
 							response.send({'information' : 'An error has occurred - ' + error});

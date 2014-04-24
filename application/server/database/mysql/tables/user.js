@@ -9,37 +9,31 @@ provider.get.all = function(callback) {
 }
 
 provider.get.byId = function(id, callback) {
-	Mysql.query('select * from `user` where `ID` = '+ parseInt(id, 10) +';', callback);
+	Mysql.query('select * from `user` where `id` = '+ parseInt(id, 10) +';', callback);
 }
 
 provider.get.byUsername = function(username, callback) {
-	Mysql.query('select * from `user` where `USERNAME`="'+ username + '";', callback);
+	Mysql.query('select * from `user` where `username`="'+ username + '";', callback);
 }
 
 provider.get.byEmail = function(email, callback) {
-	Mysql.query('select * from `user` where `EMAIL`="'+ email + '";', callback);
+	Mysql.query('select * from `user` where `email`="'+ email + '";', callback);
 }
 
 /********************************[  CREATE   ]********************************/
 
 
 provider.create.user = function(user, callback) {
-	console.log('user - create - init');
 	provider.get.byUsername(user.username, function(error, data) {
-		console.log('user - test exist - username');
-
 		if(!data || data.length == 0)
 			provider.get.byEmail(user.email, function(error, data) {
-				console.log('user - test exist - email');
 				if(!data || data.length == 0) {
 					try {
-						var query = 'insert into `user` (`USERNAME`, `PASSWORD`, `SALT`, `FIRSTNAME`, `LASTNAME`, `INSCRIPTIONDATE`, `BIRTHDATE`, `EMAIL`, `COUNTRY`, `ACTIVATED`, `ROLEID`) values (';
+						var query = 'insert into `user` (`username`, `password`, `salt`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `ROLEID`) values (';
 						tools.generatePassword(user.password, function(data) {
-							console.log('generatePassword');
 							query += '"' + user.username + '","' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 							Mysql.query(query, callback);
 						})
-						console.log(query);
 					}
 					catch(exception) { callback.call(this, 'user creation failed - ' + exception); }
 				}
@@ -56,7 +50,7 @@ provider.create.user = function(user, callback) {
 /********************************[  DELETE   ]********************************/
 
 provider.delete.byId = function(id, callback) {
-	Mysql.query('delete from `user` where `ID`='+ parseInt(id, 10) + ';', callback);
+	Mysql.query('delete from `user` where `id`='+ parseInt(id, 10) + ';', callback);
 }
 
 /********************************[  UPDATE   ]********************************/
@@ -64,20 +58,20 @@ provider.delete.byId = function(id, callback) {
 provider.update.password = function(user, callback) {
 	tools.generatePassword(user.password, function(data) {
 
-		Mysql.query('update `user` set `PASSWORD`="' + data.password + '", `SALT`="' + data.salt + '" where `ID`=' + parseInt(user.id, 10) + ';', callback);
+		Mysql.query('update `user` set `password`="' + data.password + '", `salt`="' + data.salt + '" where `id`=' + parseInt(user.id, 10) + ';', callback);
 	})
 }
 
 provider.update.activated = function(user, callback) {
-	Mysql.query('update `user` set `ACTIVATED`=' + (user.activated ? 1 : 0) + ' where `ID`=' + parseInt(user.id, 10) + ';', callback);
+	Mysql.query('update `user` set `activated`=' + (user.activated ? 1 : 0) + ' where `id`=' + parseInt(user.id, 10) + ';', callback);
 }
 
 /********************************[  OTHERS   ]********************************/
 
 provider.connect = function(email, password, callback) {
 	provider.get.byEmail(email, function(error, user) {
-		var goodPassword = user.PASSWORD ? tools.checkPassword(password, user.PASSWORD, user.SALT) : false;
-		var userResult = (user.ACTIVATED && goodPassword) ? user : null;
+		var goodPassword = user.password ? tools.checkPassword(password, user.password, user.SALT) : false;
+		var userResult = (user.activated && goodPassword) ? user : null;
 		callback(error, userResult);
 	});
 }

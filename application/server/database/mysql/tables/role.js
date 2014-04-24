@@ -8,24 +8,24 @@ provider.get.all = function(callback) {
 }
 
 provider.get.byId = function(id, callback) {
-	Mysql.query('select * from `role` where `ID` = '+ parseInt(id, 10) +';', callback);
+	Mysql.query('select * from `role` where `id` = '+ parseInt(id, 10) +';', callback);
 }
 
 provider.get.byTitle = function(title, callback) {
-	Mysql.query('select * from `role` where `TITLE`="'+ title + '";', callback);
+	Mysql.query('select * from `role` where `title`="'+ title + '";', callback);
 }
 /********************************[  CREATE   ]********************************/
 
 
 provider.create.role = function(title, callback) {
 
-	Mysql.query('insert into `role` (`TITLE`) values ("' + title + '")', callback);
+	Mysql.query('insert into `role` (`title`) values ("' + title + '")', callback);
 }
 
 /********************************[  DELETE   ]********************************/
 
 provider.delete.byId = function(id, callback) {
-	Mysql.query('delete from `role` where `ID`='+ parseInt(id, 10) + ';', callback);
+	Mysql.query('delete from `role` where `id`='+ parseInt(id, 10) + ';', callback);
 }
 
 module.exports = provider;

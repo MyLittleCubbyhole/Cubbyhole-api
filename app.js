@@ -46,7 +46,7 @@ app.configure('development', function () {
 
 require(global.paths.server + '/dependencies')(server, app);
 console.log('tstart')
-if (!module.parent)
+// if (!module.parent)
     server.listen(config['node_config'].port, function () {
         console.log('WebService server listening on port %d in %s mode - [%s] - [%s]', this.address().port, app.settings.env, environment, developer);
     });
