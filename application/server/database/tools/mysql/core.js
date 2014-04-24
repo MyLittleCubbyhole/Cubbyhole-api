@@ -7,6 +7,7 @@ function encrypt(string, salt) {
     hash.update(string);
     hash.update(salt);
 
+    console.log(string, salt, hash);
     return hash.digest('base64');
 };
 
