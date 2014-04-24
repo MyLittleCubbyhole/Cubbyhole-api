@@ -18,7 +18,7 @@ provider.init = function() {
 
 provider.get.byPath = function(data, callback){
 	var range = data.range;
-	directoryProvider.get.byPath(data.fullPath,function(error, data){
+	directoryProvider.get.byFullPath(data.fullPath,function(error, data){
 		if(data && data.type == 'file' && !error)
 			provider.download({id : data.itemId, range : range}, callback);
 		else
@@ -139,7 +139,7 @@ provider.download = function(data, callback){
 provider.zip = function(data, callback) {
 
 	var name = data.path.length >  1 ? data.path[data.path.length - 2] : data.path[data.path.length - 1];
-	directoryProvider.get.byPath(data, function(error, data){
+	directoryProvider.get.byFullPath(data, function(error, data){
 		if(!error) {
 
 			tools.zipFolder({name: name, data:data}, callback);

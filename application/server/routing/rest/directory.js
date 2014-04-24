@@ -30,10 +30,8 @@ directory.get.byPath	= function(request, response){
 
 	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
 
-	provider.get.byOwner(parameters.ownerId, function(error, data) {
-		var items = mongoTools.format(data);
-		items = mongoTools.browse(parameters.arrayPath, items);
-		response.send( (!error && data ? items  : error ) );
+	provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
+		response.send( (!error && data ? data : error ) );
 		response.end();
 	})
 }

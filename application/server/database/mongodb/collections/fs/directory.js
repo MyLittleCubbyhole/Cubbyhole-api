@@ -25,10 +25,16 @@ provider.get.byOwner = function(ownerId, callback){
     });
 };
 
-provider.get.byPath = function(fullPath, callback){
+provider.get.byPath = function(ownerId, path, callback){
 	mongo.collection('directories', function(error, collection) {
-        collection.findOne({"_id":fullPath}, callback);
+        collection.find({"ownerId": parseInt(ownerId,10), "path": path}).toArray(callback);
 	})
+}
+
+provider.get.byFullPath = function(fullPath, callback){
+    mongo.collection('directories', function(error, collection) {
+        collection.findOne({"_id":fullPath}, callback);
+    })
 }
 
 /********************************[ CREATE ]********************************/
@@ -58,13 +64,13 @@ provider.create.folder = function(params, callback){
 								sharing: []
 							}, { safe : true }, function() {
 								if(folderPath != '/')
-									provider.get.byPath(folderPath, function(error, directory) {
+									provider.get.byFullPath(folderPath, function(error, directory) {
 									    directory.children.push(params.fullPath);
 									    collection.save(directory, { safe : true }, callback);
 									});
 								else
 									callback.call(this);
-								
+
 							})
 						}
 						else
@@ -128,7 +134,7 @@ provider.create.file = function(params, callback){
                                         throw 'error creating collection - '+error;
 
                                     if(folderPath != "/")
-                                        provider.get.byPath(folderPath, function(error, directory) {
+                                        provider.get.byFullPath(folderPath, function(error, directory) {
                                             if(error)
                                                 throw 'error getting folder - '+error;
 
@@ -215,7 +221,7 @@ provider.delete.byPath = function(fullPath, callback){
 		function end() {
 			if(folderPath != '/')
 				provider.update.size(folderPath, size, function() {
-					provider.get.byPath(folderPath, function(error, directory) {
+					provider.get.byFullPath(folderPath, function(error, directory) {
 						if(!error && directory) {
 							var index = directory.children.indexOf(fullPath)
 
@@ -273,7 +279,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 path = path.substring(1);
                 paths.pop();
 
-                provider.get.byPath(path, function(error, directory) {
+                provider.get.byFullPath(path, function(error, directory) {
 
                     directory.size += parseInt(sizeUpdate, 10);
 
@@ -398,15 +404,15 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
         };
         function stop(error) {
             if(--started <= 0)
-                end();
+                end(error);
         };
-        function end() {
+        function end(error) {
             if(move)
                 provider.delete.byPath(fullPath, function(error) {
                     callback.call(this, error);
                 });
             else
-                callback.call(this);
+                callback.call(this, error);
         };
 
         collection.findOne({"_id": fullPath}, function(error, item) {
