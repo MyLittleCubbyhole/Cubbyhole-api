@@ -87,7 +87,7 @@ provider.update.fileName = function(data, callback) {
 provider.upload = function(params, callback){
 	var mode = params.mode || 'w';
 
-	var gridStore = new GridStorage(mongo, params.id, mode, {
+	var gridStore = new GridStorage(mongo, params.id, params.name, mode, {
 		content_type : params.type,
 		metadata : {
 			type : params.type,
