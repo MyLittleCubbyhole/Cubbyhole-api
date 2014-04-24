@@ -47,43 +47,37 @@ provider.get.byFullPath = function(fullPath, callback){
 provider.create.folder = function(params, callback){
 	var folderPath = params.path != '/' ? params.ownerId + params.path.slice(0, -1) : params.path;
 	provider.checkExist(folderPath, function(error, exist) {
-		try {
-			if(exist)
-				mongo.collection('directories', function(error, collection){
-					collection.findOne({"_id": params.fullPath }, function(error, data) {
-						if(!data && !error) {
-							collection.insert({
-								_id: params.fullPath,
-								ownerId: parseInt(params.ownerId, 10),
-								path: params.path,
-								name: params.name,
-								type: "folder",
-								size: params.size ? parseInt(params.size, 10) : 0,
-								lastUpdate: new Date(),
-								children: [],
-								sharing: []
-							}, { safe : true }, function() {
-								if(folderPath != '/')
-									provider.get.byFullPath(folderPath, function(error, directory) {
-									    directory.children.push(params.fullPath);
-									    collection.save(directory, { safe : true }, callback);
-									});
-								else
-									callback.call(this);
+		if(exist)
+			mongo.collection('directories', function(error, collection){
+				collection.findOne({"_id": params.fullPath }, function(error, data) {
+					if(!data && !error) {
+						collection.insert({
+							_id: params.fullPath,
+							ownerId: parseInt(params.ownerId, 10),
+							path: params.path,
+							name: params.name,
+							type: "folder",
+							size: params.size ? parseInt(params.size, 10) : 0,
+							lastUpdate: new Date(),
+							children: [],
+							sharing: []
+						}, { safe : true }, function() {
+							if(folderPath != '/')
+								provider.get.byFullPath(folderPath, function(error, directory) {
+								    directory.children.push(params.fullPath);
+								    collection.save(directory, { safe : true }, callback);
+								});
+							else
+								callback.call(this);
 
-							})
-						}
-						else
-							throw 'folder already exist'
-
-					})
+						})
+					}
+					else
+					   callback.call(this, 'folder already exist');
 				})
-			else {
-				throw 'parent doesnt exist';
-			}
-		}
-		catch(exception) {
-			callback.call(this, exception)
+			})
+		else {
+			callback.call(this, 'parent doesnt exist');
 		}
 	})
 }
@@ -100,66 +94,59 @@ provider.create.file = function(params, callback){
 
                 var folderPath = params.path == '/' ? params.path : (params.ownerId + params.path).slice(0, -1);
 
-                try {
+                provider.checkExist(folderPath, function(error, exist) {
+                    if(!exist)
+                        callback.call(this, 'folder does not exist - ' + error);
 
-                    provider.checkExist(folderPath, function(error, exist) {
-                        if(!exist)
-                            throw 'folder does not exist - '+error;
+                    params.id = new ObjectID();
 
-                        params.id = new ObjectID();
+                    var directoryFile = {
+                        _id: params.fullPath,
+                        ownerId: parseInt(params.ownerId, 10),
+                        path: params.path,
+                        name: params.name,
+                        type: 'file',
+                        lastUpdate: new Date(),
+                        size: params.size ? parseInt(params.size, 10) : 0,
+                        itemId: params.id
+                    };
 
-                        var directoryFile = {
-                            _id: params.fullPath,
-                            ownerId: parseInt(params.ownerId, 10),
-                            path: params.path,
-                            name: params.name,
-                            type: 'file',
-                            lastUpdate: new Date(),
-                            size: params.size ? parseInt(params.size, 10) : 0,
-                            itemId: params.id
-                        };
+                    fileProvider.upload(params, function(error){
+                        if(error)
+                            throw 'error during upload - ' + error;
 
-                        fileProvider.upload(params, function(error){
+                        fileProvider.get.MD5(params.id, function(error, fileMd5) {
                             if(error)
-                                throw 'error during upload - '+error;
+                                throw 'error retrieving file created - ' + error;
 
-                            fileProvider.get.MD5(params.id, function(error, fileMd5) {
+                            directoryFile.md5 = fileMd5;
+
+                            collection.insert(directoryFile, { safe : true }, function(error) {
                                 if(error)
-                                    throw 'error retrieving file created - '+error;
+                                    throw 'error creating collection - ' + error;
 
-                                directoryFile.md5 = fileMd5;
+                                if(folderPath != "/")
+                                    provider.get.byFullPath(folderPath, function(error, directory) {
+                                        if(error)
+                                            throw 'error getting folder - ' + error;
 
-                                collection.insert(directoryFile, { safe : true }, function(error) {
-                                    if(error)
-                                        throw 'error creating collection - '+error;
+                                        directory.children.push(params.fullPath);
 
-                                    if(folderPath != "/")
-                                        provider.get.byFullPath(folderPath, function(error, directory) {
+                                        collection.save(directory, { safe : true }, function(error) {
                                             if(error)
-                                                throw 'error getting folder - '+error;
+                                                throw 'error updating children - ' + error;
 
-                                            directory.children.push(params.fullPath);
-
-                                            collection.save(directory, { safe : true }, function(error) {
-                                                if(error)
-                                                    throw 'error updating children - '+error;
-
-                                                provider.update.size(folderPath, directoryFile.size, function(error) {
-                                                    callback.call(this, error);
-                                                });
+                                            provider.update.size(folderPath, directoryFile.size, function(error) {
+                                                callback.call(this, error);
                                             });
                                         });
-                                    else
-                                        callback.call(this, error);
-
-                                });
+                                    });
+                                else
+                                    callback.call(this, error);
                             });
-                        })
-                    });
-                }
-                catch(exception){
-                    callback.call(this, exception);
-                }
+                        });
+                    })
+                });
             }
             else
                 callback.call(this, 'file already exist');
@@ -188,9 +175,9 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 			else
 				fileProvider.delete.file(data.itemId, function(error) {
 					if(error)
-						throw 'problem occured during deleting file '+error;
+						console.error('problem occured during deleting file ' + error);
 				})
-			collection.remove({"_id":fullPath}, function(error,data) { if(error) console.log(error); stop(); });
+			collection.remove({"_id":fullPath}, function(error,data) { if(error) console.error(error); stop(); });
 		}
 		else
 			stop('not found');
@@ -283,21 +270,15 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
 
                     directory.size += parseInt(sizeUpdate, 10);
 
-                    try {
-                        started++;
-                        collection.save(directory, { safe : true }, function(error) {
-                            started--;
-                            if(error)
-                                throw 'error updating size - ' + error;
+                    started++;
+                    collection.save(directory, { safe : true }, function(error) {
+                        started--;
+                        if(error)
+                            callback.call(this, 'error updating size - ' + error);
 
-                            if(started <= 0 && i == nbFolders)
-                                callback.call(this, null);
-                        });
-
-                    }
-                    catch(exception){
-                        callback.call(this, exception);
-                    }
+                        if(started <= 0 && i == nbFolders)
+                            callback.call(this, null);
+                    });
                 });
             }
         });
@@ -317,113 +298,111 @@ provider.update.name = function(params, callback){
 /********************************[ UPDATE ]********************************/
 
 provider.copyItem = function(collection, item, updatedItem, targetPath, move, start, stop) {
-    try {
-        updatedItem = updatedItem || {};
+    updatedItem = updatedItem || {};
 
-        var newItem = {};
-        _.extend(newItem, item, updatedItem);
+    var newItem = {};
+    _.extend(newItem, item, updatedItem);
 
-        var oldFullPath = newItem._id;
+    var oldFullPath = newItem._id;
 
-        newItem.path = targetPath;
-        newItem._id = newItem.ownerId + newItem.path + newItem.name;
-        newItem.lastUpdate = new Date();
+    newItem.path = targetPath;
+    newItem._id = newItem.ownerId + newItem.path + newItem.name;
+    newItem.lastUpdate = new Date();
 
-        provider.getNewName(newItem._id, function(error, newName) {
-            if(!error && newName) {
+    provider.getNewName(newItem._id, function(error, newName) {
+        if(!error && newName) {
 
-                newItem.name = newName;
-                newItem._id = newItem.ownerId + newItem.path + newItem.name;
+            newItem.name = newName;
+            newItem._id = newItem.ownerId + newItem.path + newItem.name;
 
-                var params = {
-                    fullPath: newItem._id,
-                    ownerId: newItem.ownerId,
-                    path: newItem.path,
-                    name: newItem.name
-                };
+            var params = {
+                fullPath: newItem._id,
+                ownerId: newItem.ownerId,
+                path: newItem.path,
+                name: newItem.name
+            };
 
-                if(item.type == 'folder') {
-                    provider.create.folder(params, function(error) {
+            if(item.type == 'folder') {
+                provider.create.folder(params, function(error) {
+                    if(error)
+                        console.error('error saving new item - ' + error);
+
+                    for(var i = 0; i < item.children.length; i++) {
+                        start();
+                        var path = newItem.path + newItem.name + "/";
+                        collection.findOne({'_id': item.children[i]}, function(error, data) {
+                            if(error)
+                                console.error('item not found');
+
+                            provider.copyItem(collection, data, null, path, move, start, stop);
+                        });
+                    }
+                    stop();
+                });
+            } else {
+                fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
+                    if(error)
+                        console.error('error getting old file - ' + error);
+
+                    params.type = data.type;
+                    params.data = data.data;
+                    params.size = data.length;
+
+                    provider.create.file(params, function(error) {
                         if(error)
-                            throw 'error saving new item - ' + error;
+                            console.error(error);
 
-                        for(var i = 0; i < item.children.length; i++) {
-                            start();
-                            var path = newItem.path + newItem.name + "/";
-                            collection.findOne({'_id': item.children[i]}, function(error, data) {
-                                if(error)
-                                    throw 'item not found';
-
-                                provider.copyItem(collection, data, null, path, move, start, stop);
-                            });
-                        }
                         stop();
                     });
-                } else {
-                    fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
-                        if(error)
-                            throw 'error getting old file - ' + error;
 
-                        params.type = data.type;
-                        params.data = data.data;
-                        params.size = data.length;
-
-                        provider.create.file(params, function(error) {
-                            if(error)
-                                throw error;
-
-                            stop();
-                        });
-
-                    });
-                }
+                });
             }
-        });
-
-    }
-    catch(exception){
-        stop(exception);
-    }
+        }
+    });
 };
 
 /**
  * Copy or move an item
  * @param  {string}     fullPath    fullPath of the item to copy
  * @param  {document}   updatedItem new item to create if you want to process a rename
- * @param  {string}     targetPath  estination of the item
+ * @param  {string}     targetPath  destination of the item
  * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
  * @param  {Function}   callback
  */
 provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
     var started = 0;
 
-    mongo.collection('directories', function(error, collection) {
+    if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
+        mongo.collection('directories', function(error, collection) {
 
-        function start() {
-            started++;
-        };
-        function stop(error) {
-            if(--started <= 0)
-                end(error);
-        };
-        function end(error) {
-            if(move)
-                provider.delete.byPath(fullPath, function(error) {
+            function start() {
+                started++;
+            };
+            function stop(error) {
+                if(--started <= 0)
+                    end(error);
+            };
+            function end(error) {
+                if(move)
+                    provider.delete.byPath(fullPath, function(error) {
+                        callback.call(this, error);
+                    });
+                else
                     callback.call(this, error);
-                });
-            else
-                callback.call(this, error);
-        };
+            };
 
-        collection.findOne({"_id": fullPath}, function(error, item) {
-            if(!error && item) {
-                start();
-                provider.copyItem(collection, item, updatedItem, targetPath, move, start, stop);
-            }
-            else
-                callback.call(this, error);
+            collection.findOne({"_id": fullPath}, function(error, item) {
+                if(!error && item) {
+                    start();
+                    provider.copyItem(collection, item, updatedItem, targetPath, move, start, stop);
+                }
+                else
+                    callback.call(this, error);
+            });
         });
-    });
+    }
+    else
+        callback.call(this, "cannot copy an item into himself");
 }
 
 /**

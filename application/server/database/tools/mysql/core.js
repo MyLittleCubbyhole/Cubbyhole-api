@@ -23,7 +23,7 @@ mysqlTools.generatePassword = function(password, callback){
     var data = {};
 
     if(!password || password.length<8)
-        throw 'invalid password - password length must be greater than 8';
+        console.warn('invalid password - password length must be greater than 8');
 
     mysqlTools.generateRandomBytes(256, function(salt) {
         data.salt = salt;
