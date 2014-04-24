@@ -4,10 +4,10 @@ var crypto = require('crypto')
 function encrypt(string, salt) {
     var hash = crypto.createHash('sha512');
 
+    console.log(string, salt, hash);
     hash.update(string);
     hash.update(salt);
 
-    console.log(string, salt, hash);
     return hash.digest('base64');
 };
 
