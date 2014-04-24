@@ -14,7 +14,7 @@ directory.get.all 		= function(request, response){
 
 directory.get.byOwner 	= function(request, response){
 	var params = request.params;
-	provider.get.byOwner(params[0], function(error, data){		
+	provider.get.byOwner(params[0], function(error, data){
 		response.send( (!error && data ? mongoTools.format(data) : error ) );
 		response.end();
 	})
@@ -66,7 +66,31 @@ directory.post.create = function(request, response){
 
 }
 
-directory.post.upload = function(request, response){
+directory.post.copy = function(request, response){
+	var params 		= request.params
+	,	body 		= request.body
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] || '/' ;
+	parameters.move = params.move || false;
+
+	parameters.targetPath = body.path;
+
+	if(!parameters.path)
+		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
+	else
+		provider.copy(parameters.ownerId + parameters.path, null, parameters.targetPath, parameters.move,  function(error) {
+			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
+		})
+
+}
+
+directory.post.move = function(request, response) {
+	request.params.move = true;
+	directory.post.copy(request, response);
+}
+
+/*directory.post.upload = function(request, response){
 	//request body si c'est du server to server // a modifier par la suite quand on fera de l'upload par socket
 	var data 	= request.files ? request.files.file : request.body
 	,	params 	= request.params;
@@ -80,7 +104,7 @@ directory.post.upload = function(request, response){
 	})
 
 
-}
+}*/
 
 /********************************[  PUT   ]********************************/
 
@@ -93,8 +117,9 @@ directory.put.rename = function(request, response){
     parameters.userId 	= params[0]
     parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
     parameters.currentName = parameters.path.pop();
-    console.log(body)
     parameters.newName 	= body.name;
+
+    parameters.fullPath = parameters.userId + "/" + (parameters.path.length ? parameters.path + "/" : "") + parameters.currentName;
 
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });

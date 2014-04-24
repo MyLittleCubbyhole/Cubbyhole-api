@@ -69,11 +69,15 @@ provider.delete.file = function(id, callback){
 /********************************[ UPDATE ]********************************/
 
 provider.update.fileName = function(data, callback) {
-	var id = data.id;
+	var id = data.itemId;
     mongo.collection('fs.files', function(error, collection) {
         collection.findOne({ "_id" : id}, function(error, file) {
-            file.metadata.name = data.name;
-            collection.save(file, { safe : true }, callback);
+            if(!error) {
+                file.metadata.name = data.name;
+                collection.save(file, { safe : true }, callback);
+            }
+            else
+                collection.save(file, { safe : true }, function(error){callback.call(this, error)});
         });
     });
 }
@@ -88,7 +92,7 @@ provider.upload = function(params, callback){
 		metadata : {
 			type : params.type,
 			name : params.name,
-			owner : parseInt(params.owner, 10)
+			owner : parseInt(params.ownerId, 10)
 		}
 	});
 
