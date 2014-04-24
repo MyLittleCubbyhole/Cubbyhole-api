@@ -16,6 +16,10 @@ mysqlTools.generateRandomBytes = function(numberOfBytes, callback) {
         if(exception)
             throw exception;
 
+        console.log(bytes.toString('base64'));
+        console.log('------')
+        console.log(bytes);
+        console.log('passage');
         callback(bytes.toString('base64'));
     });
 }
