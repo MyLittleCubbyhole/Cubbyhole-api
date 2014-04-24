@@ -100,13 +100,16 @@ provider.upload = function(params, callback){
 	params.data = params.data != '' ? params.data : ' ';
 
 	gridStore.open(function(error, gridStore) {
-		gridStore.write(new Buffer(params.data, 'binary'), function(error, gridStore) {
-			gridStore.close(function(error, result) {
-				GridStorage.read(mongo, params.id, function(error, file) {
-					callback.call(this, error);
+		if(!error && gridStore)
+			gridStore.write(new Buffer(params.data, 'binary'), function(error, gridStore) {
+				gridStore.close(function(error, result) {
+					GridStorage.read(mongo, params.id, function(error, file) {
+						callback.call(this, error);
+					});
 				});
 			});
-		});
+		else
+			callback.call(this, error);
 	});
 
 }
