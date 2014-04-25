@@ -10,6 +10,7 @@ routing.init = function(app) {
 	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.get.byOwner);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor, directory.get.byPath);
+	app.get(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.download);
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
@@ -19,6 +20,7 @@ routing.init = function(app) {
 	app.get('/api/logout', user.get.logout);
 
 	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
+	app.post(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.post.zip);
 	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, directory.post.create);
 	app.post(/^\/api\/copy\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, directory.post.copy);
 	app.post(/^\/api\/move\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, directory.post.move);

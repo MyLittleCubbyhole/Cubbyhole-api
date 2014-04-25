@@ -139,15 +139,32 @@ provider.download = function(data, callback){
 provider.zip = function(data, callback) {
 
 	var name = data.path.length >  1 ? data.path[data.path.length - 2] : data.path[data.path.length - 1];
-	directoryProvider.get.byFullPath(data, function(error, data){
-		if(!error) {
-
-			tools.zipFolder({name: name, data:data}, callback);
+	directoryProvider.get.byOwner(data.ownerId, function(error, items){
+		if(!error && items) {
+			var rows = tools.format(items);
+			rows = tools.browse(data.path, rows);
+			tools.zipFolder({name: name, data:rows}, callback);
 		}
 		else
 			callback.call(this,'path not found');
 	})
 
+}
+
+provider.zipItems = function(data, callback) {
+	var length = data.items.length
+	,	self = this
+	,	items = [];
+
+	for(var i = 0; i<data.items.length; i++)
+		directoryProvider.get.byFullPath(data.ownerId + data.items[i], function(error, item) {
+			if(!error && item) {
+				items.push(item);
+				--length <= 0 && tools.zipItems.call(self, items, callback);
+			}
+			else 
+				callback.call(this,'item not found');
+		})
 }
 
 module.exports = provider;

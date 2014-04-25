@@ -56,22 +56,51 @@ file.get.zip = function(request, response) {
 	var params 	= request.params
 	,	header = {}
 	,	data = {};
-	data.userId = params[0];
+	data.ownerId = params[0];
 	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= 0;
 	data.path.push('/');
-	// data.fullPath = data.userId + '/' + data.path;
-		
-	provider.zip(data, function(zipFile) {
+
+	data.fullPath = data.ownerId + '/' + params[1];
+
+	var callback = function(zipFile) {
 		header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
 		response.writeHead(200, header);
 		response.write(zipFile.data, "binary");
 		response.end();
-	});
+	}
+
+	provider.zip(data, {callback: callback});
 
 
 }
 
+file.post.zip = function(request, response) {
+	var params 	= request.params
+	,	body = request.body
+	,	header = {}
+	,	data = {};
+	data.ownerId = params[0];
+	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
+	data.range 	= 0;
+	data.path.push('/');
 
+	data.items = [];
+	for(var i in body) {
+		path = body[i].slice(-1) != '/' ? body[i] : body[i].substring(0, body[i].length - 1);
+		data.items.push(path);
+	}
+
+	var callback = function(error, zipFile) {
+		if(!error) {
+			header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
+			response.writeHead(200, header);
+			response.write(zipFile.data, "binary");
+		}
+		response.end();
+	}
+	provider.zipItems(data, callback)
+
+}
 
 module.exports = file;

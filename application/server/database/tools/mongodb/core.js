@@ -1,6 +1,7 @@
 var mongoTools = {}
 ,	nodeZip = new require('node-zip')
-,	providerFile = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+,	providerFile = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+,	providerDirectory = require(global.paths.server + '/database/mongodb/collections/fs/directory');
 
 /**
  * [RECURSION] browse directory and return wanted file/folder
@@ -94,25 +95,67 @@ mongoTools.format = function(rows) {
 
 }
 
-mongoTools.zipFolder = function(folder, callback) {
-	var filesCounter = 0
+mongoTools.zipItems = function(itemsToZip, callback) {
+	var itemsCounter = itemsToZip.length
 	,	self = this
 	,	archiver = nodeZip();
 
 	archiver.file('read.me', 'powered by cubbyhole, \n cordialement, \n le trou du cube');
 
-	function start() { filesCounter++; }
-
-	function stop() {
-		filesCounter--;
-		if(filesCounter<=0)
-			success.call(self);
+	function success() {
+		var zipFile = {name: 'package', data: null};
+		zipFile.data = archiver.generate({base64:false,compression:'DEFLATE'});
+		callback && callback.call(self, '', zipFile);
 	}
 
-	function success() {
+	function zip(itemToZip) {
+		providerDirectory.get.byOwner(itemToZip.ownerId, function(error, items){
+			if(!error && items) {
+				var path = itemToZip.path.match(/[^\/\\]+/g) || [];
+				path.push('/');
+
+				var rows = mongoTools.format(items);
+				rows = mongoTools.browse(path, rows);
+
+				for(var i = 0; i<rows.length; i++)
+					if(rows[i].name != itemToZip.name)
+						delete rows[i];
+
+				mongoTools.zipFolder({name: itemToZip.name, data:rows}, {
+					archiver: archiver,
+					success: function() {
+						--itemsCounter <= 0 && success.call(self);
+					}
+				});
+			}
+		})
+	}
+
+	for(var i = 0; i<itemsToZip.length; i++)
+		if(itemsToZip[i].type == 'file')
+			providerFile.download({id : itemsToZip[i].itemId, range : 0}, function(error, download) {
+				archiver.file(download.metadata.name, download.data);
+				--itemsCounter <= 0 && success.call(self);
+			});
+		else 
+			zip(itemsToZip[i]);
+
+}
+
+mongoTools.zipFolder = function(folder, options) {
+	options = options || {};
+	var filesCounter = 0
+	,	self = this
+	,	archiver = options.archiver || nodeZip();
+
+	archiver.file('read.me', 'powered by cubbyhole, \n cordialement, \n le trou du cube');
+
+	var start =  function() { filesCounter++; }
+	var stop =  function() { --filesCounter <= 0 && success.call(self); }
+	var success = options.success || function() {
 		var zipFile = {name: folder.name, data: null};
-		zipFile.data = archiver.generate({base64:false,compression:'DEFLATE'});
-		callback.call(self, zipFile);
+		zipFile.data = archiver.generate({base64:false, compression:'DEFLATE'});
+		options && options.callback && options.callback.call(self, zipFile);
 	}
 
 	mongoTools.dirtyBrowse(folder.data, archiver, start, stop);
