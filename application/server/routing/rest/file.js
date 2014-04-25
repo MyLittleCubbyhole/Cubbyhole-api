@@ -60,6 +60,7 @@ file.get.zip = function(request, response) {
 	data.path 	= params[1] ? params[1].match(/[^\/\\]+/g) : [];
 	data.range 	= 0;
 	data.path.push('/');
+	// data.fullPath = data.userId + '/' + data.path;
 		
 	provider.zip(data, function(zipFile) {
 		header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
