@@ -44,6 +44,10 @@ app.configure('development', function () {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
+if(app.settings.env == 'dev')
+    for(var i in console)
+        console[i] = function() {};
+
 require(global.paths.server + '/dependencies')(server, app);
 if (!module.parent)
     server.listen(config['node_config'].port, function () {
