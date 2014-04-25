@@ -8,6 +8,9 @@ filters.tokenInterceptor = function(request, response, next) {
     var token = query.token || 0;
     token = encodeURIComponent(token);
 
+    for(var i = 0; i < 30; i++)
+        console.log("ANTIIIIIYOLOOOOOOOOO");
+
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
             if(((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) && data.TYPE == 'AUTHENTICATION')  {
