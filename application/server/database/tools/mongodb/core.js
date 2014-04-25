@@ -127,7 +127,7 @@ mongoTools.dirtyBrowse = function(root, archiver, start, stop){
 			mongoTools.dirtyBrowse( root[id].content, archiver.folder(root[id].name), start, stop );
 		else {
 			start();
-			providerFile.download({id : root[id].id, range : 0}, function(error, download) {
+			providerFile.download({id : root[id].itemId, range : 0}, function(error, download) {
 				archiver.file(download.metadata.name, download.data);
 				stop();
 			});
