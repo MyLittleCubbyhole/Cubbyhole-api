@@ -30,10 +30,28 @@ directory.get.byPath	= function(request, response){
 
 	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
 
-	provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
-		response.send( (!error && data ? data : error ) );
-		response.end();
-	})
+	var useSharing = parameters.path.split('/')[0] == 'Shared' && parameters.path.split('/')[1] !== undefined;
+
+	if(parameters.path.split('/')[0] != 'Shared' || useSharing) {
+		
+		if(useSharing) {
+			var fullPath = parameters.path.split('/');
+			fullPath.splice(0, 1);
+			parameters.ownerId = fullPath.splice(0, 1)[0];
+			parameters.path = fullPath.join('/');
+		}
+
+		provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
+			response.send( (!error && data ? data : error ) );
+			response.end();
+		})
+	}
+	else {
+		provider.get.childrenByFullPath(parameters.fullPath, function(error, data) {
+			response.send( (!error && data ? data : error ) );
+			response.end();
+		})
+	}
 }
 
 /********************************[  POST  ]********************************/
@@ -88,6 +106,19 @@ directory.post.move = function(request, response) {
 	directory.post.copy(request, response);
 }
 
+directory.post.share = function(request, response) {
+	var params = request.params
+	,	body = request.body
+	,	parameters = {};
+	parameters.ownerId 	= params[0]
+	parameters.right = body.right;
+	parameters.targetEmail = body.shareTo;
+	parameters.path = params[1] ? params[1] + '/' : '/' ;
+	parameters.fullPath = parameters.ownerId + parameters.path;
+
+	provider.share(parameters, callback);
+}
+
 /********************************[  PUT   ]********************************/
 
 directory.put.rename = function(request, response){
@@ -132,7 +163,7 @@ directory.delete.byPath		= function(request, response){
 	var fullPath = params[0] + params[1];
 	fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
 
-	console.log('delete ', fullPath)
+	// console.log('delete ', fullPath)
 
 	if(!params[1])
 		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });

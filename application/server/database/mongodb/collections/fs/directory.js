@@ -1,5 +1,7 @@
 var MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
-,   fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+,   fileProvider
+,   userProvider
+,   sharingProvider
 ,   tools = require(global.paths.server + '/database/tools/mongodb/core')
 ,   _ = require('lodash')
 ,   ObjectID = MongoProvider.objectId
@@ -8,7 +10,11 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 
 provider.init = function() {
     if(!fileProvider)
-    fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+        fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+    if(!userProvider)
+        userProvider = require(global.paths.server + '/database/mysql/tables/user');
+    if(!sharingProvider)
+        sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
 }
 
 /********************************[  GET   ]********************************/
@@ -29,6 +35,30 @@ provider.get.byPath = function(ownerId, path, callback){
 	mongo.collection('directories', function(error, collection) {
         collection.find({"ownerId": parseInt(ownerId,10), "path": path}).toArray(callback);
 	})
+}
+
+provider.get.childrenByFullPath = function(fullPath, callback) {
+    var started = 0;
+    fullPath = fullPath.slice(0, -1) == '/' ? fullPath.slice(0, -1) : fullPath
+    provider.get.byFullPath(fullPath, function(error, data) {
+        if(!error && data) {
+            var children = data.children;
+            data = [];
+            for(var i = 0; i < children.length; i++) {
+                started++;
+                provider.get.byFullPath(children[i], function(error, dataChild) {
+                    started--;
+                    if(!error && data)
+                        data.push(dataChild);
+
+                    if(started <= 0 && i == children.length)
+                        callback.call(this, null, data);
+                });
+            }
+        }
+        else
+            callback.call(this, error);
+    })
 }
 
 provider.get.byFullPath = function(fullPath, callback){
@@ -59,8 +89,8 @@ provider.create.folder = function(params, callback){
 							type: "folder",
 							size: params.size ? parseInt(params.size, 10) : 0,
 							lastUpdate: new Date(),
-							children: [],
-							sharing: []
+                            undeletable: typeof params.undeletable != 'undefined' && params.undeletable === true,
+							children: []
 						}, { safe : true }, function() {
 							if(folderPath != '/')
 								provider.get.byFullPath(folderPath, function(error, directory) {
@@ -450,5 +480,47 @@ provider.checkExist = function(fullPath, callback) {
 		})
 
 }
+
+/**
+ * share a folder with an other user
+ *
+ * ex: provider.share({
+ *     ownerId: xx
+ *     right: 'xx' { R (read) | W (write) | N (nothing) }
+ *     targetEmail: "xxx@xxx.xx",
+ *     fullPath: "/xx/xx/xx/"
+ * }, function() {...})
+ * 
+ * @param  {object}   params   params needed to share
+ * @param  {Function} callback
+ */
+provider.share = function(params, callback) {
+    userProvider.get.byEmail(params.targetEmail, function(error, user) {
+        if(!error && user) {
+            mongo.collection('directories', function(error, collection) {
+
+                var sharingOptions = {
+                    ownerId: params.ownerId,
+                    fullPath: params.fullPath, 
+                    targetId: user.id, 
+                    right: params.right
+                }
+
+                sharingProvider.create.sharing(sharingOptions, function(error, data) {
+
+                    collection.update({'_id': user.id + '/Shared'}, {$push: { children: params.fullPath}}, { safe : true }, function(error) {
+                        callback.call(this, error);
+                    })
+
+                });
+
+            })
+        }
+        else
+            callback.call(this, error);
+    }); 
+}
+
+provider.unshare = function(params, callback) {}
 
 module.exports = provider;
