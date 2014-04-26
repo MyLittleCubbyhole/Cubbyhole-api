@@ -23,7 +23,7 @@ uploader.init = function(socket) {
 		console.log('init - ', name);
 
 		var chunk = 0;
-		socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId  });
+		socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'size': 0  });
 	});
 
 	socket.on('upload', function(data) {
