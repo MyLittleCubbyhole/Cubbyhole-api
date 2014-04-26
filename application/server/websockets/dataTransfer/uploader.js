@@ -18,18 +18,20 @@ uploader.init = function(socket) {
 			type: data.type,
 			logicPath: logicPath,
 			downloaded : 0,
+			currentChunkSize: 0,
 			clientSideId: data.id
 		}
 		console.log('init - ', name);
 
 		var chunk = 0;
-		socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'size': 0  });
+		socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'chunkSize': files[name].currentChunkSize  });
 	});
 
 	socket.on('upload', function(data) {
 		console.log('upload')
 		var name = data.name;
-		files[name]['downloaded'] += data.data.length;
+		files[name].currentChunkSize = data.data.length
+		files[name]['downloaded'] += files[name].currentChunkSize;
 		var parameters = {
 			name: name,
 			type: files[name].type,
@@ -61,14 +63,26 @@ uploader.init = function(socket) {
 				if(files[name]['downloaded'] >= files[name]['size']){
 					console.log('file uploaded');
 					files[name].id = null;
-					socket.emit('upload_done', { 'downloaded': files[name]['downloaded'], 'size': files[name]['size'], id: files[name].clientSideId });
+					socket.emit('upload_done', { 
+						'downloaded': files[name]['downloaded'], 
+						'size': files[name]['size'], 
+						'chunkSize': files[name].currentChunkSize,
+						'id': files[name].clientSideId 
+					});
 					delete files[name];
 				}
 				else {
 					console.log('chunk uploaded');
 					var chunk = files[name]['downloaded'] / 524288;
 					var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
-					socket.emit('upload_next', { 'chunk' : chunk, 'percent' :  percent, 'downloaded': files[name]['downloaded'], 'size': files[name]['size'], 'id': files[name].clientSideId });
+					socket.emit('upload_next', { 
+						'chunk' : chunk, 
+						'percent' :  percent, 
+						'downloaded': files[name]['downloaded'], 
+						'size': files[name]['size'], 
+						'chunkSize': files[name].currentChunkSize,
+						'id': files[name].clientSideId 
+					});
 				}
 			}
 		}
