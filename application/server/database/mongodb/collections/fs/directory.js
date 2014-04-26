@@ -126,19 +126,13 @@ provider.create.file = function(params, callback){
                                     throw 'error creating collection - ' + error;
 
                                 if(folderPath != "/")
-                                    provider.get.byFullPath(folderPath, function(error, directory) {
+
+                                    collection.update({'_id': folderPath}, { $push: { children: params.fullPath} }, { safe : true }, function(error) {
                                         if(error)
-                                            throw 'error getting folder - ' + error;
+                                            throw 'error updating children - ' + error;
 
-                                        directory.children.push(params.fullPath);
-
-                                        collection.save(directory, { safe : true }, function(error) {
-                                            if(error)
-                                                throw 'error updating children - ' + error;
-
-                                            provider.update.size(folderPath, directoryFile.size, function(error) {
-                                                callback.call(this, error);
-                                            });
+                                        provider.update.size(folderPath, directoryFile.size, function(error) {
+                                            callback.call(this, error);
                                         });
                                     });
                                 else
@@ -256,7 +250,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
 
         var started = 0;
 
-        mongo.collection('directories', function(error, collection) {
+        // mongo.collection('directories', function(error, collection) {
             for(var i = 0; i < nbFolders; i++) {
                 var path = "";
                 for(var j = 0; j < paths.length; j++) {
@@ -266,22 +260,40 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 path = path.substring(1);
                 paths.pop();
 
-                provider.get.byFullPath(path, function(error, directory) {
+                console.log(path, sizeUpdate);
 
-                    directory.size += parseInt(sizeUpdate, 10);
+                started++;
+                // collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }}, { safe : true }, function(error) {
 
-                    started++;
-                    collection.save(directory, { safe : true }, function(error) {
+                //     console.log('end', path, sizeUpdate)
+                //     started--;
+                //     if(error)
+                //         callback.call(this, 'error updating size - ' + error);
+
+                //     if(started <= 0 && i == nbFolders)
+                //         callback.call(this, null);
+                // });
+
+
+
+
+                mongo.collection('directories').findAndModify(
+                    {_id: path},
+                    [],
+                    {$inc: { size: parseInt(sizeUpdate, 10) }},
+                    { upsert: true},
+                    function(error, object) {
+                        console.log(' - - end', path, sizeUpdate, object.size)
                         started--;
                         if(error)
                             callback.call(this, 'error updating size - ' + error);
 
                         if(started <= 0 && i == nbFolders)
                             callback.call(this, null);
-                    });
                 });
+
             }
-        });
+        // });
     }
 }
 
