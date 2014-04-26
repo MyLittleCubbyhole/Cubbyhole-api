@@ -61,7 +61,7 @@ uploader.init = function(socket) {
 				if(files[name]['downloaded'] >= files[name]['size']){
 					console.log('file uploaded');
 					files[name].id = null;
-					socket.emit('upload_done', { 'downloaded': files[name]['downloaded'], id: files[name].clientSideId });
+					socket.emit('upload_done', { 'downloaded': files[name]['downloaded'], 'size': files[name]['size'], id: files[name].clientSideId });
 					delete files[name];
 				}
 				else {
