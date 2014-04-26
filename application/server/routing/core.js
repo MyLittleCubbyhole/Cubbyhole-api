@@ -21,6 +21,7 @@ routing.init = function(app) {
 
 	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
 	app.post(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.post.zip);
+	app.post(/^\/api\/share\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, directory.post.share);
 	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, directory.post.create);
 	app.post(/^\/api\/copy\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, directory.post.copy);
 	app.post(/^\/api\/move\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, directory.post.move);
