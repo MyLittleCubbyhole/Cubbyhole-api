@@ -162,9 +162,10 @@ provider.create.file = function(params, callback){
                                         if(error)
                                             throw 'error updating children - ' + error;
 
-                                        provider.update.size(folderPath, directoryFile.size, function(error) {
-                                            callback.call(this, error);
-                                        });
+                                            provider.update.size(folderPath, directoryFile.size, function(error) {
+                                                callback.call(this, error);
+                                            });
+
                                     });
                                 else
                                     callback.call(this, error);
@@ -232,19 +233,24 @@ provider.delete.byPath = function(fullPath, callback){
 		};
 		function end() {
 			if(folderPath != '/')
-				provider.update.size(folderPath, size, function() {
-					provider.get.byFullPath(folderPath, function(error, directory) {
-						if(!error && directory) {
-							var index = directory.children.indexOf(fullPath)
+                setTimeout(function() {
 
-							if(index != -1)
-								directory.children.splice(index);
-							collection.save(directory, { safe : true }, callback);
-						}
-						else
-							callback.call(this, error);
-					});
-				})
+                    provider.update.size(folderPath, size, function() {
+                        provider.get.byFullPath(folderPath, function(error, directory) {
+                            if(!error && directory) {
+                                var index = directory.children.indexOf(fullPath)
+
+                                if(index != -1)
+                                    directory.children.splice(index);
+                                collection.save(directory, { safe : true }, callback);
+                            }
+                            else
+                                callback.call(this, error);
+                        });
+                    })
+
+
+                },Math.random() * 150);
 			else
 				callback.call(this);
 		};
@@ -281,7 +287,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
 
         var started = 0;
 
-        // mongo.collection('directories', function(error, collection) {
+        mongo.collection('directories', function(error, collection) {
             for(var i = 0; i < nbFolders; i++) {
                 var path = "";
                 for(var j = 0; j < paths.length; j++) {
@@ -294,45 +300,45 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 // console.log(path, sizeUpdate);
 
                 started++;
-                // collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }}, { safe : true }, function(error) {
+                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }}, { safe : true }, function(error) {
 
-                //     console.log('end', path, sizeUpdate)
-                //     started--;
-                //     if(error)
-                //         callback.call(this, 'error updating size - ' + error);
+                    console.log('end', path, sizeUpdate)
+                    started--;
+                    if(error)
+                        callback.call(this, 'error updating size - ' + error);
 
-                //     if(started <= 0 && i == nbFolders)
-                //         callback.call(this, null);
-                // });
+                    if(started <= 0 && i == nbFolders)
+                        callback.call(this, null);
+                });
 
                 // var value = parseInt(sizeUpdate, 10) >= 0 ? 1 : -1;
                 // console.log(value)
 
 
-                mongo.collection('directories').findAndModify(
-                    {_id: path},
-                    [],
-                    {$inc: { size: 1  }},
-                    { upsert: true},
-                    function(error, object) {
-                        started--;
-                        if(error)
-                            callback.call(this, 'error updating size - ' + error);
+                // mongo.collection('directories').findAndModify(
+                //     {_id: path},
+                //     [],
+                //     {$inc: { size: 1  }},
+                //     { upsert: true},
+                //     function(error, object) {
+                //         started--;
+                //         if(error)
+                //             callback.call(this, 'error updating size - ' + error);
 
-                        if(started <= 0 && i == nbFolders)
-                            callback.call(this, null);
-                });
-                var value = 1;
-                mongo.collection('directories').findAndModify(
-                    {_id: path},
-                    [],
-                    {$inc: { test: 1 }},
-                    { upsert: true},
-                    function(error, object) { 
-                        console.log(error)
-                    });
+                //         if(started <= 0 && i == nbFolders)
+                //             callback.call(this, null);
+                // });
+                // var value = 1;
+                // mongo.collection('directories').findAndModify(
+                //     {_id: path},
+                //     [],
+                //     {$inc: { test: 1 }},
+                //     { upsert: true},
+                //     function(error, object) { 
+                //         console.log(error)
+                //     });
             }
-        // });
+        });
     }
 }
 
