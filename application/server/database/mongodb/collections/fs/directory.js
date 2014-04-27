@@ -39,18 +39,19 @@ provider.get.byPath = function(ownerId, path, callback){
 
 provider.get.childrenByFullPath = function(fullPath, callback) {
     var started = 0;
-    fullPath = fullPath.slice(0, -1) == '/' ? fullPath.slice(0, -1) : fullPath
+    fullPath = fullPath.slice(0, -1) == '/' ? fullPath.slice(0, -1) : fullPath;
     provider.get.byFullPath(fullPath, function(error, data) {
         if(!error && data) {
             var children = data.children;
             data = [];
             for(var i = 0; i < children.length; i++) {
                 started++;
+                console.log(children[i]);
                 provider.get.byFullPath(children[i], function(error, dataChild) {
                     started--;
                     if(!error && data)
                         data.push(dataChild);
-
+                    console.log(dataChild)
                     if(started <= 0 && i == children.length)
                         callback.call(this, null, data);
                 });
@@ -298,9 +299,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 paths.pop();
 
                 started++;
-                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $currentDate: { lastUpdate: true }}, { safe : true }, function(error) {
-
-                    console.log('end', path, sizeUpdate)
+                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $set: {lastUpdate: new Date()} }, { safe : true }, function(error) {
                     started--;
                     if(error)
                         callback.call(this, 'error updating size - ' + error);

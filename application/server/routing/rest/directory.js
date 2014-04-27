@@ -113,10 +113,11 @@ directory.post.share = function(request, response) {
 	parameters.ownerId 	= params[0]
 	parameters.right = body.right;
 	parameters.targetEmail = body.shareTo;
-	parameters.path = params[1] ? params[1] + '/' : '/' ;
-	parameters.fullPath = parameters.ownerId + parameters.path;
+	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
 
-	provider.share(parameters, callback);
+	provider.share(parameters, function(error) {
+			response.send({'information': (!error ? 'folder shared' : 'An error has occurred - ' + error), 'params' : parameters });
+	});
 }
 
 /********************************[  PUT   ]********************************/
