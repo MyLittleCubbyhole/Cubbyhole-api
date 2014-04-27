@@ -87,6 +87,7 @@ provider.create.folder = function(params, callback){
 							path: params.path,
 							name: params.name,
 							type: "folder",
+                            test: 0,
 							size: params.size ? parseInt(params.size, 10) : 0,
 							lastUpdate: new Date(),
                             undeletable: typeof params.undeletable != 'undefined' && params.undeletable === true,
@@ -290,7 +291,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 path = path.substring(1);
                 paths.pop();
 
-                console.log(path, sizeUpdate);
+                // console.log(path, sizeUpdate);
 
                 started++;
                 // collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }}, { safe : true }, function(error) {
@@ -304,16 +305,16 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 //         callback.call(this, null);
                 // });
 
-
+                // var value = parseInt(sizeUpdate, 10) >= 0 ? 1 : -1;
+                // console.log(value)
 
 
                 mongo.collection('directories').findAndModify(
                     {_id: path},
                     [],
-                    {$inc: { size: parseInt(sizeUpdate, 10) }},
+                    {$inc: { size: 1  }},
                     { upsert: true},
                     function(error, object) {
-                        console.log(' - - end', path, sizeUpdate, object.size)
                         started--;
                         if(error)
                             callback.call(this, 'error updating size - ' + error);
@@ -321,7 +322,15 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                         if(started <= 0 && i == nbFolders)
                             callback.call(this, null);
                 });
-
+                var value = 1;
+                mongo.collection('directories').findAndModify(
+                    {_id: path},
+                    [],
+                    {$inc: { test: 1 }},
+                    { upsert: true},
+                    function(error, object) { 
+                        console.log(error)
+                    });
             }
         // });
     }
