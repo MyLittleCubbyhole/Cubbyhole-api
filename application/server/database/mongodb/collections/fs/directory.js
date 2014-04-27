@@ -298,7 +298,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 paths.pop();
 
                 started++;
-                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }}, { safe : true }, function(error) {
+                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $currentDate: { lastUpdate: true }}, { safe : true }, function(error) {
 
                     console.log('end', path, sizeUpdate)
                     started--;
@@ -400,7 +400,10 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
 provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
     var started = 0;
 
+    console.log(fullPath, targetPath);
+
     if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
+        console.log(fullPath, targetPath);
         mongo.collection('directories', function(error, collection) {
 
             function start() {
@@ -488,7 +491,7 @@ provider.checkExist = function(fullPath, callback) {
  *     targetEmail: "xxx@xxx.xx",
  *     fullPath: "/xx/xx/xx/"
  * }, function() {...})
- * 
+ *
  * @param  {object}   params   params needed to share
  * @param  {Function} callback
  */
@@ -499,8 +502,8 @@ provider.share = function(params, callback) {
 
                 var sharingOptions = {
                     ownerId: params.ownerId,
-                    fullPath: params.fullPath, 
-                    targetId: user.id, 
+                    fullPath: params.fullPath,
+                    targetId: user.id,
                     right: params.right
                 }
 
@@ -516,7 +519,7 @@ provider.share = function(params, callback) {
         }
         else
             callback.call(this, error);
-    }); 
+    });
 }
 
 provider.unshare = function(params, callback) {}
