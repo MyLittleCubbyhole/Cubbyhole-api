@@ -5,7 +5,7 @@ var path    = require('path')
 ,   server  = http.createServer(app)
 ,   environment = ( typeof process.argv[2] != 'undefined' ? process.argv[2] : 'dev')
 ,   developer = ( typeof process.argv[3] != 'undefined' ? process.argv[3] : '')
-,   link = {'prod':'config-prod.json', 'dev':'config-dev.json', 'julien': 'config-julien.json', 'nicolas': 'config-nicolas.json'};
+,   link = {'prod':'config-prod.json', 'dev':'config-dev.json', 'julien': 'config-julien.json', 'julienbis': 'config-julienbis.json', 'nicolas': 'config-nicolas.json'};
 
 global.configFile = {};
 global.configFile.env = typeof link[environment] != 'undefined' ? link[environment] : link['dev'];
