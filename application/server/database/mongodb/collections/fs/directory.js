@@ -611,4 +611,35 @@ provider.shareFile = function(fullPath, callback) {
     })
 }
 
+provider.unshareFile = function(fullPath, callback) {
+    mongo.collection('directories', function(error, collection) {
+
+        provider.get.byFullPath(fullPath, function(error, data) {
+            if(!error && data)
+                if(data.type == 'file')
+                    tokenProvider.get.byFileId(data.itemId, function(error, tokenFound) {
+                        if(tokenFound && tokenFound.id)
+                            tokenProvider.delete.byId(tokenFound.id, function(error, data) {
+                                if(!error && data)
+                                    collection.update({'_id': fullPath}, {$set : { shared: false }}, { safe : true }, function (error) {
+                                        if(!error)
+                                            callback.call(this, null);
+                                        else
+                                           callback.call(this, 'error updating item');
+                                    });
+                                else
+                                    callback.call(this, 'error deleting token');
+                            });
+                        else
+                            callback.call(this, null);
+                    });
+                else
+                    callback.call(this, 'you can\'t publicly unshare a folder');
+            else
+                callback.call(this, error);
+        });
+
+    })
+}
+
 module.exports = provider;

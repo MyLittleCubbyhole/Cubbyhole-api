@@ -66,6 +66,18 @@ file.get.share 	= function(request, response) {
 	})
 }
 
+file.get.unshare 	= function(request, response) {
+	var params 	= request.params
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] || '/' ;
+	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
+
+	directoryProvider.unshareFile(parameters.fullPath, function(error, data) {
+		response.send({'information': (!error ? 'file unshared' : 'An error has occurred - ' + error)});
+	})
+}
+
 file.get.shared 	= function(request, response) {
 	var params 	= request.params
 	,	parameters 	= {};
