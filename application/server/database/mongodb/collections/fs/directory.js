@@ -147,6 +147,7 @@ provider.create.file = function(params, callback){
                         type: 'file',
                         lastUpdate: new Date(),
                         size: params.size ? parseInt(params.size, 10) : 0,
+                        shared: false,
                         itemId: params.id
                     };
 
@@ -559,6 +560,8 @@ provider.share = function(params, callback) {
     });
 }
 
+provider.unshare = function(params, callback) {}
+
 /**
  * share a file
  *
@@ -573,7 +576,7 @@ provider.shareFile = function(fullPath, callback) {
                 if(data.type == 'file')
 
                     tokenProvider.get.byFileId(data.itemId, function(error, tokenFound) {
-                        if(!tokenFound)
+                        if(!tokenFound || tokenFound.length == 0)
                             mysqlTools.generateRandomBytes(32, function(tokenId) {
                                 tokenId = encodeURIComponent(tokenId);
                                 var token = {
@@ -584,8 +587,14 @@ provider.shareFile = function(fullPath, callback) {
                                     fileId: data.itemId
                                 };
                                 tokenProvider.create.token(token, function(error, data) {
-                                    if(!error && data)
-                                        callback.call(this, null, token);
+                                    if(!error && data) {
+                                        collection.update({'_id': fullPath}, {$set : { shared: true }}, { safe : true }, function (error) {
+                                            if(!error)
+                                                callback.call(this, null, token);
+                                            else
+                                               callback.call(this, 'error updating item');
+                                        });
+                                    }
                                     else
                                         callback.call(this, 'error creating token');
                                 });
@@ -601,7 +610,5 @@ provider.shareFile = function(fullPath, callback) {
 
     })
 }
-
-provider.unshare = function(params, callback) {}
 
 module.exports = provider;
