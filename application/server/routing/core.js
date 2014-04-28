@@ -13,6 +13,9 @@ routing.init = function(app) {
 	app.get(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.download);
+	app.get(/^\/api\/share\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.share);
+	app.get(/^\/api\/shared\/preview\/(.+)+/, file.get.sharedPreview);
+	app.get(/^\/api\/shared\/(.+)+/, file.get.shared);
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/activation', user.get.activateAccount);

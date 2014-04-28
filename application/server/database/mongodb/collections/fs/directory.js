@@ -2,7 +2,9 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   fileProvider
 ,   userProvider
 ,   sharingProvider
+,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,   tools = require(global.paths.server + '/database/tools/mongodb/core')
+,   mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,   _ = require('lodash')
 ,   ObjectID = MongoProvider.objectId
 ,   mongo = MongoProvider.db
@@ -30,6 +32,12 @@ provider.get.byOwner = function(ownerId, callback){
         collection.find({"ownerId":parseInt(ownerId,10)}).toArray(callback);
     });
 };
+
+provider.get.byItemId = function(itemId, callback){
+    mongo.collection('directories', function(error, collection) {
+        collection.find({"itemId": ObjectID(itemId)}).toArray(callback);
+    })
+}
 
 provider.get.byPath = function(ownerId, path, callback){
 	mongo.collection('directories', function(error, collection) {
@@ -300,7 +308,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 // console.log(path, sizeUpdate);
 
                 started++;
-                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $currentDate: { lastUpdate: true }}, { safe : true }, function(error) {
+                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $set: { lastUpdate: new Date() }}, { safe : true }, function(error) {
 
                     console.log('end', path, sizeUpdate)
                     started--;
@@ -549,6 +557,49 @@ provider.share = function(params, callback) {
         else
             callback.call(this, error);
     });
+}
+
+/**
+ * share a file
+ *
+ * @param  {object}   fullPath   fullPath of the file
+ * @param  {Function} callback
+ */
+provider.shareFile = function(fullPath, callback) {
+    mongo.collection('directories', function(error, collection) {
+
+        provider.get.byFullPath(fullPath, function(error, data) {
+            if(!error && data)
+                if(data.type == 'file')
+
+                    tokenProvider.get.byFileId(data.itemId, function(error, tokenFound) {
+                        if(!tokenFound)
+                            mysqlTools.generateRandomBytes(32, function(tokenId) {
+                                tokenId = encodeURIComponent(tokenId);
+                                var token = {
+                                    id: tokenId,
+                                    expirationDate: new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '),
+                                    type: 'SHARING',
+                                    origin: 'none',
+                                    fileId: data.itemId
+                                };
+                                tokenProvider.create.token(token, function(error, data) {
+                                    if(!error && data)
+                                        callback.call(this, null, token);
+                                    else
+                                        callback.call(this, 'error creating token');
+                                });
+                            });
+                        else
+                            callback.call(this, null, tokenFound);
+                    });
+                else
+                    callback.call(this, 'you can\'t publicly share a folder');
+            else
+                callback.call(this, error);
+        });
+
+    })
 }
 
 provider.unshare = function(params, callback) {}

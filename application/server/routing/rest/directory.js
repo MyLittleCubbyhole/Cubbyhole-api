@@ -33,7 +33,7 @@ directory.get.byPath	= function(request, response){
 	var useSharing = parameters.path.split('/')[0] == 'Shared' && parameters.path.split('/')[1] !== undefined;
 
 	if(parameters.path.split('/')[0] != 'Shared' || useSharing) {
-		
+
 		if(useSharing) {
 			var fullPath = parameters.path.split('/');
 			fullPath.splice(0, 1);
