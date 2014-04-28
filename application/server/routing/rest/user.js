@@ -1,8 +1,10 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,   mailer = require(global.paths.server + '/mailer/mails/core')
+,   moment = require('moment')
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
 
 
@@ -111,7 +113,7 @@ user.post.create = function(request, response){
 		firstname: body.firstname,
 		lastname: body.lastname,
 		email: body.email,
-		birthdate: body.birthdate,
+		birthdate: moment(body.birthdate).format('YYYY-MM-DD'),
 		country: body.country,
         activated: false,
 		roleId: 1
@@ -138,24 +140,36 @@ user.post.create = function(request, response){
                 directoryProvider.create.folder(sharedFolder, function(error) {
                     if(!error) {
 
-                        response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
-
                         if(!error) {
-                            mysqlTools.generateRandomBytes(32, function(tokenId) {
-                                tokenId = encodeURIComponent(tokenId);
-                                var token = {
-                                    id: tokenId,
-                                    expirationDate: new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '),
-                                    type: 'ACTIVATION',
-                                    origin: request.header("User-Agent"),
-                                    userId: user.id
-                                };
-                                tokenProvider.create.token(token, function(error, dataToken) {
-                                    if(!error) {
-                                        mailer.sendActivationMail(user.email, user.username, tokenId);
-                                    } else
-                                        console.log(error);
-                                });
+
+                            var subscribe = {
+                                userId: user.id,
+                                planId: 1,
+                                dateStart: moment().format('YYYY-MM-DD HH:mm:ss'),
+                                dateEnd: moment().add('years', 1000).format('YYYY-MM-DD HH:mm:ss')
+                            };
+
+                            subscribeProvider.create.subscribe(subscribe, function(error, data) {
+                                if(!error)
+                                    mysqlTools.generateRandomBytes(32, function(tokenId) {
+                                        tokenId = encodeURIComponent(tokenId);
+                                        var token = {
+                                            id: tokenId,
+                                            expirationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+                                            type: 'ACTIVATION',
+                                            origin: request.header("User-Agent"),
+                                            userId: user.id
+                                        };
+                                        tokenProvider.create.token(token, function(error, dataToken) {
+                                            if(!error) {
+                                                response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+                                                mailer.sendActivationMail(user.email, user.username, tokenId);
+                                            } else
+                                                response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                        });
+                                    });
+                                else
+                                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
                             });
                         }
 
@@ -189,7 +203,7 @@ user.post.authenticate = function(request, response) {
 					tokenId = encodeURIComponent(tokenId);
 					var token = {
 						id: tokenId,
-						expirationDate: new Date(Date.now() + 86400000).toISOString().slice(0, 19).replace('T', ' '),
+						expirationDate: moment().add('days', 1).format('YYYY-MM-DD HH:mm:ss'),
                         type: 'AUTHENTICATION',
 						origin: request.header("User-Agent"),
 						userId: dataUser.id
