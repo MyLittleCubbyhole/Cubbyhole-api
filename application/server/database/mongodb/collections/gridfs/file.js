@@ -162,7 +162,7 @@ provider.zipItems = function(data, callback) {
 				items.push(item);
 				--length <= 0 && tools.zipItems.call(self, items, callback);
 			}
-			else 
+			else
 				callback.call(this,'item not found');
 		})
 }

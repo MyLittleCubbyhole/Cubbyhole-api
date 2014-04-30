@@ -11,12 +11,16 @@ provider.get.byId = function(id, callback) {
 	Mysql.query('select * from `token` where `id` = "'+ id +'";', callback);
 }
 
+provider.get.byFileId = function(id, callback) {
+    Mysql.query('select * from `token` where `fileid` = "'+ id +'";', callback);
+}
+
 /********************************[  CREATE   ]********************************/
 
 
 provider.create.token = function(token, callback) {
-	var query = 'insert into `token` (`id`, `expirationdate`, `type`, `origin`,`userid`) values (';
-	query += '"' + token.id + '","' + token.expirationDate + '","' + token.type + '","' + token.origin + '",' + parseInt(token.userId, 10) + ')';
+	var query = 'insert into `token` (`id`, `expirationdate`, `type`, `origin`, `userid`, `fileid`) values (';
+	query += '"' + token.id + '","' + token.expirationDate + '","' + token.type + '","' + token.origin + '",' + (token.userId ? parseInt(token.userId, 10) : null) + ',"' + (token.fileId || null) + '")';
 	Mysql.query(query, callback);
 }
 

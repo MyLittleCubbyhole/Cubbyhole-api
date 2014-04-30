@@ -1,4 +1,6 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+, 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
+,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
@@ -50,6 +52,74 @@ file.get.download = function(request, response){
 		response.end();
 	})
 
+}
+
+file.get.share 	= function(request, response) {
+	var params 	= request.params
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] || '/' ;
+	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
+
+	directoryProvider.shareFile(parameters.fullPath, function(error, data) {
+		response.send({'information': (!error ? 'file shared' : 'An error has occurred - ' + error), 'token' : data.id });
+	})
+}
+
+file.get.unshare 	= function(request, response) {
+	var params 	= request.params
+	,	parameters 	= {};
+	parameters.ownerId 	= params[0]
+	parameters.path = params[1] || '/' ;
+	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
+
+	directoryProvider.unshareFile(parameters.fullPath, function(error, data) {
+		response.send({'information': (!error ? 'file unshared' : 'An error has occurred - ' + error)});
+	})
+}
+
+file.get.shared 	= function(request, response) {
+	var params 	= request.params
+	,	parameters 	= {};
+	parameters.token = encodeURIComponent((params[0] || 0));
+
+	tokenProvider.get.byId(parameters.token, function(error, token) {
+		if(!error && token) {
+			if(token.type == 'SHARING' && token.fileid)
+				directoryProvider.get.byItemId(token.fileid, function(error, itemFile) {
+					if(!error && itemFile && itemFile[0] && itemFile[0].type == 'file') {
+						if(request.preview) {
+							request.params[0] = itemFile[0].ownerId;
+							request.params[1] = itemFile[0].path.substring(1) + itemFile[0].name;
+							file.get.download(request, response);
+						} else {
+							delete itemFile[0]._id;
+							delete itemFile[0].ownerId;
+							delete itemFile[0].path;
+							delete itemFile[0].itemId;
+							response.send(itemFile);
+							response.end();
+						}
+					}
+					else {
+						response.send('file not found');
+						response.end();
+					}
+				})
+			else {
+				response.send('token not found');
+				response.end();
+			}
+		} else {
+			response.send(error);
+			response.end();
+		}
+	});
+}
+
+file.get.sharedPreview 	= function(request, response) {
+	request.preview = true;
+	file.get.shared(request, response);
 }
 
 file.get.zip = function(request, response) {
