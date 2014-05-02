@@ -11,6 +11,31 @@ provider.get.byId = function(id, callback) {
 	Mysql.query('select * from `subscribe` where `id` = '+ parseInt(id, 10) +';', callback);
 }
 
+provider.get.actualSubscriptions = function(userId, callback) {
+    var query = 'select * from `subscribe` where `userid` = '+ parseInt(userId, 10) +' and `datestart` < NOW() and `dateend` > NOW();';
+    Mysql.query(query, callback);
+}
+
+provider.get.actualSubscription = function(userId, callback) {
+    provider.get.actualSubscriptions(userId, function(error, subscriptions) {
+        if(!error && subscriptions) {
+            if(subscriptions.id) {
+                callback.call(this, null, subscriptions);
+            } else if(subscriptions.length > 0) {
+                for(var i = 0; i < subscriptions.length; i++) {
+                    if(subscriptions[i].id != 1) {
+                        callback.call(this, null, subscriptions[i]);
+                        break;
+                    }
+                }
+            } else {
+                callback.call(this, 'no subscription found');
+            }
+        } else
+            callback.call(this, error);
+    });
+}
+
 /********************************[  CREATE   ]********************************/
 
 
