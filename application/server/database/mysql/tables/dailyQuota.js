@@ -25,12 +25,16 @@ provider.get.current = function(subscribeId, callback) {
                 else
                     callback.call(this, 'no dailyQuota found');
             } else if(dailyQuota.length > 0) {
+                var dailyQuotaFound = false;
                 for(var i = 0; i < dailyQuota.length; i++) {
                    if(moment(dailyQuota[i].day).isSame(moment(), 'day')) {
                         callback.call(this, null, dailyQuota[i]);
+                        dailyQuotaFound = true;
                         break;
                     }
                 }
+                if(!dailyQuotaFound)
+                    callback.call(this, 'no dailyQuota found');
             } else {
                 callback.call(this, 'no dailyQuota found');
             }

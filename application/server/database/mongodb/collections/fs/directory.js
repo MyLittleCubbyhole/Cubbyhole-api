@@ -575,7 +575,7 @@ provider.shareFile = function(fullPath, callback) {
                 else
                     callback.call(this, 'you can\'t publicly share a folder');
             else
-                callback.call(this, error);
+                callback.call(this, 'file not found');
         });
 
     })

@@ -76,7 +76,7 @@ file.get.share 	= function(request, response) {
 	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
 
 	directoryProvider.shareFile(parameters.fullPath, function(error, data) {
-		response.send({'information': (!error ? 'file shared' : 'An error has occurred - ' + error), 'token' : data.id });
+		response.send({'information': (!error ? 'file shared' : 'An error has occurred - ' + error), 'token' : (data ? data.id : null) });
 	})
 }
 
