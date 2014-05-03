@@ -54,7 +54,7 @@ file.get.download = function(request, response){
 				}
 
 				if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
-					file.update.updateDailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
+					file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
 
 			} else {
 				response.writeHead(401, header);
@@ -237,7 +237,7 @@ file.post.zip = function(request, response) {
 
 }
 
-file.update.updateDailyQuota = function(quotaId, quotaAvailable, planQuota) {
+file.put.updateDailyQuota = function(quotaId, quotaAvailable, planQuota) {
 	dailyQuotaProvider.get.byId(quotaId, function(error, dailyQuota) {
 		if(!error && dailyQuota && dailyQuota.id) {
 			dailyQuota.quotaUsed = planQuota - quotaAvailable;
