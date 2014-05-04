@@ -31,30 +31,32 @@ file.get.download = function(request, response){
 
 			var total 	= download.length;
 
-			if(request.quotaAvailable == undefined || request.quotaAvailable - total >= 0) {
+			if(request.quotaAvailable === undefined || request.quotaAvailable - total >= 0) {
 				header["Content-Type"] = download.type;
 				header["Accept-Ranges"] = "bytes";
 
 				if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined') {
 					var start 	= parseInt(partialstart, 10)
 					,	end 	= partialend ? parseInt(partialend, 10) : total-1;
-
 					header["Content-Range"] 	= "bytes " + start + "-" + end + "/" + (total);
 					header["Content-Length"]	= (end-start)+1;
 					header['Transfer-Encoding'] = 'chunked';
 					header["Connection"] 		= "close";
 					response.writeHead(206, header);
 					response.write(download.data.slice(start, end), "binary");
+
+					if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
+						file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - (end-start)+1, request.planQuota);
 				}
 				else {
 					header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
 					header["Content-Length"]		= total;
 					response.writeHead(200, header );
 					response.write(download.data, "binary");
-				}
 
-				if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
-					file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
+					if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
+						file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
+				}
 
 			} else {
 				response.writeHead(401, header);
