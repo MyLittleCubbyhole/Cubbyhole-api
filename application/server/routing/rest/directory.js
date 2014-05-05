@@ -5,14 +5,14 @@ provider.init();
 
 /********************************[  GET   ]********************************/
 
-directory.get.all 		= function(request, response){
+directory.get.all = function(request, response){
 	provider.get.directory(function(error, data){
 		response.send( (!error ? data : error ) );
 		response.end();
 	})
 };
 
-directory.get.byOwner 	= function(request, response){
+directory.get.byOwner = function(request, response){
 	var params = request.params;
 	provider.get.byOwner(params[0], function(error, data){
 		response.send( (!error && data ? mongoTools.format(data) : error ) );
@@ -20,7 +20,7 @@ directory.get.byOwner 	= function(request, response){
 	})
 };
 
-directory.get.byPath	= function(request, response){
+directory.get.byPath = function(request, response){
 	var params 	= request.params
 	,	parameters 	= {};
 	parameters.ownerId 	= params[0]
