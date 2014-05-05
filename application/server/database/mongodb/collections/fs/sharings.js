@@ -19,7 +19,7 @@ provider.init = function() {
 
 provider.get.byItemFullPath = function(fullPath, callback){
     mongo.collection('sharings', function(error, collection) {
-        collection.findOne({"_id":fullPath}, callback);
+        collection.findOne({"itemId":fullPath}, callback);
     })
 }
 

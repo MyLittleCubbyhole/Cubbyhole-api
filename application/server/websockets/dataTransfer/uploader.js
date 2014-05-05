@@ -47,12 +47,11 @@ uploader.init = function(socket) {
 			parameters.mode = 'w+';
 			fileProvider.upload(parameters, uploadCallback);
 		}
-		else
+		else 
 			directoryProvider.create.file(parameters, uploadCallback)
 
 		function uploadCallback(error){
 			if(error) {
-				console.log(error);
 				files[name].id = null;
 				socket.emit('upload_stoped', { id: files[name].clientSideId });
 				delete files[name];
@@ -63,6 +62,17 @@ uploader.init = function(socket) {
 				if(files[name]['downloaded'] >= files[name]['size']){
 					console.log('file uploaded');
 					files[name].id = null;
+
+
+					historicProvider.create.event({
+						ownerId: request.ownerId,
+						targetOwner: parameters.fullPath.split('/')[0],
+						fullPath: parameters.fullPath,
+						action: 'create',
+						name: name,
+						itemType: 'file'
+					});
+
 					socket.emit('upload_done', { 
 						'downloaded': files[name]['downloaded'], 
 						'size': files[name]['size'], 
@@ -72,7 +82,6 @@ uploader.init = function(socket) {
 					delete files[name];
 				}
 				else {
-					console.log('chunk uploaded');
 					var chunk = files[name]['downloaded'] / 524288;
 					var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
 					socket.emit('upload_next', { 

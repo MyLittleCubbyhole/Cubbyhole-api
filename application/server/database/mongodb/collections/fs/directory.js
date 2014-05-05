@@ -408,7 +408,6 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
 provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
     var started = 0;
 
-    console.log(fullPath, targetPath);
 
     if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
         console.log(fullPath, targetPath);
