@@ -113,7 +113,7 @@ user.post.create = function(request, response){
 		firstname: body.firstname,
 		lastname: body.lastname,
 		email: body.email,
-		birthdate: moment(body.birthdate).format('YYYY-MM-DD'),
+		birthdate: moment(body.birthdate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
 		country: body.country,
         activated: false,
 		roleId: 1
