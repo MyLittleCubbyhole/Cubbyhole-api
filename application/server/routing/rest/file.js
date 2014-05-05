@@ -44,9 +44,6 @@ file.get.download = function(request, response){
 					header["Connection"] 		= "close";
 					response.writeHead(206, header);
 					response.write(download.data.slice(start, end), "binary");
-
-					if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
-						file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - (end-start)+1, request.planQuota);
 				}
 				else {
 					header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
