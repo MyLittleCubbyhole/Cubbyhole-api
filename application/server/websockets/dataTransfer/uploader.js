@@ -1,6 +1,7 @@
 var uploader = {}
 ,	files = {}
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
 
 uploader.init = function(socket) {
