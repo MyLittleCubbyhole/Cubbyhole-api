@@ -17,6 +17,7 @@ provider.get.byId = function(id, callback) {
 provider.create.plan = function(plan, callback) {
 	var query = 'insert into `plan` (`price`,`name`,`storage`,`duration`,`uploadbandwidth`,`downloadbandwidth`,`quota`) values (';
 	query += plan.price + ',"' + plan.name + '",' + parseInt(plan.storage, 10) + ',' + parseInt(plan.duration, 10) + ',' + parseInt(plan.uploadBandWidth, 10) + ',' + parseInt(plan.downloadBandWidth,10) + ', ' + parseInt(plan.quota, 10) + ')';
+
 	Mysql.query(query, callback);
 
 }

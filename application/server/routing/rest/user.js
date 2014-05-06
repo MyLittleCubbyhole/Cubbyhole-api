@@ -108,7 +108,6 @@ user.post.create = function(request, response){
 	,	body = request.body
 	,	witness = true
 	,	user = {
-		username: body.username,
 		password: body.password,
 		firstname: body.firstname,
 		lastname: body.lastname,
@@ -120,7 +119,7 @@ user.post.create = function(request, response){
 	};
 
 	for(var i in user)
-		witness = typeof user[i] == 'undefined' ? true : witness;
+		witness = typeof user[i] == 'undefined' ? false : witness;
 
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
@@ -163,7 +162,7 @@ user.post.create = function(request, response){
                                         tokenProvider.create.token(token, function(error, dataToken) {
                                             if(!error) {
                                                 response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
-                                                mailer.sendActivationMail(user.email, user.username, tokenId);
+                                                mailer.sendActivationMail(user.email, user.firstname, tokenId);
                                             } else
                                                 response.send({'information': 'An error has occurred - ' + error, 'user' : user });
                                         });
@@ -195,7 +194,7 @@ user.post.authenticate = function(request, response) {
 	witness = body.email && body.password ? witness : false;
 
 	if(!witness)
-		response.send({'information': 'An error has occurred - missing information', 'email' : body.email, 'password' : bodu.password });
+		response.send({'information': 'An error has occurred - missing information', 'email' : body.email, 'password' : body.password });
 	else
 		userProvider.connect(body.email, body.password, function(error, dataUser) {
 			if(dataUser) {
@@ -227,6 +226,62 @@ user.post.authenticate = function(request, response) {
 }
 
 /********************************[  PUT   ]********************************/
+
+user.put.updateInformations = function(request, response){
+    var params = request.params
+    ,   body = request.body
+    ,   witness = true
+    ,   user = {
+        id: params.id,
+        password: body.password,
+        firstname: body.firstname,
+        lastname: body.lastname,
+        birthdate: moment(body.birthdate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
+        country: body.country
+    };
+
+    for(var i in user)
+        witness = typeof user[i] == 'undefined' ? false : witness;
+
+    user.newPassword = body.newPassword;
+
+    if(!witness)
+        response.send({'information': 'An error has occurred - missing information', 'user' : user });
+    else
+        userProvider.connectById(user.id, user.password, function(error, dataUser) {
+            if(!error && dataUser) {
+                user.id = dataUser.id;
+                userProvider.update.informations(user, function(error, data) {
+                    if(!error && data) {
+                        delete(dataUser.salt);
+                        dataUser.password = user.newPassword;
+                        dataUser.firstname = user.firstname;
+                        dataUser.lastname = user.lastname;
+                        dataUser.birthdate = user.birthdate;
+                        dataUser.country = user.country;
+
+                        if(dataUser.password) {
+                            userProvider.update.password(dataUser, function(error, data) {
+                                if(!error && data) {
+                                    delete(dataUser.password);
+                                    response.send({'information': (!error ? 'user updated' : 'An error has occurred - ' + error), 'user': dataUser });
+                                } else
+                                    response.send({'information' : 'Error updating user password - ' + error});
+                            })
+                        } else {
+                            delete(dataUser.password);
+                            response.send({'information': (!error ? 'user updated' : 'An error has occurred - ' + error), 'user': dataUser });
+                        }
+                    } else
+                        response.send({'information' : 'Error updating user informations - ' + error});
+
+                })
+            } else
+                response.send({'information' : 'An error has occurred - bad credentials'});
+        })
+
+}
+
 /********************************[ DELETE ]********************************/
 
 

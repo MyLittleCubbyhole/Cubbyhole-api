@@ -1,6 +1,7 @@
 var file = require(global.paths.server + '/routing/rest/file')
 ,	directory = require(global.paths.server + '/routing/rest/directory')
 ,	user = require(global.paths.server + '/routing/rest/user')
+,	plan = require(global.paths.server + '/routing/rest/plan')
 ,	multipartDecoder = require('connect-multiparty')()
 ,	filters = require(global.paths.server + '/routing/filters/core')
 ,	routing = {};
@@ -22,6 +23,7 @@ routing.init = function(app) {
 	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);
+	app.get('/api/plans', plan.get.all);
 
 	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
 	app.post(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.post.zip);
@@ -32,8 +34,11 @@ routing.init = function(app) {
 	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);
+	app.post('/api/plans', filters.tokenInterceptor, plan.post.create); // TODO ajouter filter pour check si admin
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
+    app.put('/api/users/:id', filters.tokenInterceptor, user.put.updateInformations);
+    app.get('/api/plans/:id', plan.put.updateInformations);
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, filters.tokenInterceptor, directory.delete.byPath);
