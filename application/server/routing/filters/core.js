@@ -3,21 +3,26 @@ var filters = {}
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
-    ,   witness = true;
+    ,   witness = false;
 
     var token = query.token || 0;
     token = encodeURIComponent(token);
 
     tokenProvider.get.byId(token, function(error, data) {
         if(data) {
-            if(((data.ORIGIN && data.ORIGIN.match(/CubbyHole/i)) || data.EXPIRATIONDATE >= Date.now()) && data.TYPE == 'AUTHENTICATION')  {
+            var currentDate = new Date()
+            ,   expirationDate = new Date(data.expirationdate)
+
+            if(((data.origin && data.origin.match(/CubbyHole/i)) || expirationDate >= currentDate) && data.type == 'AUTHENTICATION')  {
                 witness = true;
-            } else if(data.TYPE == 'AUTHENTICATION'){
-                tokenProvider.delete.byId(token, function(error, data) {
-                    if(error)
-                        console.log(error);
-                });
+                request.userId = data.userid;
             }
+            else
+                if(data.TYPE == 'AUTHENTICATION')
+                    tokenProvider.delete.byId(token, function(error, data) {
+                        if(error)
+                            console.log(error);
+                    });
         }
 
         if(true /*witness*/)
