@@ -34,15 +34,15 @@ routing.init = function(app) {
 	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);
-	app.post('/api/plans', filters.tokenInterceptor, plan.post.create); // TODO ajouter filter pour check si admin
+	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
     app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);
-    app.put('/api/plans/:id', filters.tokenInterceptor, plan.put.byId); // TODO ajouter filter pour check si admin
+    app.put('/api/plans/:id', filters.tokenInterceptor, filters.adminInterceptor, plan.put.byId);
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, filters.tokenInterceptor, directory.delete.byPath);
-	app.delete('/api/plans/:id', filters.tokenInterceptor, plan.delete.byId); // TODO ajouter filter pour check si admin
+	app.delete('/api/plans/:id', filters.tokenInterceptor, filters.adminInterceptor, plan.delete.byId);
 
 }
 

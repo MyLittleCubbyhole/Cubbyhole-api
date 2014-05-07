@@ -1,6 +1,7 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
 ,	tools = require(global.paths.server + '/database/tools/mysql/core')
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
+tools.init();
 
 /********************************[  GET   ]********************************/
 

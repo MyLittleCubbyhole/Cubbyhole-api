@@ -1,6 +1,11 @@
 var crypto = require('crypto')
-,   userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,   userProvider
 ,   mysqlTools = {};
+
+mysqlTools.init = function() {
+    if(!userProvider)
+        userProvider = require(global.paths.server + '/database/mysql/tables/user');
+}
 
 function encrypt(string, salt) {
     var hash = crypto.createHash('sha512');

@@ -6,6 +6,7 @@ var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   mailer = require(global.paths.server + '/mailer/mails/core')
 ,   moment = require('moment')
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
+mysqlTools.init();
 
 
 /********************************[  GET   ]********************************/

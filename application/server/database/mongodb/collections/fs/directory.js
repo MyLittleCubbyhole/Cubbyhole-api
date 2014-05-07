@@ -9,6 +9,7 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   ObjectID = MongoProvider.objectId
 ,   mongo = MongoProvider.db
 ,   provider = { get: {}, create: {}, delete: {}, update: {} };
+mysqlTools.init();
 
 provider.init = function() {
     if(!fileProvider)

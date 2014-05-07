@@ -4,6 +4,7 @@ var provider = require(global.paths.server + '/database/mongodb/collections/fs/d
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
+mysqlTools.init();
 
 /********************************[  GET   ]********************************/
 

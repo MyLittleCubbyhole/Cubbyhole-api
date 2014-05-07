@@ -83,7 +83,8 @@ plan.delete.byId = function(request, response) {
     else {
         planProvider.get.byId(planId, function(error, plan) {
             if(!error && plan && plan.id) {
-                planProvider.delete.byId(planId, function(error, planData) {
+                plan.available = false;
+                planProvider.update.available(plan, function(error, planData) {
                     response.send({'information': (!error ? 'plan deleted' : 'An error has occurred - ' + error), 'plan': plan });
                 })
             } else
