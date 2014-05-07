@@ -1,5 +1,6 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
+,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
@@ -24,6 +25,30 @@ user.get.byId = function(request, response) {
 		response.send( (!error ? data : error ) );
 	})
 }
+
+user.get.currentPlan = function(request, response) {
+    var params  = request.params;
+    userProvider.get.byId(params.id, function(error, user){
+        if(!error && user && user.id) {
+            subscribeProvider.get.actualSubscription(user.id, function(error, subscription) {
+                if(!error && subscription && subscription.id) {
+                    planProvider.get.byId(subscription.planid, function(error, plan) {
+                        if(!error && plan && plan.id) {
+                            plan.datestart = subscription.datestart;
+                            plan.dateend = subscription.dateend;
+                            response.send(plan);
+                        }
+                        else
+                            response.send({'information': 'An error has occurred - ' + error});
+                    });
+                } else
+                    response.send({'information': 'An error has occurred - no subscription found'});
+            })
+        } else
+            response.send({'information': 'An error has occurred - user not found'});
+    })
+}
+
 
 user.get.checkToken = function(request, response) {
     response.writeHead(200);
