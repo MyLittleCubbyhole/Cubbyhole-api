@@ -65,9 +65,15 @@ plan.put.byId = function(request, response) {
     if(!witness)
         response.send({'information': 'An error has occurred - missing information', 'plan' : plan });
     else {
-        planProvider.update.all(plan, function(error, planData) {
-            response.send({'information': (!error ? 'plan updated' : 'An error has occurred - ' + error), 'plan': plan });
-        })
+        planProvider.get.byId(plan.id, function(error, planData) {
+            if(!error && planData && planData.id) {
+                planProvider.update.all(plan, function(error, data) {
+                    response.send({'information': (!error ? 'plan updated' : 'An error has occurred - ' + error), 'plan': plan });
+                })
+            } else
+                response.send({'information': 'An error has occurred - plan not found'});
+        });
+
     }
 }
 
