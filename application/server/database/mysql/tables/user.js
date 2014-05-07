@@ -16,6 +16,18 @@ provider.get.byEmail = function(email, callback) {
 	Mysql.query('select * from `user` where `email`="'+ email + '";', callback);
 }
 
+provider.get.namesByIds = function(ids, callback) {
+	var query = 'select concat(firstname, " ", lastname) as owner from `user` where `id` IN (';
+	for(var i = 0; i < ids.length; i++) {
+		query += parseInt(ids[i], 10);
+		if(i != ids.length - 1)
+			query += ', ';
+	}
+	query += ');'
+
+	Mysql.query(query, callback);
+}
+
 /********************************[  CREATE   ]********************************/
 
 

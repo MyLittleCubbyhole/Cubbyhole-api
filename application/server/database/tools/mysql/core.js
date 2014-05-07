@@ -1,4 +1,5 @@
 var crypto = require('crypto')
+,   userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   mysqlTools = {};
 
 function encrypt(string, salt) {
@@ -37,6 +38,39 @@ mysqlTools.generatePassword = function(password, callback){
 mysqlTools.checkPassword = function(userPassword, bddPassword, salt){
     var encryptedPassword = encrypt(userPassword, salt);
     return encryptedPassword === bddPassword;
+}
+
+mysqlTools.setOwnersNames = function(files, callback) {
+    if(files && files.length > 0) {
+        var ownerIds = [];
+        // Construct an array with owner ids
+        for(var i = 0; i < files.length; i++) {
+            var exists = false;
+            // Check if the id is already in the array
+            for(var j = 0; j < ownerIds.length; j++)
+                if(files[i].ownerId == ownerIds[j])
+                    exists = true
+            if(!exists)
+                ownerIds.push(files[i].ownerId);
+        }
+        // Get the corresponding array with owner's names inside
+        userProvider.get.namesByIds(ownerIds, function(error, owners) {
+            if(!error && owners && (owners.length > 0 || owners.owner)) {
+                if(owners.owner)
+                    for(var i = 0; i < files.length; i++)
+                        files[i].owner = owners.owner;
+                else
+                    for(var i = 0; i < files.length; i++)
+                        for(var j = 0; j < owners.length; j++)
+                            if(files[i].ownerId == ownerIds[j])
+                                files[i].owner = owners[j].owner;
+            }
+
+            callback.call(this, error, files);
+        })
+    } else {
+        callback.call(this, null, files);
+    }
 }
 
 module.exports = mysqlTools;
