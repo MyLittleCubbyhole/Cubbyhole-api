@@ -9,26 +9,11 @@ filters.tokenInterceptor = function(request, response, next) {
     var token = query.token || 0;
     token = encodeURIComponent(token);
 
-    tokenProvider.get.byId(token, function(error, data) {
-        if(data) {
-            var currentDate = new Date()
-            ,   expirationDate = new Date(data.expirationdate)
-
-            if(((data.origin && data.origin.match(/CubbyHole/i)) || expirationDate >= currentDate) && data.type == 'AUTHENTICATION')  {
-                witness = true;
-                request.userId = data.userid;
-            }
-            else
-                if(data.TYPE == 'AUTHENTICATION')
-                    tokenProvider.delete.byId(token, function(error, data) {
-                        if(error)
-                            console.log(error);
-                    });
-        }
-
-        if(witness)
+    tokenProvider.isValidForAuthentication(token, function(error, userId) {
+        if(!error && userId) {
+            request.userId = userId;
             next();
-        else {
+        } else {
             response.writeHead(401);
             response.write("You must be authentified to request the API");
             response.end();

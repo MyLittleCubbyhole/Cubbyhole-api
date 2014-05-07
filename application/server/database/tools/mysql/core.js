@@ -59,22 +59,25 @@ mysqlTools.setCreatorsNames = function(files, callback) {
                 creatorIds.push(files[i].creatorId);
         }
         // Get the corresponding array with creator's names inside
-        userProvider.get.namesByIds(creatorIds, function(error, creators) {
-            if(!error && creators && (creators.length > 0 || creators.creator)) {
-                if(creators.creator) {
-                    for(var i = 0; i < files.length; i++)
-                        if(files[i].creatorId !== undefined && files[i].creatorId !== null)
-                            files[i].creator = creators.creator;
+        if(creatorIds.length > 0)
+            userProvider.get.namesByIds(creatorIds, function(error, creators) {
+                if(!error && creators && (creators.length > 0 || creators.creator)) {
+                    if(creators.creator) {
+                        for(var i = 0; i < files.length; i++)
+                            if(files[i].creatorId !== undefined && files[i].creatorId !== null)
+                                files[i].creator = creators.creator;
+                    }
+                    else
+                        for(var i = 0; i < files.length; i++)
+                            for(var j = 0; j < creators.length; j++)
+                                if(files[i].creatorId == creatorIds[j])
+                                    files[i].creator = creators[j].creator;
                 }
-                else
-                    for(var i = 0; i < files.length; i++)
-                        for(var j = 0; j < creators.length; j++)
-                            if(files[i].creatorId == creatorIds[j])
-                                files[i].creator = creators[j].creator;
-            }
 
-            callback.call(this, error, files);
-        })
+                callback.call(this, error, files);
+            })
+        else
+           callback.call(this, null, files);
     } else
         callback.call(this, null, files);
 }
