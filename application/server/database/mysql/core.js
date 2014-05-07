@@ -8,9 +8,9 @@ mysql.query = function(query, callback) {
 			if(!error) {
 				self.query(query, function(error, rows) {
 					if(!error) {
-						data = rows.length == 1 ? rows[0] : rows;
 
-						callback.call(this, error, data);
+						data = rows.length == 1 ? rows[0] : rows;
+						callback.call(this, rows.length <0 ? 'no entries founded': null , data);
 					}
 					else
 						throw 'error when querying the database'+error;

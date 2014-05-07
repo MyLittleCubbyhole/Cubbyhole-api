@@ -42,14 +42,16 @@ uploader.init = function(socket) {
 			fullPath: files[name].owner + files[name].logicPath + name,
 			ownerId: files[name].owner
 		};
-
 		if(files[name].id) {
 			parameters.id = files[name].id;
 			parameters.mode = 'w+';
+			console.log('upload avancement')
 			fileProvider.upload(parameters, uploadCallback);
 		}
-		else 
+		else {
+			console.log('create')
 			directoryProvider.create.file(parameters, uploadCallback)
+		}
 
 		function uploadCallback(error){
 			if(error) {
@@ -58,7 +60,7 @@ uploader.init = function(socket) {
 				delete files[name];
 			}
 			else {
-
+				console.log(parameters.id, files[name], name)
 				files[name].id = parameters.id;
 				if(files[name]['downloaded'] >= files[name]['size']){
 					console.log('file uploaded');
@@ -66,7 +68,8 @@ uploader.init = function(socket) {
 
 
 					historicProvider.create.event({
-						ownerId: request.ownerId,
+						//todo recup par token l'id
+						ownerId: files[name].owner,
 						targetOwner: parameters.fullPath.split('/')[0],
 						fullPath: parameters.fullPath,
 						action: 'create',

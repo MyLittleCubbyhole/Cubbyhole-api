@@ -52,18 +52,19 @@ provider.get.childrenByFullPath = function(fullPath, callback) {
         if(!error && data) {
             var children = data.children;
             data = [];
-            for(var i = 0; i < children.length; i++) {
-                started++;
-                console.log(children[i]);
-                provider.get.byFullPath(children[i], function(error, dataChild) {
-                    started--;
-                    if(!error && data)
-                        data.push(dataChild);
-                    console.log(dataChild)
-                    if(started <= 0 && i == children.length)
-                        callback.call(this, null, data);
-                });
-            }
+            if(children.length > 0)
+                for(var i = 0; i < children.length; i++) {
+                    started++;
+                    provider.get.byFullPath(children[i], function(error, dataChild) {
+                        started--;
+                        if(!error && data)
+                            data.push(dataChild);
+                        if(started <= 0 && i == children.length)
+                            callback.call(this, null, data);
+                    });
+                }
+            else
+                callback.call(this, '', []);
         }
         else
             callback.call(this, error);
@@ -93,6 +94,7 @@ provider.create.folder = function(params, callback){
 						collection.insert({
 							_id: params.fullPath,
 							ownerId: parseInt(params.ownerId, 10),
+                            creatorId: params.createdBy,
 							path: params.path,
 							name: params.name,
 							type: "folder",
@@ -202,7 +204,7 @@ provider.delete.byOwner = function(ownerId, callback) {
 provider.delete.item = function(collection, fullPath, start, stop) {
 	collection.findOne({"_id":fullPath}, function(error, data) {
 
-		if(!error && data) {
+		if(!error && data && !data.undeletable) {
 			if(data.type == 'folder')
 				for(var i = 0; i< data.children.length; i++) {
 					start();
@@ -216,7 +218,7 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 			collection.remove({"_id":fullPath}, function(error,data) { if(error) console.error(error); stop(); });
 		}
 		else
-			stop('not found');
+			stop('not found or undeletable');
 	})
 
 }
@@ -344,7 +346,6 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
     newItem.path = targetPath;
     newItem._id = newItem.ownerId + newItem.path + newItem.name;
     newItem.lastUpdate = new Date();
-
     provider.getNewName(newItem._id, function(error, newName) {
         if(!error && newName) {
 
@@ -358,24 +359,23 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 name: newItem.name
             };
 
-            if(item.type == 'folder') {
+
+            if(item.type == 'folder')
                 provider.create.folder(params, function(error) {
                     if(error)
                         console.error('error saving new item - ' + error);
-
                     for(var i = 0; i < item.children.length; i++) {
                         start();
                         var path = newItem.path + newItem.name + "/";
                         collection.findOne({'_id': item.children[i]}, function(error, data) {
                             if(error)
                                 console.error('item not found');
-
                             provider.copyItem(collection, data, null, path, move, start, stop);
                         });
                     }
                     stop();
                 });
-            } else {
+            else 
                 fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
                     if(error)
                         console.error('error getting old file - ' + error);
@@ -392,7 +392,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     });
 
                 });
-            }
+            
         }
     });
 };
@@ -410,7 +410,7 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
 
 
     if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
-        console.log(fullPath, targetPath);
+        fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
         mongo.collection('directories', function(error, collection) {
 
             function start() {
@@ -513,7 +513,6 @@ provider.share = function(params, callback) {
                     targetId: user.id,
                     right: params.right
                 }
-
                 sharingProvider.create.sharing(sharingOptions, function(error, data) {
 
                     collection.update({'_id': user.id + '/Shared'}, {$push: { children: params.fullPath}}, { safe : true }, function(error) {
