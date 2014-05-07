@@ -18,6 +18,7 @@ uploader.init = function(socket) {
 				if(!error && userId) {
 					files[name] = {
 						owner: data.owner,
+						creatorId: userId,
 						size : data.size,
 						type: data.type,
 						logicPath: logicPath,
@@ -48,7 +49,8 @@ uploader.init = function(socket) {
 			size: files[name].size,
 			path: files[name].logicPath,
 			fullPath: files[name].owner + files[name].logicPath + name,
-			ownerId: files[name].owner
+			ownerId: files[name].owner,
+			creatorId: files[name].creatorId
 		};
 		if(files[name].id) {
 			parameters.id = files[name].id;

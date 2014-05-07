@@ -146,6 +146,7 @@ provider.create.file = function(params, callback){
                     var directoryFile = {
                         _id: params.fullPath,
                         ownerId: parseInt(params.ownerId, 10),
+                        creatorId: parseInt(params.creatorId, 10),
                         path: params.path,
                         name: params.name,
                         type: 'file',
@@ -376,7 +377,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     }
                     stop();
                 });
-            else 
+            else
                 fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
                     if(error)
                         console.error('error getting old file - ' + error);
@@ -393,7 +394,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     });
 
                 });
-            
+
         }
     });
 };
