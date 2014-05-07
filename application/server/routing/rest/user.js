@@ -227,7 +227,7 @@ user.post.authenticate = function(request, response) {
 
 /********************************[  PUT   ]********************************/
 
-user.put.updateInformations = function(request, response){
+user.put.byId = function(request, response){
     var params = request.params
     ,   body = request.body
     ,   witness = true

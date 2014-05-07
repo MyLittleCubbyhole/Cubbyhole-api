@@ -37,11 +37,12 @@ routing.init = function(app) {
 	app.post('/api/plans', filters.tokenInterceptor, plan.post.create); // TODO ajouter filter pour check si admin
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
-    app.put('/api/users/:id', filters.tokenInterceptor, user.put.updateInformations);
-    app.get('/api/plans/:id', plan.put.updateInformations);
+    app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);
+    app.put('/api/plans/:id', filters.tokenInterceptor, plan.put.byId); // TODO ajouter filter pour check si admin
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, filters.tokenInterceptor, directory.delete.byPath);
+	app.delete('/api/plans/:id', filters.tokenInterceptor, plan.delete.byId); // TODO ajouter filter pour check si admin
 
 }
 
