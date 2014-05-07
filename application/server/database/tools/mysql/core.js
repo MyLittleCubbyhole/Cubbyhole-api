@@ -45,37 +45,38 @@ mysqlTools.checkPassword = function(userPassword, bddPassword, salt){
     return encryptedPassword === bddPassword;
 }
 
-mysqlTools.setOwnersNames = function(files, callback) {
+mysqlTools.setCreatorsNames = function(files, callback) {
     if(files && files.length > 0) {
-        var ownerIds = [];
-        // Construct an array with owner ids
+        var creatorIds = [];
+        // Construct an array with creator ids
         for(var i = 0; i < files.length; i++) {
             var exists = false;
             // Check if the id is already in the array
-            for(var j = 0; j < ownerIds.length; j++)
-                if(files[i].ownerId == ownerIds[j])
-                    exists = true
-            if(!exists)
-                ownerIds.push(files[i].ownerId);
+            for(var j = 0; j < creatorIds.length; j++)
+                if(files[i].creatorId == creatorIds[j])
+                    exists = true;
+            if(!exists && files[i].creatorId !== undefined && files[i].creatorId !== null)
+                creatorIds.push(files[i].creatorId);
         }
-        // Get the corresponding array with owner's names inside
-        userProvider.get.namesByIds(ownerIds, function(error, owners) {
-            if(!error && owners && (owners.length > 0 || owners.owner)) {
-                if(owners.owner)
+        // Get the corresponding array with creator's names inside
+        userProvider.get.namesByIds(creatorIds, function(error, creators) {
+            if(!error && creators && (creators.length > 0 || creators.creator)) {
+                if(creators.creator) {
                     for(var i = 0; i < files.length; i++)
-                        files[i].owner = owners.owner;
+                        if(files[i].creatorId !== undefined && files[i].creatorId !== null)
+                            files[i].creator = creators.creator;
+                }
                 else
                     for(var i = 0; i < files.length; i++)
-                        for(var j = 0; j < owners.length; j++)
-                            if(files[i].ownerId == ownerIds[j])
-                                files[i].owner = owners[j].owner;
+                        for(var j = 0; j < creators.length; j++)
+                            if(files[i].creatorId == creatorIds[j])
+                                files[i].creator = creators[j].creator;
             }
 
             callback.call(this, error, files);
         })
-    } else {
+    } else
         callback.call(this, null, files);
-    }
 }
 
 module.exports = mysqlTools;

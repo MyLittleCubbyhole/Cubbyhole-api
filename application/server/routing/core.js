@@ -21,6 +21,7 @@ routing.init = function(app) {
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
+	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
 	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);

@@ -123,7 +123,7 @@ file.get.shared 	= function(request, response) {
 
 												} else {
 													var dailyQuota = {
-														day: moment().format('YYYY-MM-DD'),
+														day: moment().utc().format('YYYY-MM-DD'),
 														quotaUsed: 0,
 														subscribeId: subscription.id
 													}

@@ -1,6 +1,7 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
+,   dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
@@ -40,6 +41,30 @@ user.get.currentPlan = function(request, response) {
                         }
                         else
                             response.send({'information': 'An error has occurred - ' + error});
+                    });
+                } else
+                    response.send({'information': 'An error has occurred - no subscription found'});
+            })
+        } else
+            response.send({'information': 'An error has occurred - user not found'});
+    })
+}
+
+user.get.usedQuota = function(request, response) {
+    var params  = request.params;
+    userProvider.get.byId(params.id, function(error, user){
+        if(!error && user && user.id) {
+            subscribeProvider.get.actualSubscription(user.id, function(error, subscription) {
+                if(!error && subscription && subscription.id) {
+                    dailyQuotaProvider.get.current(subscription.id, function(error, quota) {
+                        if(!error && quota) {
+                            delete(quota.id);
+                            delete(quota.subscribeid);
+                            response.send(quota);
+                        }
+                        else {
+                            response.send({'information': 'An error has occurred - ' + error});
+                        }
                     });
                 } else
                     response.send({'information': 'An error has occurred - no subscription found'});
