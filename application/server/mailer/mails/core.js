@@ -3,7 +3,7 @@ var mailer = {}
 ,   config = require(global.paths.server + '/config/core').get()
 ,   fs = require('fs');
 
-mailer.sendActivationMail = function(receiverAddress, username, token) {
+mailer.sendActivationMail = function(receiverAddress, firstname, token) {
 
     var webserverUrl = config["webserver"].protocol + '//' + config["webserver"].host + ':' + config["webserver"].port;
 
@@ -17,7 +17,7 @@ mailer.sendActivationMail = function(receiverAddress, username, token) {
                 to: receiverAddress,
                 subject: "Activez votre compte CubbyHole",
                 generateTextFromHTML: true,
-                html: data.replace(/{{activationUrl}}/g, activationUrl).replace(/{{logoUrl}}/g, logoUrl).replace(/{{username}}/g, username)
+                html: data.replace(/{{activationUrl}}/g, activationUrl).replace(/{{logoUrl}}/g, logoUrl).replace(/{{firstname}}/g, firstname)
             };
 
             sender.sendMail(mailOptions);

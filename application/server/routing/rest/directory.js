@@ -1,8 +1,10 @@
 var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	mongoTools = require(global.paths.server + '/database/tools/mongodb/core')
+,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
+mysqlTools.init();
 
 /********************************[  GET   ]********************************/
 
@@ -43,8 +45,14 @@ directory.get.byPath = function(request, response){
 		}
 
 		provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
-			response.send( (!error && data ? data : error ) );
-			response.end();
+			if(!error && data && data.length > 0) {
+				mysqlTools.setOwnersNames(data, function(error, data) {
+					response.send( (!error && data ? data : error ) );
+				})
+			} else {
+				response.send( (!error && data ? data : error ) );
+				response.end();
+			}
 		})
 	}
 	else {

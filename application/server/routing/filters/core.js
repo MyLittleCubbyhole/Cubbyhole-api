@@ -1,5 +1,6 @@
 var filters = {}
-,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token');
+,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
+,   userProvider = require(global.paths.server + '/database/mysql/tables/user');
 
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
@@ -25,7 +26,7 @@ filters.tokenInterceptor = function(request, response, next) {
                     });
         }
 
-        if(true /*witness*/)
+        if(witness)
             next();
         else {
             response.writeHead(401);
@@ -34,5 +35,17 @@ filters.tokenInterceptor = function(request, response, next) {
         }
     });
 };
+
+filters.adminInterceptor = function(request, response, next) {
+    userProvider.get.byId(request.userId, function(error, user) {
+        if(!error && user && user.roleid == 2)
+            next();
+        else {
+            response.writeHead(401);
+            response.write("You must be authentified as an administrator to make this request");
+            response.end();
+        }
+    })
+}
 
 module.exports = filters;
