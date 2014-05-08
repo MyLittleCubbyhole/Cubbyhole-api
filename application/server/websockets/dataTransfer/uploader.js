@@ -66,13 +66,10 @@ uploader.init = function(socket) {
 				socket.emit('upload_stopped', { id: files[name].clientSideId });
 				delete files[name];
 			}
-			else if(name && files[name]) {
-				files[name].id = parameters.id;
-				files[name]._id = parameters.fullPath;
-				if(files[name]['downloaded'] >= files[name]['size']){
-					files[name].id = null;
-
+			else
+				if(name && files[name]) {
 					files[name].id = parameters.id;
+					files[name]._id = parameters.fullPath;
 					if(files[name]['downloaded'] >= files[name]['size']){
 						files[name].id = null;
 
@@ -108,7 +105,7 @@ uploader.init = function(socket) {
 						});
 					}
 				}
-			}
+
 		}
 	});
 }
