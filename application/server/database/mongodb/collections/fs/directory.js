@@ -87,6 +87,7 @@ provider.get.byFullPath = function(fullPath, callback){
  */
 provider.create.folder = function(params, callback){
 	var folderPath = params.path != '/' ? params.ownerId + params.path.slice(0, -1) : params.path;
+    console.log(folderPath, params)
 	provider.checkExist(folderPath, function(error, exist) {
 		if(exist)
 			mongo.collection('directories', function(error, collection){
@@ -359,7 +360,9 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 path: newItem.path,
                 name: newItem.name
             };
-
+            console.log('..')
+            console.log(params, newItem, updatedItem)
+            console.log('..')
 
             if(item.type == 'folder')
                 provider.create.folder(params, function(error) {
