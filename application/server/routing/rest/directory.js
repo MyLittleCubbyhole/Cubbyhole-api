@@ -46,7 +46,7 @@ directory.get.byPath = function(request, response){
 
 		provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
 			if(!error && data && data.length > 0) {
-				mysqlTools.setOwnersNames(data, function(error, data) {
+				mysqlTools.setCreatorsNames(data, function(error, data) {
 					response.send( (!error && data ? data : error ) );
 				})
 			} else {

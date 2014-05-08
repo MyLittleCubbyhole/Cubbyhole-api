@@ -1,6 +1,7 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
+,   dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
@@ -40,6 +41,30 @@ user.get.currentPlan = function(request, response) {
                         }
                         else
                             response.send({'information': 'An error has occurred - ' + error});
+                    });
+                } else
+                    response.send({'information': 'An error has occurred - no subscription found'});
+            })
+        } else
+            response.send({'information': 'An error has occurred - user not found'});
+    })
+}
+
+user.get.usedQuota = function(request, response) {
+    var params  = request.params;
+    userProvider.get.byId(params.id, function(error, user){
+        if(!error && user && user.id) {
+            subscribeProvider.get.actualSubscription(user.id, function(error, subscription) {
+                if(!error && subscription && subscription.id) {
+                    dailyQuotaProvider.get.current(subscription.id, function(error, quota) {
+                        if(!error && quota) {
+                            delete(quota.id);
+                            delete(quota.subscribeid);
+                            response.send(quota);
+                        }
+                        else {
+                            response.send({'information': 'An error has occurred - ' + error});
+                        }
                     });
                 } else
                     response.send({'information': 'An error has occurred - no subscription found'});
@@ -249,6 +274,51 @@ user.post.authenticate = function(request, response) {
 		});
 
 
+}
+
+user.post.subscribe = function(request, response) {
+    var params = request.params
+    ,   body = request.body
+    ,   witness = true
+    ,   subscribe = {
+        userId: params.userId,
+        planId: params.planId,
+        dateStart: moment(body.dateStart, 'DD-MM-YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss'),
+        dateEnd: moment(body.dateEnd, 'DD-MM-YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')
+    };
+
+    for(var i in subscribe)
+        witness = typeof subscribe[i] == 'undefined' ? false : witness;
+
+    if(!witness)
+        response.send({'information': 'An error has occurred - missing information', 'subscribe' : subscribe });
+    else
+        if(subscribe.planId != 1)
+            if(moment(subscribe.dateStart).isAfter() || moment(subscribe.dateStart).isSame())
+                if(moment(subscribe.dateStart).isBefore(moment(subscribe.dateEnd)))
+                    userProvider.get.byId(subscribe.userId, function(error, user) {
+                        if(!error && user && user.id)
+                            planProvider.get.byId(subscribe.planId, function(error, plan) {
+                                if(!error && plan && plan.id)
+                                    subscribeProvider.create.subscribe(subscribe, function(error, data) {
+                                        if(!error && data) {
+                                            subscribe.id = data.insertId;
+                                            response.send({'information' : 'subscribe created', 'subscribe': subscribe});
+                                        } else
+                                            response.send({'information' : 'An error has occurred - ' + error});
+                                    })
+                                else
+                                    response.send({'information' : 'An error has occurred - plan not found'});
+                            })
+                        else
+                            response.send({'information' : 'An error has occurred - user not found'});
+                    })
+                else
+                    response.send({'information' : 'An error has occurred - dateEnd must be after dateStart'});
+            else
+                response.send({'information' : 'An error has occurred - dateStart must be after now'});
+        else
+            response.send({'information' : 'An error has occurred - you can\'t subscribe to the free plan'});
 }
 
 /********************************[  PUT   ]********************************/

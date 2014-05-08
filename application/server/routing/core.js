@@ -21,6 +21,7 @@ routing.init = function(app) {
 	app.get('/api/users', filters.tokenInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
+	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
 	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);
@@ -36,6 +37,7 @@ routing.init = function(app) {
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);
 	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);
+	app.post('/api/users/:userId/plans/:planId', filters.tokenInterceptor, user.post.subscribe);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
     app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);

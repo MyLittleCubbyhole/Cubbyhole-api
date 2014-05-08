@@ -100,7 +100,6 @@ provider.create.folder = function(params, callback){
 							path: params.path,
 							name: params.name,
 							type: "folder",
-                            test: 0,
 							size: params.size ? parseInt(params.size, 10) : 0,
 							lastUpdate: new Date(),
                             undeletable: typeof params.undeletable != 'undefined' && params.undeletable === true,
@@ -147,6 +146,7 @@ provider.create.file = function(params, callback){
                     var directoryFile = {
                         _id: params.fullPath,
                         ownerId: parseInt(params.ownerId, 10),
+                        creatorId: parseInt(params.creatorId, 10),
                         path: params.path,
                         name: params.name,
                         type: 'file',
@@ -358,11 +358,9 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 fullPath: newItem._id,
                 ownerId: newItem.ownerId,
                 path: newItem.path,
-                name: newItem.name
+                name: newItem.name,
+                creatorId: newItem.creatorId
             };
-            console.log('..')
-            console.log(params, newItem, updatedItem)
-            console.log('..')
 
             if(item.type == 'folder')
                 provider.create.folder(params, function(error) {
@@ -379,7 +377,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     }
                     stop();
                 });
-            else 
+            else
                 fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
                     if(error)
                         console.error('error getting old file - ' + error);
@@ -396,7 +394,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     });
 
                 });
-            
+
         }
     });
 };

@@ -15,6 +15,32 @@ provider.get.byFileId = function(id, callback) {
     Mysql.query('select * from `token` where `fileid` = "'+ id +'";', callback);
 }
 
+provider.isValidForAuthentication = function(id, callback) {
+
+    var witness = false;
+
+    provider.get.byId(id, function(error, data) {
+        if(data) {
+            var currentDate = new Date()
+            ,   expirationDate = new Date(data.expirationdate)
+
+            if(((data.origin && data.origin.match(/CubbyHole/i)) || expirationDate >= currentDate) && data.type == 'AUTHENTICATION')
+                witness = true;
+            else
+                if(data.TYPE == 'AUTHENTICATION')
+                    tokenProvider.delete.byId(id, function(error, data) {
+                        if(error)
+                            console.log(error);
+                    });
+        }
+
+        if(witness)
+            callback.call(this, null, data.userid);
+        else
+            callback.call(this, 'bad token', null);
+    });
+}
+
 /********************************[  CREATE   ]********************************/
 
 
