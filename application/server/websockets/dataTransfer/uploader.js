@@ -26,7 +26,6 @@ uploader.init = function(socket) {
 						currentChunkSize: 0,
 						clientSideId: data.id
 					};
-					console.log('init - ', name);
 
 					var chunk = 0;
 					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'chunkSize': files[name].currentChunkSize  });
@@ -38,7 +37,6 @@ uploader.init = function(socket) {
 	});
 
 	socket.on('upload', function(data) {
-		console.log('upload')
 		var name = data.name;
 		files[name].currentChunkSize = data.data.length
 		files[name]['downloaded'] += files[name].currentChunkSize;
@@ -55,11 +53,9 @@ uploader.init = function(socket) {
 		if(files[name].id) {
 			parameters.id = files[name].id;
 			parameters.mode = 'w+';
-			console.log('upload avancement')
 			fileProvider.upload(parameters, uploadCallback);
 		}
 		else {
-			console.log('create')
 			directoryProvider.create.file(parameters, uploadCallback)
 		}
 
@@ -70,11 +66,9 @@ uploader.init = function(socket) {
 				delete files[name];
 			}
 			else {
-				console.log(parameters.id, files[name], name)
 				files[name].id = parameters.id;
 				files[name]._id = parameters.fullPath;
 				if(files[name]['downloaded'] >= files[name]['size']){
-					console.log('file uploaded');
 					files[name].id = null;
 
 

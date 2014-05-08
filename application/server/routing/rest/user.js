@@ -293,29 +293,32 @@ user.post.subscribe = function(request, response) {
     if(!witness)
         response.send({'information': 'An error has occurred - missing information', 'subscribe' : subscribe });
     else
-        if(moment(subscribe.dateStart).isAfter() || moment(subscribe.dateStart).isSame())
-            if(moment(subscribe.dateStart).isBefore(moment(subscribe.dateEnd)))
-                userProvider.get.byId(subscribe.userId, function(error, user) {
-                    if(!error && user) {
-                        planProvider.get.byId(subscribe.planId, function(error, plan) {
-                            if(!error && plan) {
-                                subscribeProvider.create.subscribe(subscribe, function(error, data) {
-                                    if(!error && data) {
-                                        subscribe.id = data.insertId;
-                                        response.send({'information' : 'subscribe created', 'subscribe': subscribe});
-                                    } else
-                                        response.send({'information' : 'An error has occurred - ' + error});
-                                })
-                            } else
-                                response.send({'information' : 'An error has occurred - plan not found'});
-                        })
-                    } else
-                        response.send({'information' : 'An error has occurred - user not found'});
-                })
+        if(subscribe.planId != 1)
+            if(moment(subscribe.dateStart).isAfter() || moment(subscribe.dateStart).isSame())
+                if(moment(subscribe.dateStart).isBefore(moment(subscribe.dateEnd)))
+                    userProvider.get.byId(subscribe.userId, function(error, user) {
+                        if(!error && user && user.id)
+                            planProvider.get.byId(subscribe.planId, function(error, plan) {
+                                if(!error && plan && plan.id)
+                                    subscribeProvider.create.subscribe(subscribe, function(error, data) {
+                                        if(!error && data) {
+                                            subscribe.id = data.insertId;
+                                            response.send({'information' : 'subscribe created', 'subscribe': subscribe});
+                                        } else
+                                            response.send({'information' : 'An error has occurred - ' + error});
+                                    })
+                                else
+                                    response.send({'information' : 'An error has occurred - plan not found'});
+                            })
+                        else
+                            response.send({'information' : 'An error has occurred - user not found'});
+                    })
+                else
+                    response.send({'information' : 'An error has occurred - dateEnd must be after dateStart'});
             else
-                response.send({'information' : 'An error has occurred - dateEnd must be after dateStart'});
+                response.send({'information' : 'An error has occurred - dateStart must be after now'});
         else
-            response.send({'information' : 'An error has occurred - dateStart must be after now'});
+            response.send({'information' : 'An error has occurred - you can\'t subscribe to the free plan'});
 }
 
 /********************************[  PUT   ]********************************/
