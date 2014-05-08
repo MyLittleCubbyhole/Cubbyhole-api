@@ -55,10 +55,6 @@ uploader.init = function(socket) {
 		if(files[name].id) {
 			parameters.id = files[name].id;
 			parameters.mode = 'w+';
-<<<<<<< HEAD
-			console.log('upload avancement', parameters.id)
-=======
->>>>>>> 52559eedbb6aebf5b3f2dde4e75cd0bca0930cda
 			fileProvider.upload(parameters, uploadCallback);
 		}
 		else {
@@ -72,16 +68,11 @@ uploader.init = function(socket) {
 				socket.emit('upload_stopped', { id: files[name].clientSideId });
 				delete files[name];
 			}
-<<<<<<< HEAD
-			else 
-				if(name && files[name]) {
-=======
-			else {
+			else if(name && files[name]) {
 				files[name].id = parameters.id;
 				files[name]._id = parameters.fullPath;
 				if(files[name]['downloaded'] >= files[name]['size']){
 					files[name].id = null;
->>>>>>> 52559eedbb6aebf5b3f2dde4e75cd0bca0930cda
 
 					console.log(parameters.id,files,  files[name], name)
 					files[name].id = parameters.id;
@@ -89,8 +80,6 @@ uploader.init = function(socket) {
 						console.log('file uploaded');
 						files[name].id = null;
 
-
-<<<<<<< HEAD
 						historicProvider.create.event({
 							//todo recup par token l'id
 							ownerId: files[name].owner,
@@ -101,51 +90,30 @@ uploader.init = function(socket) {
 							itemType: 'file'
 						});
 
-						socket.emit('upload_done', { 
-							'downloaded': files[name]['downloaded'], 
-							'size': files[name]['size'], 
+						socket.emit('upload_done', {
+							'downloaded': files[name]['downloaded'],
+							'size': files[name]['size'],
 							'chunkSize': files[name].currentChunkSize,
-							'id': files[name].clientSideId 
+							'id': files[name].clientSideId,
+							'_id': files[name]._id
 						});
 						delete files[name];
 					}
 					else {
 						var chunk = files[name]['downloaded'] / 524288;
 						var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
-						socket.emit('upload_next', { 
-							'chunk' : chunk, 
-							'percent' :  percent, 
-							'downloaded': files[name]['downloaded'], 
-							'size': files[name]['size'], 
+						socket.emit('upload_next', {
+							'chunk' : chunk,
+							'percent' :  percent,
+							'downloaded': files[name]['downloaded'],
+							'size': files[name]['size'],
 							'chunkSize': files[name].currentChunkSize,
-							'id': files[name].clientSideId 
+							'id': files[name].clientSideId
 						});
 					}
-=======
-					socket.emit('upload_done', {
-						'downloaded': files[name]['downloaded'],
-						'size': files[name]['size'],
-						'chunkSize': files[name].currentChunkSize,
-						'id': files[name].clientSideId,
-						'_id': files[name]._id
-					});
-					delete files[name];
 				}
-				else {
-					var chunk = files[name]['downloaded'] / 524288;
-					var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
-					socket.emit('upload_next', {
-						'chunk' : chunk,
-						'percent' :  percent,
-						'downloaded': files[name]['downloaded'],
-						'size': files[name]['size'],
-						'chunkSize': files[name].currentChunkSize,
-						'id': files[name].clientSideId
-					});
->>>>>>> 52559eedbb6aebf5b3f2dde4e75cd0bca0930cda
-				}
+			}
 		}
-
 	});
 }
 
