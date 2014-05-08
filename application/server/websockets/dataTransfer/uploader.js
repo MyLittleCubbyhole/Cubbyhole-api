@@ -51,7 +51,6 @@ uploader.init = function(socket) {
 			creatorId: files[name].creatorId
 		};
 
-		console.log(parameters['name'],parameters['type'],parameters['size'],parameters['path'],parameters['fullPath'],parameters['ownerId'])
 		if(files[name].id) {
 			parameters.id = files[name].id;
 			parameters.mode = 'w+';
@@ -63,7 +62,6 @@ uploader.init = function(socket) {
 
 		function uploadCallback(error){
 			if(error) {
-				console.log('error, stop', error)
 				files[name].id = null;
 				socket.emit('upload_stopped', { id: files[name].clientSideId });
 				delete files[name];
@@ -74,10 +72,8 @@ uploader.init = function(socket) {
 				if(files[name]['downloaded'] >= files[name]['size']){
 					files[name].id = null;
 
-					console.log(parameters.id,files,  files[name], name)
 					files[name].id = parameters.id;
 					if(files[name]['downloaded'] >= files[name]['size']){
-						console.log('file uploaded');
 						files[name].id = null;
 
 						historicProvider.create.event({
