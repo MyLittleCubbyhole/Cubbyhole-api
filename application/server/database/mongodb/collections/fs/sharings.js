@@ -23,6 +23,7 @@ provider.get.byItemFullPath = function(fullPath, callback){
     })
 }
 
+
 /********************************[ CREATE ]********************************/
 
 /**
@@ -84,5 +85,30 @@ provider.delete.byItemFullPath = function(fullPath, callback) {
 }
 
 /********************************[ OTHER  ]********************************/
+
+provider.checkRight = function(fullPath, callback) {
+
+	provider.get.byItemFullPath(fullPath, function(error, data) {
+		// console.log(typeof data);
+		if(!error && data && data._id) {
+			callback && callback.call(this, error, data);
+			return data;
+		}
+
+		var length = fullPath.indexOf('/') != -1 ? fullPath.split('/').length : 0;
+
+		if(length <= 2)
+			callback && callback.call(this, 'not found');
+		else {
+			fullPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
+			console.log('->'+fullPath)
+			return provider.checkRight(fullPath, callback);
+		}
+
+	})
+
+
+}
+
 
 module.exports = provider;
