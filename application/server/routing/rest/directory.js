@@ -185,13 +185,14 @@ directory.put.rename = function(request, response){
     ,	body 	= request.body
     ,	parameters 	= {};
 
-    parameters.userId 	= params[0]
-    parameters.path 	= params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
+    parameters.userId = params[0]
+    parameters.path = params[1] && params[1] ? params[1].match(/[^\/\\]+/g) : []
     parameters.currentName = parameters.path.pop();
     parameters.newName 	= body.name;
+    parameters.path = parameters.path.join('/');
 
     parameters.fullPath = parameters.userId + "/" + (parameters.path.length ? parameters.path + "/" : "") + parameters.currentName;
-
+    console.log(parameters);
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });
     else
