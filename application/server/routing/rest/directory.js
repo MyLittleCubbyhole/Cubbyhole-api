@@ -63,6 +63,16 @@ directory.get.byPath = function(request, response){
 	}
 }
 
+directory.get.size = function(request, response) {
+	var params = request.params
+	,	parameters 	= {};;
+	parameters.ownerId = params[0];
+	provider.get.size(parameters.ownerId, function(error, data) {
+		response.send( (!error && data ? data : error ) );
+	})
+
+}
+
 /********************************[  POST  ]********************************/
 
 directory.post.init	= function(request, response){

@@ -78,6 +78,12 @@ provider.get.byFullPath = function(fullPath, callback){
     })
 }
 
+provider.get.size = function(ownerId, callback) {
+    mongo.collection('directories', function(error, collection) {
+        collection.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$contentType', size: {$sum: '$size'} } }], callback);
+    })
+}
+
 /********************************[ CREATE ]********************************/
 
 /**
@@ -152,7 +158,8 @@ provider.create.file = function(params, callback){
                         lastUpdate: new Date(),
                         size: params.size ? parseInt(params.size, 10) : 0,
                         shared: false,
-                        itemId: params.id
+                        itemId: params.id,
+                        contentType: params.type
                     };
 
                     fileProvider.upload(params, function(error){

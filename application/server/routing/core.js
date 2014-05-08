@@ -10,6 +10,7 @@ routing.init = function(app) {
 
 	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.get.byOwner);
+	app.get(/^\/api\/browse\/([0-9]+)\/size$/, filters.tokenInterceptor, directory.get.size);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor, directory.get.byPath);
 	app.get(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, file.get.zip);
 	app.get(/^\/api\/download\/([0-9]+)\/?(\/?.+)\/$/, filters.tokenInterceptor, file.get.zip);
@@ -18,7 +19,7 @@ routing.init = function(app) {
 	app.get(/^\/api\/unshare\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, file.get.unshare);
 	app.get(/^\/api\/download\/shared\/(.+)+/, file.get.sharedPreview);
 	app.get(/^\/api\/shared\/(.+)+/, file.get.shared);
-	app.get('/api/users', filters.tokenInterceptor, user.get.all);
+	app.get('/api/users', filters.tokenInterceptor, filters.adminInterceptor, user.get.all);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
 	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
@@ -42,6 +43,8 @@ routing.init = function(app) {
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
     app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);
     app.put('/api/plans/:id', filters.tokenInterceptor, filters.adminInterceptor, plan.put.byId);
+	app.put('/api/users/:id/promote', filters.tokenInterceptor, filters.adminInterceptor, user.put.promote);
+	app.put('/api/users/:id/demote', filters.tokenInterceptor, filters.adminInterceptor, user.put.demote);
 
 	app.delete(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.delete.byOwner);
 	app.delete(/^\/api\/browse\/([0-9]+)\/(\/*.+)+/, filters.tokenInterceptor, directory.delete.byPath);

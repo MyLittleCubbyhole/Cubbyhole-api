@@ -15,8 +15,21 @@ mysqlTools.init();
 
 user.get.all = function(request, response) {
 
-	userProvider.get.all(function(error, data){
-		response.send( (!error ? data : error ) );
+	userProvider.get.all(function(error, data) {
+        var users = [];
+        if(data && (data.length > 0 || data.id)) {
+
+            if(data && data.id)
+                users.push(data);
+            else
+                users = data;
+
+            for(var i = 0; i < users.length; i++) {
+                delete(users[i].password);
+                delete(users[i].salt);
+            }
+        }
+		response.send( (!error ? users : error ) );
 	})
 }
 
@@ -375,6 +388,45 @@ user.put.byId = function(request, response){
             } else
                 response.send({'information' : 'An error has occurred - bad credentials'});
         })
+}
+
+user.put.promote = function(request, response) {
+    var params = request.params;
+
+    userProvider.get.byId(params.id, function(error, user) {
+        if(!error && user && user.id) {
+            user.roleId = 2;
+            userProvider.update.role(user, function(error, data) {
+                user.roleid = user.roleId;
+                delete(user.roleId);
+                delete(user.password);
+                delete(user.salt);
+                response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
+            });
+        }
+        else
+            response.send({'information' : 'An error has occurred - user not found'});
+    })
+
+}
+
+user.put.demote = function(request, response) {
+    var params = request.params;
+
+    userProvider.get.byId(params.id, function(error, user) {
+        if(!error && user && user.id) {
+            user.roleId = 1;
+            userProvider.update.role(user, function(error, data) {
+                user.roleid = user.roleId;
+                delete(user.roleId);
+                delete(user.password);
+                delete(user.salt);
+                response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
+            });
+        }
+        else
+            response.send({'information' : 'An error has occurred - user not found'});
+    })
 
 }
 

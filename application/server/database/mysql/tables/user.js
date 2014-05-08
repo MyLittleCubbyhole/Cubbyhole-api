@@ -36,7 +36,7 @@ provider.create.user = function(user, callback) {
 	provider.get.byEmail(user.email, function(error, data) {
 		if(!data || data.length == 0) {
 			try {
-				var query = 'insert into `user` (`password`, `salt`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `ROLEID`) values (';
+				var query = 'insert into `user` (`password`, `salt`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
 				tools.generatePassword(user.password, function(data) {
 					query += '"' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 					Mysql.query(query, callback);
@@ -71,6 +71,10 @@ provider.update.informations = function(user, callback) {
 
 provider.update.activated = function(user, callback) {
 	Mysql.query('update `user` set `activated`=' + (user.activated ? 1 : 0) + ' where `id`=' + parseInt(user.id, 10) + ';', callback);
+}
+
+provider.update.role = function(user, callback) {
+	Mysql.query('update `user` set `roleid`=' + parseInt(user.roleId, 10) + ' where `id`=' + parseInt(user.id, 10) + ';', callback);
 }
 
 /********************************[  OTHERS   ]********************************/
