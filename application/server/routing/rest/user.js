@@ -276,6 +276,48 @@ user.post.authenticate = function(request, response) {
 
 }
 
+user.post.subscribe = function(request, response) {
+    var params = request.params
+    ,   body = request.body
+    ,   witness = true
+    ,   subscribe = {
+        userId: params.userId,
+        planId: params.planId,
+        dateStart: moment(body.dateStart, 'DD-MM-YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss'),
+        dateEnd: moment(body.dateEnd, 'DD-MM-YYYY HH:mm:ss').format('YYYY-MM-DD HH:mm:ss')
+    };
+
+    for(var i in subscribe)
+        witness = typeof subscribe[i] == 'undefined' ? false : witness;
+
+    if(!witness)
+        response.send({'information': 'An error has occurred - missing information', 'subscribe' : subscribe });
+    else
+        if(moment(subscribe.dateStart).isAfter() || moment(subscribe.dateStart).isSame())
+            if(moment(subscribe.dateStart).isBefore(moment(subscribe.dateEnd)))
+                userProvider.get.byId(subscribe.userId, function(error, user) {
+                    if(!error && user) {
+                        planProvider.get.byId(subscribe.planId, function(error, plan) {
+                            if(!error && plan) {
+                                subscribeProvider.create.subscribe(subscribe, function(error, data) {
+                                    if(!error && data) {
+                                        subscribe.id = data.insertId;
+                                        response.send({'information' : 'subscribe created', 'subscribe': subscribe});
+                                    } else
+                                        response.send({'information' : 'An error has occurred - ' + error});
+                                })
+                            } else
+                                response.send({'information' : 'An error has occurred - plan not found'});
+                        })
+                    } else
+                        response.send({'information' : 'An error has occurred - user not found'});
+                })
+            else
+                response.send({'information' : 'An error has occurred - dateEnd must be after dateStart'});
+        else
+            response.send({'information' : 'An error has occurred - dateStart must be after now'});
+}
+
 /********************************[  PUT   ]********************************/
 
 user.put.byId = function(request, response){

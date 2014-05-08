@@ -99,7 +99,6 @@ provider.create.folder = function(params, callback){
 							path: params.path,
 							name: params.name,
 							type: "folder",
-                            test: 0,
 							size: params.size ? parseInt(params.size, 10) : 0,
 							lastUpdate: new Date(),
                             undeletable: typeof params.undeletable != 'undefined' && params.undeletable === true,
@@ -358,9 +357,9 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 fullPath: newItem._id,
                 ownerId: newItem.ownerId,
                 path: newItem.path,
-                name: newItem.name
+                name: newItem.name,
+                creatorId: newItem.creatorId
             };
-
 
             if(item.type == 'folder')
                 provider.create.folder(params, function(error) {

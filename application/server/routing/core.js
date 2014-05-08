@@ -37,6 +37,7 @@ routing.init = function(app) {
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', user.post.create);
 	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);
+	app.post('/api/users/:userId/plans/:planId', filters.tokenInterceptor, user.post.subscribe);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, directory.put.rename);
     app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);
