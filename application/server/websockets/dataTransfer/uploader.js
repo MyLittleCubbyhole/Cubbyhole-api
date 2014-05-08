@@ -30,10 +30,10 @@ uploader.init = function(socket) {
 					var chunk = 0;
 					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'chunkSize': files[name].currentChunkSize  });
 				} else
-					socket.emit('upload_stopped', { id: files[name].clientSideId });
+					socket.emit('upload_stopped', { id: files[name].clientSideId, error: 'invalid token' });
 			});
 		else
-			socket.emit('upload_stopped', { id: files[name].clientSideId });
+			socket.emit('upload_stopped', { id: files[name].clientSideId, error: 'no token send' });
 	});
 
 	socket.on('upload', function(data) {
@@ -63,7 +63,7 @@ uploader.init = function(socket) {
 		function uploadCallback(error){
 			if(error) {
 				files[name].id = null;
-				socket.emit('upload_stopped', { id: files[name].clientSideId });
+				socket.emit('upload_stopped', { id: files[name].clientSideId, error: error });
 				delete files[name];
 			}
 			else
