@@ -13,7 +13,7 @@ uploader.init = function(socket) {
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
 		,	name = data.name;
 
-		if(data.token)
+		if(data.token && logicPath != '/Shared/') 
 			tokenProvider.isValidForAuthentication(data.token, function(error, userId) {
 				if(!error && userId) {
 					files[name] = {
@@ -26,7 +26,6 @@ uploader.init = function(socket) {
 						currentChunkSize: 0,
 						clientSideId: data.id
 					};
-
 					var chunk = 0;
 					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'chunkSize': files[name].currentChunkSize  });
 				} else

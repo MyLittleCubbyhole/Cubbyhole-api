@@ -309,7 +309,7 @@ directory.delete.byPath		= function(request, response){
 	,	body 		= request.body
 	,	parameters 	= {};
 
-	var fullPath = params[0] + params[1]
+	var fullPath = params[0] + '/' + params[1]
 	,	type = fullPath.slice(-1) == '/' ? 'folder' : 'file';
 
 	fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;

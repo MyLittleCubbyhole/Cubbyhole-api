@@ -21,7 +21,6 @@ mailer.sendActivationMail = function(receiverAddress, firstname, token) {
             };
 
             sender.sendMail(mailOptions);
-
         } else
             console.log(error);
     });

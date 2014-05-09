@@ -97,6 +97,9 @@ provider.get.size = function(ownerId, callback) {
  */
 provider.create.folder = function(params, callback){
 	var folderPath = params.path != '/' ? params.ownerId + params.path.slice(0, -1) : params.path;
+    if(params.ownerId + '/Shared' == folderPath)
+       callback.call(this, 'unable to create in Shared folder');
+    else
 	provider.checkExist(folderPath, function(error, exist) {
 		if(exist)
 			mongo.collection('directories', function(error, collection){
@@ -145,6 +148,7 @@ provider.create.file = function(params, callback){
             if(!data) {
 
                 var folderPath = params.path == '/' ? params.path : (params.ownerId + params.path).slice(0, -1);
+
 
                 provider.checkExist(folderPath, function(error, exist) {
                     if(!exist)
@@ -227,6 +231,7 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 					if(error)
 						console.error('problem occured during deleting file ' + error);
 				})
+
 			collection.remove({"_id":fullPath}, function(error,data) { 
                 if(error)
                     console.error(error);
@@ -373,9 +378,8 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 ownerId: newItem.ownerId,
                 path: newItem.path,
                 name: newItem.name,
-                creatorId: newItem.creatorId
+                createdBy: newItem.creatorId
             };
-
             if(item.type == 'folder')
                 provider.create.folder(params, function(error) {
                     if(error)

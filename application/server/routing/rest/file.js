@@ -195,7 +195,6 @@ file.get.zip = function(request, response) {
 	data.path.push('/');
 
 	data.fullPath = data.ownerId + '/' + params[1];
-
 	var callback = function(zipFile) {
 		header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
 		response.writeHead(200, header);
@@ -203,7 +202,14 @@ file.get.zip = function(request, response) {
 		response.end();
 	}
 
-	provider.zip(data, {callback: callback});
+	if(typeof data.ownerId != 'undefined' && typeof data.path != 'undefined')
+		provider.zip(data, {callback: callback});
+	else {
+		response.send('folder not found');
+		response.end();
+	}
+
+
 
 
 }
@@ -232,7 +238,12 @@ file.post.zip = function(request, response) {
 		}
 		response.end();
 	}
-	provider.zipItems(data, callback)
+	if(typeof data.ownerId != 'undefined' && typeof data.path != 'undefined')
+		provider.zipItems(data, callback);
+	else {
+		response.send('folder not found');
+		response.end();
+	}
 
 }
 
