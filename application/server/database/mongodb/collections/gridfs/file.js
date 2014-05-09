@@ -8,8 +8,11 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 
 
 provider.init = function() {
-	if(!tools)
+	if(!tools) {
 		tools = require(global.paths.server + '/database/tools/mongodb/core');
+		tools.init();
+
+	}
 	if(!directoryProvider)
 		directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory');
 }

@@ -3,7 +3,7 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   userProvider
 ,   sharingProvider
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
-,   tools = require(global.paths.server + '/database/tools/mongodb/core')
+,   tools
 ,   mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,   _ = require('lodash')
 ,   ObjectID = MongoProvider.objectId
@@ -18,6 +18,10 @@ provider.init = function() {
         userProvider = require(global.paths.server + '/database/mysql/tables/user');
     if(!sharingProvider)
         sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
+    if(!tools) {
+        tools = require(global.paths.server + '/database/tools/mongodb/core');
+        tools.init();
+    }
 }
 
 /********************************[  GET   ]********************************/

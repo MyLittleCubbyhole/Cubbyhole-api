@@ -1,7 +1,14 @@
 var mongoTools = {}
 ,	nodeZip = new require('node-zip')
-,	providerFile = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
-,	providerDirectory = require(global.paths.server + '/database/mongodb/collections/fs/directory');
+,	providerFile
+,	providerDirectory;
+
+mongoTools.init = function() {
+	if(!providerFile)
+		providerFile = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+	if(!providerDirectory)
+		providerDirectory = require(global.paths.server + '/database/mongodb/collections/fs/directory');
+}
 
 /**
  * [RECURSION] browse directory and return wanted file/folder
