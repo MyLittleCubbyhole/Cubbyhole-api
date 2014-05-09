@@ -17,6 +17,11 @@ directory.get.all = function(request, response){
 
 directory.get.byOwner = function(request, response){
 	var params = request.params;
+	if(!request.owner) {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
+
 	provider.get.byOwner(params[0], function(error, data){
 		response.send( (!error && data ? mongoTools.format(data) : error ) );
 		response.end();
@@ -34,6 +39,12 @@ directory.get.byPath = function(request, response){
 	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
 
 	var useSharing = parameters.path.split('/')[0] == 'Shared' && parameters.path.split('/')[1] !== undefined;
+
+
+	if(request.right != 'R' && request.right != 'W' ) {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 
 	if(parameters.path.split('/')[0] != 'Shared' || useSharing) {
 
@@ -67,6 +78,10 @@ directory.get.size = function(request, response) {
 	var params = request.params
 	,	parameters 	= {};;
 	parameters.ownerId = params[0];
+	if(!request.owner) {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 	provider.get.size(parameters.ownerId, function(error, data) {
 		response.send( (!error && data ? data : error ) );
 	})
@@ -75,12 +90,12 @@ directory.get.size = function(request, response) {
 
 /********************************[  POST  ]********************************/
 
-directory.post.init	= function(request, response){
-	var userId = request.params[0];
-	provider.create.directory(userId, function(error, data){
-		response.send({'information': (!error ? 'directory created' : 'An error has occurred - ' + error) });
-	})
-}
+// directory.post.init	= function(request, response){
+// 	var userId = request.params[0];
+// 	provider.create.directory(userId, function(error, data){
+// 		response.send({'information': (!error ? 'directory created' : 'An error has occurred - ' + error) });
+// 	})
+// }
 
 directory.post.create = function(request, response){
 	var params 		= request.params
@@ -92,6 +107,11 @@ directory.post.create = function(request, response){
 
 	parameters.name = body.name;
 	parameters.fullPath = parameters.ownerId + parameters.path + parameters.name;
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 
 	if(!parameters.name)
 		response.send({'information': 'An error has occurred - folder name must be defined', 'params' : parameters });
@@ -123,6 +143,12 @@ directory.post.copy = function(request, response){
 
 	parameters.targetPath = body.path;
 
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
+
 	var fullPath = parameters.ownerId + parameters.path
 	,	arrayPath = fullPath.split('/');
 
@@ -150,6 +176,11 @@ directory.post.copy = function(request, response){
 }
 
 directory.post.move = function(request, response) {
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 	request.params.move = true;
 	directory.post.copy(request, response);
 }
@@ -160,8 +191,14 @@ directory.post.share = function(request, response) {
 	,	parameters = {};
 	parameters.ownerId 	= params[0]
 	parameters.right = body.right;
-	parameters.targetEmail = body.shareTo;
+	parameters.targetEmail = body.target;
 	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
+
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 
 	provider.share(parameters, function(error) {
 		historicProvider.create.event({
@@ -173,6 +210,33 @@ directory.post.share = function(request, response) {
 			itemType: parameters.right
 		});
 		response.send({'information': (!error ? 'folder shared' : 'An error has occurred - ' + error), 'params' : parameters });
+		response.end();
+	});
+}
+
+directory.post.unshare = function(request, response) {
+	var params = request.params
+	,	body = request.body
+	,	parameters = {};
+	parameters.ownerId 	= params[0]
+	parameters.targetEmail = body.target;
+	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
+
+	if(!request.owner) {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
+
+	provider.unshare(parameters, function(error) {
+		historicProvider.create.event({
+			ownerId: request.userId,
+			targetOwner: parameters.fullPath.split('/')[0],
+			fullPath: parameters.fullPath,
+			action: 'unshare',
+			name: parameters.targetEmail,
+			itemType: 'N'
+		});
+		response.send({'information': (!error ? 'folder unshared' : 'An error has occurred - ' + error), 'params' : parameters });
 		response.end();
 	});
 }
@@ -191,8 +255,13 @@ directory.put.rename = function(request, response){
     parameters.newName 	= body.name;
     parameters.path = parameters.path.join('/');
 
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
+
     parameters.fullPath = parameters.userId + "/" + (parameters.path.length ? parameters.path + "/" : "") + parameters.currentName;
-    console.log(parameters);
     if(!parameters.newName)
         response.send({'information': 'An error has occurred - folder or file name must be defined', 'params' : parameters });
     else
@@ -215,6 +284,12 @@ directory.put.rename = function(request, response){
 
 directory.delete.byOwner 	= function(request, response){
 	var userId = request.params[0];
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
+
 	provider.delete.byOwner(userId, function(error, data){
 		historicProvider.create.event({
 			ownerId: request.userId,
@@ -240,6 +315,11 @@ directory.delete.byPath		= function(request, response){
 	fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
 	var path = params[1].split('/');
 
+
+	if(request.right != 'W') {
+		response.send({'information': 'An error has occurred - method not allowed'});
+		return;
+	}
 
 	if(!params[1])
 		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });

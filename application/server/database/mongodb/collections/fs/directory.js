@@ -536,7 +536,44 @@ provider.share = function(params, callback) {
     });
 }
 
-provider.unshare = function(params, callback) {}
+
+provider.unshareAll = function(fullPath, callback) {
+
+}
+
+provider.unshare = function(params, callback) {
+    userProvider.get.byEmail(params.targetEmail, function(error, user) {
+        if(!error && user) {
+            mongo.collection('directories', function(error, collection) {
+
+                var sharingOptions = {
+                    ownerId: params.ownerId,
+                    fullPath: params.fullPath,
+                    targetId: user.id
+                }
+
+                sharingProvider.delete.byItemAndTarget(sharingOptions, function(error, data) {
+
+
+                        provider.get.byFullPath(sharingOptions.targetId + '/Shared', function(error, directory) {
+                            if(!error && directory) {
+                                var index = directory.children.indexOf(sharingOptions.fullPath)
+                                if(index != -1)
+                                    directory.children.splice(index);
+                                collection.save(directory, { safe : true }, callback);
+                            }
+                            else
+                                callback.call(this, error);
+                        });
+
+                });
+
+            })
+        }
+        else
+            callback.call(this, error);
+    });
+}
 
 /**
  * share a file

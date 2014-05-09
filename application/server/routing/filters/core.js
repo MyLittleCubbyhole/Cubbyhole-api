@@ -25,9 +25,13 @@ filters.tokenInterceptor = function(request, response, next) {
 filters.rightInterceptor = function(request, response, next) {
     var ownerId = request.params[0]
     ,   userId = request.userId
-    ,   fullPath = ownerId + '/' + (request.params[1] ? request.params[1] : '') ;
+    ,   fullPath = ownerId + '/' + (request.params[1] ? (request.params[1][0] == '/' ? request.params[1].substring(1) : request.params[1] ) : '') ;
+    console.log(fullPath+' '+ownerId+ ' '+ userId)
+
     if(ownerId == userId) {
         request.right = 'W';
+        request.owner = true;
+        console.log('passage - authentified - right: ' + request.right)
         next();
     }
     else {
@@ -35,9 +39,12 @@ filters.rightInterceptor = function(request, response, next) {
         sharingProvider.checkRight(fullPath, function(error, data) {
             if(!error && data) {
                 request.right = data.right;
+                request.owner = false;
+                console.log('passage - sharing ok - right: ' + request.right)
                 next();
             }
             else {
+                console.log('passage - sharing not allowed - right: ' + request.right)
                 response.writeHead(401);
                 response.write('forbiden resource');
                 response.end();
