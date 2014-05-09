@@ -227,7 +227,11 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 					if(error)
 						console.error('problem occured during deleting file ' + error);
 				})
-			collection.remove({"_id":fullPath}, function(error,data) { if(error) console.error(error); stop(); });
+			collection.remove({"_id":fullPath}, function(error,data) { 
+                if(error)
+                    console.error(error);
+                provider.unshareAll(fullPath, stop);
+            });
 		}
 		else
 			stop('not found or undeletable');
@@ -542,7 +546,36 @@ provider.share = function(params, callback) {
 
 
 provider.unshareAll = function(fullPath, callback) {
-
+    provider.get.byFullPath(fullPath, function(error, directory) {
+        if(!error && directory && directory.id) {
+            mongo.collection('directories', function(error, collection) {
+                sharingProvider.get.byItemFullPath(fullPath, function(error, sharings) {
+                    if(!error && sharings)
+                        sharingProvider.delete.byItemFullPath(fullPath, function(error, data) {
+                            var started = 0;
+                            for(var i = 0;i < sharings.length; i++) {
+                                started++
+                                provider.get.byFullPath(sharings[i].targetId + '/Shared', function(error, directory) {
+                                    if(!error && directory) {
+                                        var index = directory.children.indexOf(fullPath)
+                                        if(index != -1)
+                                            directory.children.splice(index);
+                                        collection.save(directory, { safe : true });
+                                    }
+                                    
+                                    if(--started <= 0)
+                                        callback.call(this, error);                                    
+                                });
+                            }
+                        });
+                    else
+                        callback.call(this, error);
+                }
+            )})
+        }
+        else
+            callback.call(this, 'directory not found');
+    });
 }
 
 provider.unshare = function(params, callback) {
