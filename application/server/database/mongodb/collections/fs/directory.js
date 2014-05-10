@@ -108,7 +108,7 @@ provider.create.folder = function(params, callback){
 						collection.insert({
 							_id: params.fullPath,
 							ownerId: parseInt(params.ownerId, 10),
-                            creatorId: params.createdBy,
+                            creatorId: params.creatorId,
 							path: params.path,
 							name: params.name,
 							type: "folder",
@@ -382,7 +382,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 ownerId: newItem.ownerId,
                 path: newItem.path,
                 name: newItem.name,
-                createdBy: newItem.creatorId
+                creatorId: newItem.creatorId
             };
 
             if(item.type == 'folder')

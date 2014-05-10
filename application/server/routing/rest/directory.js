@@ -102,7 +102,7 @@ directory.post.create = function(request, response){
 	,	body 		= request.body
 	,	parameters 	= {};
 	parameters.ownerId 	= params[0]
-	parameters.createdBy = request.userId;
+	parameters.creatorId = request.userId;
 	parameters.path = params[1] ? params[1] + '/' : '/' ;
 
 	parameters.name = body.name;
