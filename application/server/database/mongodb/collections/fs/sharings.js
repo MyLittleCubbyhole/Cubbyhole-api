@@ -19,7 +19,13 @@ provider.init = function() {
 
 provider.get.byItemFullPath = function(fullPath, callback){
     mongo.collection('sharings', function(error, collection) {
-        collection.findOne({"itemId":fullPath}, callback);
+        collection.find({'itemId':fullPath}).toArray(callback);
+    })
+}
+
+provider.get.byItemAndTarget = function(parameters, callback){
+    mongo.collection('sharings', function(error, collection) {
+        collection.findOne({'itemId':parameters.fullPath, 'sharedWith':parameters.targetId}, callback);
     })
 }
 
@@ -92,9 +98,11 @@ provider.delete.byItemAndTarget = function(parameters, callback) {
 
 /********************************[ OTHER  ]********************************/
 
-provider.checkRight = function(fullPath, callback) {
-
-	provider.get.byItemFullPath(fullPath, function(error, data) {
+provider.checkRight = function(parameters, callback) {
+	console.log('passage');
+	var fullPath = parameters.fullPath;
+	provider.get.byItemAndTarget(parameters, function(error, data) {
+		console.log(data)
 		if(!error && data && data._id) {
 			callback && callback.call(this, error, data);
 		}
@@ -112,6 +120,41 @@ provider.checkRight = function(fullPath, callback) {
 	})
 
 
+}
+
+provider.duplicateWithNewItemPath = function(parameters, callback) {
+
+	var path = parameters.fullPath
+	,	newPath = parameters.newPath
+	,	length ;
+
+	provider.get.byItemFullPath(path, function(error, data) {
+		if(!error && data) {
+			length = data.length;
+
+			for(var i = 0; i<data.length; i++)
+				provider.create.sharing({
+					ownerId: data[i].ownerId,
+					fullPath: newPath,
+					right: data[i].right,
+					targetId: data[i].sharedWith
+				}, function(error, data) {
+            		mongo.collection('directories', function(error, collection) {
+            			console.log('share',data[0].sharedWith + '/Shared', newPath)
+						collection.update({'_id': data[0].sharedWith + '/Shared'}, {
+							$push: { children: newPath}
+						}, { safe : true }, 
+						function(error, data) {
+							--length <= 0 && callback && callback.call();
+						})
+					})
+				});		
+		
+		}
+		else
+			callback.call(this, 'error during duplicate');
+
+	})
 }
 
 

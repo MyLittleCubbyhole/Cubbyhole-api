@@ -34,7 +34,7 @@ filters.rightInterceptor = function(request, response, next) {
     }
     else {
         fullPath = fullPath.slice(-1) != '/' || !request.params[1] ? fullPath :fullPath.slice(0, -1);
-        sharingProvider.checkRight(fullPath, function(error, data) {
+        sharingProvider.checkRight({fullPath: fullPath, targetId: userId}, function(error, data) {
             if(!error && data) {
                 request.right = data.right;
                 request.owner = false;

@@ -195,15 +195,20 @@ file.get.zip = function(request, response) {
 	data.path.push('/');
 
 	data.fullPath = data.ownerId + '/' + params[1];
-	var callback = function(zipFile) {
-		header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
-		response.writeHead(200, header);
-		response.write(zipFile.data, "binary");
+	var callback = function(error, zipFile) {
+
+		if(!error) {
+			header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
+			response.writeHead(200, header);
+			response.write(zipFile.data, "binary");
+		}
+		else
+			response.send(error);
 		response.end();
 	}
 
-	if(typeof data.ownerId != 'undefined' && typeof data.path != 'undefined')
-		provider.zip(data, {callback: callback});
+	if(data.ownerId && data.path)
+		provider.zip(data, callback);
 	else {
 		response.send('folder not found');
 		response.end();
@@ -229,16 +234,18 @@ file.post.zip = function(request, response) {
 		path = body[i].slice(-1) != '/' ? body[i] : body[i].substring(0, body[i].length - 1);
 		data.items.push(path);
 	}
-
 	var callback = function(error, zipFile) {
 		if(!error) {
 			header["Content-Disposition"] 	= 'attachment; filename="' + zipFile.name + '"';
 			response.writeHead(200, header);
 			response.write(zipFile.data, "binary");
 		}
+		else
+			response.send(error);
+		response.end();
 		response.end();
 	}
-	if(typeof data.ownerId != 'undefined' && typeof data.path != 'undefined')
+	if(data.ownerId && data.path)
 		provider.zipItems(data, callback);
 	else {
 		response.send('folder not found');

@@ -218,6 +218,7 @@ provider.delete.byOwner = function(ownerId, callback) {
 }
 
 provider.delete.item = function(collection, fullPath, start, stop) {
+    var myPath = fullPath;
 	collection.findOne({"_id":fullPath}, function(error, data) {
 
 		if(!error && data && !data.undeletable) {
@@ -232,10 +233,13 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 						console.error('problem occured during deleting file ' + error);
 				})
 
-			collection.remove({"_id":fullPath}, function(error,data) { 
-                if(error)
-                    console.error(error);
-                provider.unshareAll(fullPath, stop);
+            provider.unshareAll(myPath, function() {
+                collection.remove({"_id":fullPath}, function(error,data) { 
+                    if(error)
+                        console.error(error);
+
+                    stop();
+                });
             });
 		}
 		else
@@ -380,20 +384,37 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 name: newItem.name,
                 createdBy: newItem.creatorId
             };
+
             if(item.type == 'folder')
                 provider.create.folder(params, function(error) {
-                    if(error)
+                    var newPath = params.fullPath;
+                    if(!error)
+                        sharingProvider.get.byItemFullPath(oldFullPath, function(error, sharings) {
+                            console.log(oldFullPath, error, sharings)
+                            
+                            var callMeBaby = function() {
+
+                                for(var i = 0; i < item.children.length; i++) {
+                                    start();
+                                    var path = newItem.path + newItem.name + "/";
+                                    collection.findOne({'_id': item.children[i]}, function(error, data) {
+                                        if(error)
+                                            console.error('item not found');
+                                        provider.copyItem(collection, data, null, path, move, start, stop);
+                                    });
+                                }
+                                stop();
+
+                            }
+
+                            if(!error && sharings.length > 0) 
+                                sharingProvider.duplicateWithNewItemPath({fullPath: oldFullPath, newPath: newPath}, callMeBaby);
+                            else
+                                callMeBaby();
+                        })
+                    else
                         console.error('error saving new item - ' + error);
-                    for(var i = 0; i < item.children.length; i++) {
-                        start();
-                        var path = newItem.path + newItem.name + "/";
-                        collection.findOne({'_id': item.children[i]}, function(error, data) {
-                            if(error)
-                                console.error('item not found');
-                            provider.copyItem(collection, data, null, path, move, start, stop);
-                        });
-                    }
-                    stop();
+
                 });
             else
                 fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
@@ -551,24 +572,27 @@ provider.share = function(params, callback) {
 
 provider.unshareAll = function(fullPath, callback) {
     provider.get.byFullPath(fullPath, function(error, directory) {
-        if(!error && directory && directory.id) {
+        if(!error && directory && directory._id) {
             mongo.collection('directories', function(error, collection) {
                 sharingProvider.get.byItemFullPath(fullPath, function(error, sharings) {
-                    if(!error && sharings)
+                    if(!error && sharings && sharings.length>0)
                         sharingProvider.delete.byItemFullPath(fullPath, function(error, data) {
                             var started = 0;
                             for(var i = 0;i < sharings.length; i++) {
                                 started++
-                                provider.get.byFullPath(sharings[i].targetId + '/Shared', function(error, directory) {
+                                console.log('unshare', sharings[i].sharedWith + '/Shared')
+                                provider.get.byFullPath(sharings[i].sharedWith + '/Shared', function(error, directory) {
                                     if(!error && directory) {
+                                        console.log(directory.children)
                                         var index = directory.children.indexOf(fullPath)
                                         if(index != -1)
-                                            directory.children.splice(index);
-                                        collection.save(directory, { safe : true });
+                                            directory.children.splice(index,1);
+                                        collection.save(directory, { safe : true }, function() {                                            
+                                            if(--started <= 0)
+                                                callback.call(this, error);   
+                                        });
                                     }
-                                    
-                                    if(--started <= 0)
-                                        callback.call(this, error);                                    
+                                                                     
                                 });
                             }
                         });
@@ -592,9 +616,7 @@ provider.unshare = function(params, callback) {
                     fullPath: params.fullPath,
                     targetId: user.id
                 }
-
                 sharingProvider.delete.byItemAndTarget(sharingOptions, function(error, data) {
-
 
                         provider.get.byFullPath(sharingOptions.targetId + '/Shared', function(error, directory) {
                             if(!error && directory) {

@@ -162,7 +162,7 @@ mongoTools.zipFolder = function(folder, options) {
 	var success = options.success || function() {
 		var zipFile = {name: folder.name, data: null};
 		zipFile.data = archiver.generate({base64:false, compression:'DEFLATE'});
-		options && options.callback && options.callback.call(self, zipFile);
+		options && options.callback && options.callback.call(self, null,  zipFile);
 	}
 
 	mongoTools.dirtyBrowse(folder.data, archiver, start, stop);

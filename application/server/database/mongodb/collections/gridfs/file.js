@@ -75,7 +75,7 @@ provider.update.fileName = function(data, callback) {
 	var id = data.itemId;
     mongo.collection('fs.files', function(error, collection) {
         collection.findOne({ "_id" : id}, function(error, file) {
-            if(!error) {
+            if(!error && file && file.metadata) {
                 file.metadata.name = data.name;
                 collection.save(file, { safe : true }, callback);
             }
@@ -143,10 +143,10 @@ provider.zip = function(data, callback) {
 
 	var name = data.path.length >  1 ? data.path[data.path.length - 2] : data.path[data.path.length - 1];
 	directoryProvider.get.byOwner(data.ownerId, function(error, items){
-		if(!error && items) {
+		if(!error && items && items.length>0) {
 			var rows = tools.format(items);
 			rows = tools.browse(data.path, rows);
-			tools.zipFolder({name: name, data:rows}, callback);
+			tools.zipFolder({name: name, data:rows}, {callback: callback});
 		}
 		else
 			callback.call(this,'path not found');
@@ -161,7 +161,7 @@ provider.zipItems = function(data, callback) {
 
 	for(var i = 0; i<data.items.length; i++)
 		directoryProvider.get.byFullPath(data.ownerId + data.items[i], function(error, item) {
-			if(!error && item) {
+			if(!error && item && item._id) {
 				items.push(item);
 				--length <= 0 && tools.zipItems.call(self, items, callback);
 			}

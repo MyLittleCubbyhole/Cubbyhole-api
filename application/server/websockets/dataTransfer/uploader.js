@@ -32,7 +32,7 @@ uploader.init = function(socket) {
 					socket.emit('upload_stopped', { id: files[name].clientSideId, error: 'invalid token' });
 			});
 		else
-			socket.emit('upload_stopped', { id: files[name].clientSideId, error: 'no token send' });
+			socket.emit('upload_stopped', { id: data.id, error: 'no token send' });
 	});
 
 	socket.on('upload', function(data) {
@@ -73,8 +73,7 @@ uploader.init = function(socket) {
 						files[name].id = null;
 
 						historicProvider.create.event({
-							//todo recup par token l'id
-							ownerId: files[name].owner,
+							ownerId: files[name].creatorId,
 							targetOwner: parameters.fullPath.split('/')[0],
 							fullPath: parameters.fullPath,
 							action: 'create',
