@@ -20,6 +20,7 @@ routing.init = function(app) {
 	app.get(/^\/api\/download\/shared\/(.+)+/, file.get.sharedPreview);
 	app.get(/^\/api\/shared\/(.+)+/, file.get.shared);
 	app.get('/api/users', filters.tokenInterceptor, filters.adminInterceptor, user.get.all);
+	app.get(/^\/api\/users\/shared\/(\/?.+)+\/$/, filters.tokenInterceptor, filters.adminInterceptor, user.get.emailsbyIds);
 	app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/users/:email/exists', filters.tokenInterceptor, user.get.byEmail);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);

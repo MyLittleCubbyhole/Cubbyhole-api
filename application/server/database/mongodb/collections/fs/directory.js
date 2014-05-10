@@ -546,22 +546,28 @@ provider.checkExist = function(fullPath, callback) {
 provider.share = function(params, callback) {
     userProvider.get.byEmail(params.targetEmail, function(error, user) {
         if(!error && user && user.id) {
-            mongo.collection('directories', function(error, collection) {
+            provider.unshare({
+                targetEmail: user.email,
+                ownerId: params.ownerId,
+                fullPath: params.fullPath
+            }, function() {
+                mongo.collection('directories', function(error, collection) {
 
-                var sharingOptions = {
-                    ownerId: params.ownerId,
-                    fullPath: params.fullPath,
-                    targetId: user.id,
-                    right: params.right
-                }
-                sharingProvider.create.sharing(sharingOptions, function(error, data) {
+                    var sharingOptions = {
+                        ownerId: params.ownerId,
+                        fullPath: params.fullPath,
+                        targetId: user.id,
+                        right: params.right
+                    }
+                    sharingProvider.create.sharing(sharingOptions, function(error, data) {
 
-                    collection.update({'_id': user.id + '/Shared'}, {$push: { children: params.fullPath}}, { safe : true }, function(error) {
-                        callback.call(this, error);
-                    })
+                        collection.update({'_id': user.id + '/Shared'}, {$push: { children: params.fullPath}}, { safe : true }, function(error) {
+                            callback.call(this, error);
+                        })
 
-                });
+                    });
 
+                })
             })
         }
         else

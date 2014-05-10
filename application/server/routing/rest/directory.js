@@ -190,15 +190,23 @@ directory.post.share = function(request, response) {
 	,	body = request.body
 	,	parameters = {};
 	parameters.ownerId 	= params[0]
-	parameters.right = body.right;
+	parameters.right = body.right || '';
 	parameters.targetEmail = body.target;
 	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
 
+	parameters.right = parameters.right.toUpperCase();
 
 	if(request.right != 'W') {
 		response.send({'information': 'An error has occurred - method not allowed'});
 		return;
 	}
+
+	if(parameters.right != 'W' && parameters.right != 'R'){
+		response.send({'information': 'An error has occurred - Bad right'});
+		return;
+	}
+
+
 
 	provider.share(parameters, function(error) {
 		historicProvider.create.event({
