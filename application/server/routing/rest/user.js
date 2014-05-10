@@ -165,6 +165,20 @@ user.get.logout = function(request, response) {
 
 };
 
+user.get.emailsbyIds = function(request, response) {
+    var params  = request.params
+    ,   fullPath  = params[0];
+    console.log(fullPath)
+    userProvider.get.emailsbyIds(fullPath, function(error, data) {
+        if(!error) {
+            response.send(data);
+        }
+        else
+            response.send({'information': error });
+        response.end();
+    });
+}
+
 /********************************[  POST  ]********************************/
 
 user.post.create = function(request, response){

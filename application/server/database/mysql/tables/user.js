@@ -1,5 +1,6 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
 ,	tools = require(global.paths.server + '/database/tools/mysql/core')
+,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 tools.init();
 
@@ -18,15 +19,36 @@ provider.get.byEmail = function(email, callback) {
 }
 
 provider.get.namesByIds = function(ids, callback) {
-	var query = 'select concat(firstname, " ", lastname) as creator from `user` where `id` IN (';
-	for(var i = 0; i < ids.length; i++) {
-		query += parseInt(ids[i], 10);
-		if(i != ids.length - 1)
-			query += ', ';
-	}
-	query += ');'
+	var query = 'select concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');'
 
 	Mysql.query(query, callback);
+}
+
+provider.get.emailsbyIds = function(ids, callback) {
+	Mysql.query('select id, email from `user` where `id`in('+ ids.join(',') +');', callback);
+}
+
+provider.get.userBySharing = function(fullPath, callback) {
+	sharingProvider.get.byItemFullPath(fullPath, function(error, items) {
+		if(!error && items && items.length>0) {
+			var userIds = []
+			,	users = {};
+			for(var i = 0; i<items.length; i++) {
+				users[items.targetId] = {right: items.right});
+				userIds.push(items.targetId);
+			}
+
+			provider.get.emailsbyIds(userIds, function(error, dbUsers) {
+
+				for(var i = 0; i<dbUsers.length; i++)
+					users[dbUsers[i].id].email = dbUsers[i].email;
+
+				callback.call(this, '', users);
+			})
+		}
+		else
+			callback.call(this, 'an error has occured'+error);
+	})
 }
 
 /********************************[  CREATE   ]********************************/
