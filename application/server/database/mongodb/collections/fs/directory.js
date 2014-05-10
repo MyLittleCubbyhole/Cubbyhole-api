@@ -234,7 +234,7 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 				})
 
             provider.unshareAll(myPath, function() {
-                collection.remove({"_id":fullPath}, function(error,data) { 
+                collection.remove({"_id":fullPath}, function(error,data) {
                     if(error)
                         console.error(error);
 
@@ -391,7 +391,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                     if(!error)
                         sharingProvider.get.byItemFullPath(oldFullPath, function(error, sharings) {
                             console.log(oldFullPath, error, sharings)
-                            
+
                             var callMeBaby = function() {
 
                                 for(var i = 0; i < item.children.length; i++) {
@@ -407,7 +407,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
 
                             }
 
-                            if(!error && sharings.length > 0) 
+                            if(!error && sharings.length > 0)
                                 sharingProvider.duplicateWithNewItemPath({fullPath: oldFullPath, newPath: newPath}, callMeBaby);
                             else
                                 callMeBaby();
@@ -545,7 +545,7 @@ provider.checkExist = function(fullPath, callback) {
  */
 provider.share = function(params, callback) {
     userProvider.get.byEmail(params.targetEmail, function(error, user) {
-        if(!error && user) {
+        if(!error && user && user.id) {
             mongo.collection('directories', function(error, collection) {
 
                 var sharingOptions = {
@@ -565,7 +565,7 @@ provider.share = function(params, callback) {
             })
         }
         else
-            callback.call(this, error);
+            callback.call(this, 'An error occured - user not found - ' + error);
     });
 }
 
@@ -587,12 +587,12 @@ provider.unshareAll = function(fullPath, callback) {
                                         var index = directory.children.indexOf(fullPath)
                                         if(index != -1)
                                             directory.children.splice(index,1);
-                                        collection.save(directory, { safe : true }, function() {                                            
+                                        collection.save(directory, { safe : true }, function() {
                                             if(--started <= 0)
-                                                callback.call(this, error);   
+                                                callback.call(this, error);
                                         });
                                     }
-                                                                     
+
                                 });
                             }
                         });

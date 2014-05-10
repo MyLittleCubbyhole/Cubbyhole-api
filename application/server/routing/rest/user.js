@@ -36,8 +36,23 @@ user.get.all = function(request, response) {
 user.get.byId = function(request, response) {
 	var params 	= request.params;
 	userProvider.get.byId(params.id, function(error, data){
+        if(!error && data && data.id) {
+            delete(data.password);
+            delete(data.salt);
+        }
+
 		response.send( (!error ? data : error ) );
 	})
+}
+
+user.get.byEmail = function(request, response) {
+    var params  = request.params;
+    userProvider.get.byEmail(params.email, function(error, data){
+        if(!error && data && data.id)
+            response.send({"information" : "user exists"})
+        else
+            response.send({"information": "user does not exists"})
+    })
 }
 
 user.get.currentPlan = function(request, response) {
