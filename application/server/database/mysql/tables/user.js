@@ -1,6 +1,6 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
 ,	tools = require(global.paths.server + '/database/tools/mysql/core')
-,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
+,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 tools.init();
 
@@ -34,7 +34,7 @@ provider.get.userBySharing = function(fullPath, callback) {
 			var userIds = []
 			,	users = {};
 			for(var i = 0; i<items.length; i++) {
-				users[items.targetId] = {right: items.right});
+				users[items.targetId] = {right: items.right};
 				userIds.push(items.targetId);
 			}
 

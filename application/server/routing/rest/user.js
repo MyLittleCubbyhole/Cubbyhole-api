@@ -180,7 +180,7 @@ user.get.logout = function(request, response) {
 
 };
 
-user.get.emailsbyIds = function(request, response) {
+user.get.userBySharing = function(request, response) {
     var params  = request.params
     ,   fullPath  = params[0];
     console.log(fullPath)
