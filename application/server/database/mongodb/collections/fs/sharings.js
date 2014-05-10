@@ -35,13 +35,13 @@ provider.get.byItemAndTarget = function(parameters, callback){
 /**
  * create a sharing row
  *
- *ex: provider.create.sharing({ 
+ *ex: provider.create.sharing({
  *	ownerId: xx
- *	fullPath: "xx/xx/", 
- *	targetId: xx, 
- *	right: xx { R | W | N } 
+ *	fullPath: "xx/xx/",
+ *	targetId: xx,
+ *	right: xx { R | W | N }
  *}, function() {...})
- * 
+ *
  * @param  {object}   params   contains all needed property to execute the sharing
  * @param  {Function} callback
  */
@@ -54,7 +54,7 @@ provider.create.sharing = function(params, callback) {
 			itemId: params.fullPath,
 			right: params.right,
 			sharedWith: params.targetId
-		}, 
+		},
 		{ safe : true }, callback);
 
 	})
@@ -66,11 +66,11 @@ provider.create.sharing = function(params, callback) {
 /**
  * update a sharing row
  *
- *ex: provider.create.sharing({ 
- *	fullPath: "xx/xx/", 
- *	right: xx { R | W | N } 
+ *ex: provider.create.sharing({
+ *	fullPath: "xx/xx/",
+ *	right: xx { R | W | N }
  *}, function() {...})
- * 
+ *
  * @param  {object}   params
  * @param  {Function} callback
  */
@@ -99,10 +99,9 @@ provider.delete.byItemAndTarget = function(parameters, callback) {
 /********************************[ OTHER  ]********************************/
 
 provider.checkRight = function(parameters, callback) {
-	console.log('passage');
 	var fullPath = parameters.fullPath;
 	provider.get.byItemAndTarget(parameters, function(error, data) {
-		console.log(data)
+
 		if(!error && data && data._id) {
 			callback && callback.call(this, error, data);
 		}
@@ -113,7 +112,7 @@ provider.checkRight = function(parameters, callback) {
 				callback && callback.call(this, 'not found');
 			else {
 				fullPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
-				return provider.checkRight(fullPath, callback);
+				return provider.checkRight({'fullPath': fullPath, 'targetId': parameters.targetId}, callback);
 			}
 		}
 
@@ -143,13 +142,13 @@ provider.duplicateWithNewItemPath = function(parameters, callback) {
             			console.log('share',data[0].sharedWith + '/Shared', newPath)
 						collection.update({'_id': data[0].sharedWith + '/Shared'}, {
 							$push: { children: newPath}
-						}, { safe : true }, 
+						}, { safe : true },
 						function(error, data) {
 							--length <= 0 && callback && callback.call();
 						})
 					})
-				});		
-		
+				});
+
 		}
 		else
 			callback.call(this, 'error during duplicate');
