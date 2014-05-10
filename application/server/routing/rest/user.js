@@ -184,7 +184,7 @@ user.get.userBySharing = function(request, response) {
     var params  = request.params
     ,   fullPath  = params[0];
     console.log(fullPath)
-    userProvider.get.emailsbyIds(fullPath, function(error, data) {
+    userProvider.get.userBySharing(fullPath, function(error, data) {
         if(!error) {
             response.send(data);
         }

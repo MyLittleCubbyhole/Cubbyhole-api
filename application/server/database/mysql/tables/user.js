@@ -25,6 +25,7 @@ provider.get.namesByIds = function(ids, callback) {
 }
 
 provider.get.emailsbyIds = function(ids, callback) {
+	console.log(ids)
 	Mysql.query('select id, email from `user` where `id`in('+ ids.join(',') +');', callback);
 }
 
@@ -34,8 +35,8 @@ provider.get.userBySharing = function(fullPath, callback) {
 			var userIds = []
 			,	users = {};
 			for(var i = 0; i<items.length; i++) {
-				users[items.targetId] = {right: items.right};
-				userIds.push(items.targetId);
+				users[items[i].sharedWith] = {right: items[i].right};
+				userIds.push(items[i].sharedWith);
 			}
 
 			provider.get.emailsbyIds(userIds, function(error, dbUsers) {
