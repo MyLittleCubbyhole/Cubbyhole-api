@@ -183,7 +183,7 @@ user.get.logout = function(request, response) {
 user.get.userBySharing = function(request, response) {
     var params  = request.params
     ,   fullPath  = params[0];
-    console.log(fullPath)
+
     userProvider.get.userBySharing(fullPath, function(error, data) {
         if(!error) {
             response.send(data);
