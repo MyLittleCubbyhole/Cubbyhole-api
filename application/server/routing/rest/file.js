@@ -32,22 +32,22 @@ file.get.download = function(request, response){
 			var total 	= download.length;
 
 			if(request.quotaAvailable === undefined || request.quotaAvailable - total >= 0) {
-				header["Content-Type"] = download.type;
-				header["Accept-Ranges"] = "bytes";
+				header['Content-Type'] = download.type;
+				header['Accept-Ranges'] = "bytes";
 
 				if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined') {
 					var start 	= parseInt(partialstart, 10)
 					,	end 	= partialend ? parseInt(partialend, 10) : total-1;
-					header["Content-Range"] 	= "bytes " + start + "-" + end + "/" + (total);
-					header["Content-Length"]	= (end-start)+1;
+					header['Content-Range'] 	= "bytes " + start + "-" + end + "/" + (total);
+					header['Content-Length']	= (end-start)+1;
 					header['Transfer-Encoding'] = 'chunked';
-					header["Connection"] 		= "close";
+					header['Connection'] 		= "close";
 					response.writeHead(206, header);
 					response.write(download.data.slice(start, end), "binary");
 				}
 				else {
-					header["Content-Disposition"] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
-					header["Content-Length"]		= total;
+					header['Content-Disposition'] 	= ( typeof query.run !== 'undefined' ? 'inline' : 'attachment' ) + '; filename="' + download.metadata.name + '"';
+					header['Content-Length']		= total;
 					response.writeHead(200, header );
 					response.write(download.data, "binary");
 
