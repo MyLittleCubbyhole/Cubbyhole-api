@@ -1,6 +1,7 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,	planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
