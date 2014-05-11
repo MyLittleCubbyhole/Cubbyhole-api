@@ -2,7 +2,8 @@ var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,   dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
-,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,   directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,   mailer = require(global.paths.server + '/mailer/mails/core')
@@ -185,6 +186,20 @@ user.get.userBySharing = function(request, response) {
     ,   fullPath  = params[0];
 
     userProvider.get.userBySharing(fullPath, function(error, data) {
+        if(!error) {
+            response.send(data);
+        }
+        else
+            response.send({'information': error });
+        response.end();
+    });
+}
+
+user.get.fullHistoric = function(request, response) {    
+    var params  = request.params;
+
+    historicProvider.get.byUser(parseInt(params.id), function(error, data) {
+        
         if(!error) {
             response.send(data);
         }

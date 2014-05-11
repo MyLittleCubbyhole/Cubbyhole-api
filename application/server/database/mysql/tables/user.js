@@ -1,6 +1,7 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
 ,	tools = require(global.paths.server + '/database/tools/mysql/core')
 ,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
+,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 tools.init();
 
@@ -19,7 +20,7 @@ provider.get.byEmail = function(email, callback) {
 }
 
 provider.get.namesByIds = function(ids, callback) {
-	var query = 'select concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');'
+	var query = 'select concat(firstname, " ", lastname), id as creator from `user` where `id` IN ('+ ids.join(',') +');'
 
 	Mysql.query(query, callback);
 }
@@ -41,6 +42,39 @@ provider.get.userBySharing = function(fullPath, callback) {
 			var usersTab = [];
 
 			provider.get.emailsbyIds(userIds, function(error, dbUsers) {
+				if(!error && dbUsers) {
+					if(dbUsers.id) {
+						users[dbUsers.id].email = dbUsers.email;
+						usersTab.push(users[dbUsers.id]);
+					}
+					else if(dbUsers.length > 0)
+						for(var i = 0; i<dbUsers.length; i++) {
+							users[dbUsers[i].id].email = dbUsers[i].email;
+							usersTab.push(users[dbUsers[i].id]);
+						}
+				}
+
+				callback.call(this, '', usersTab);
+			})
+		}
+		else
+			callback.call(this, 'an error has occured'+error);
+	})
+}
+
+provider.get.historic = function(userId) {
+	historicProvider.get.byUser(userId, function(error, hitoric) {
+		if(!error && hitoric && hitoric.length>0) {
+			var userIds = []
+			,	users = {};
+			for(var i = 0; i<hitoric.length; i++) {
+				userIds.push(hitoric[i].ownerId);
+				userIds.push(hitoric[i].targetOwner);
+			}
+
+			var usersTab = [];
+
+			provider.get.namesByIds(userIds, function(error, dbUsers) {
 				if(!error && dbUsers) {
 					if(dbUsers.id) {
 						users[dbUsers.id].email = dbUsers.email;
