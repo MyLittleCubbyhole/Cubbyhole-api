@@ -25,7 +25,7 @@ routing.init = function(app) {
 	app.get('/api/users/:email/exists', filters.tokenInterceptor, user.get.byEmail);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
 	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
-	app.get('/api/users/:id/historic', filters.tokenInterceptor, user.get.fullHistoric);
+	app.get('/api/users/:id/historic', filters.tokenInterceptor, user.get.historic);
 	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);

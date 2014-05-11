@@ -195,10 +195,20 @@ user.get.userBySharing = function(request, response) {
     });
 }
 
-user.get.fullHistoric = function(request, response) {    
-    var params  = request.params;
+user.get.historic = function(request, response) {    
+    var params  = request.params
+    ,   query = request.query
+    ,   parameters = {};
+    parameters.userId = parseInt(params.id);
+    parameters.offset = params.offset;
+    parameters.limit = params.limit;
 
-    userProvider.get.historic(parseInt(params.id), function(error, data) {
+    if(parameters.userId != request.userId) {
+        response.send({'information': 'An error has occurred - method not allowed'}, 401);
+        return;
+    }
+
+    userProvider.get.historic(parameters, function(error, data) {
         
         if(!error) {
             response.send(data);

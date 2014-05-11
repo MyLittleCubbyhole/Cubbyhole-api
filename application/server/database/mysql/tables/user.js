@@ -63,9 +63,9 @@ provider.get.userBySharing = function(fullPath, callback) {
 	})
 }
 
-provider.get.historic = function(userId, callback) {
-	userId = parseInt(userId);
-	historicProvider.get.byUser(userId, function(error, historic) {
+provider.get.historic = function(parameters, callback) {
+
+	historicProvider.get.byUser(parameters, function(error, historic) {
 		if(!error && historic && historic.length>0) {
 			var userIds = []
 			,	users = {};
@@ -84,8 +84,8 @@ provider.get.historic = function(userId, callback) {
 								users[dbUsers[i].id] = dbUsers[i].creator;
 
 					for(var i = 0; i<historic.length; i++) {
-						historic[i].owner = historic[i].ownerId == userId ? 'You' : users[historic[i].ownerId];
-						historic[i].targetOwner = historic[i].targetOwner == userId ? 'You' : users[historic[i].targetOwner]; 
+						historic[i].owner = historic[i].ownerId == parameters.userId ? 'You' : users[historic[i].ownerId];
+						historic[i].targetOwner = historic[i].targetOwner == parameters.userId ? 'You' : users[historic[i].targetOwner]; 
 						delete historic[i].ownerId
 						delete historic[i]._id;
 					}
