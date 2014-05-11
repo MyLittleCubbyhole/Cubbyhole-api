@@ -70,7 +70,7 @@ mysqlTools.setCreatorsNames = function(files, callback) {
                     else
                         for(var i = 0; i < files.length; i++)
                             for(var j = 0; j < creators.length; j++)
-                                if(files[i].creatorId == creatorIds[j])
+                                if(files[i].creatorId == creators[j].id)
                                     files[i].creator = creators[j].creator;
                 }
 
