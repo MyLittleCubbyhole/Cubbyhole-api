@@ -189,7 +189,8 @@ directory.post.share = function(request, response) {
 	var params = request.params
 	,	body = request.body
 	,	parameters = {};
-	parameters.ownerId 	= params[0]
+	parameters.ownerId 	= params[0];
+	parameters.userId 	= request.userId;
 	parameters.right = body.right || '';
 	parameters.targetEmail = body.target;
 	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
@@ -209,14 +210,6 @@ directory.post.share = function(request, response) {
 
 
 	provider.share(parameters, function(error) {
-		historicProvider.create.event({
-			ownerId: request.userId,
-			targetOwner: parameters.fullPath.split('/')[0],
-			fullPath: parameters.fullPath,
-			action: 'share',
-			name: parameters.targetEmail,
-			itemType: parameters.right
-		});
 		response.send({'information': (!error ? 'folder shared' : 'An error has occurred - ' + error), 'params' : parameters });
 		response.end();
 	});
@@ -227,6 +220,7 @@ directory.post.unshare = function(request, response) {
 	,	body = request.body
 	,	parameters = {};
 	parameters.ownerId 	= params[0]
+	parameters.userId 	= request.userId;
 	parameters.targetEmail = body.target;
 	parameters.fullPath = parameters.ownerId + (params[1].slice(-1)  == '/' ? params[1].slice(0,-1) : params[1]) ;
 
@@ -236,14 +230,6 @@ directory.post.unshare = function(request, response) {
 	}
 
 	provider.unshare(parameters, function(error) {
-		historicProvider.create.event({
-			ownerId: request.userId,
-			targetOwner: parameters.fullPath.split('/')[0],
-			fullPath: parameters.fullPath,
-			action: 'unshare',
-			name: parameters.targetEmail,
-			itemType: 'N'
-		});
 		response.send({'information': (!error ? 'folder unshared' : 'An error has occurred - ' + error), 'params' : parameters });
 		response.end();
 	});

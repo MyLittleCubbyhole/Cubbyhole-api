@@ -75,6 +75,14 @@ file.get.share 	= function(request, response) {
 	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
 
 	directoryProvider.shareFile(parameters.fullPath, function(error, data) {
+		historicProvider.create.event({
+			ownerId: request.userId,
+			targetOwner: parameters.ownerId,
+			fullPath: parameters.fullPath,
+			action: 'share',
+			name: 'public',
+			itemType: ''
+		});
 		response.send({'information': (!error ? 'file shared' : 'An error has occurred - ' + error), 'token' : (data ? data.id : null) });
 	})
 }
@@ -87,6 +95,14 @@ file.get.unshare 	= function(request, response) {
 	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
 
 	directoryProvider.unshareFile(parameters.fullPath, function(error, data) {
+		historicProvider.create.event({
+			ownerId: request.userId,
+			targetOwner: parameters.ownerId,
+			fullPath: parameters.fullPath,
+			action: 'unshare',
+			name: 'public',
+			itemType: ''
+		});
 		response.send({'information': (!error ? 'file unshared' : 'An error has occurred - ' + error)});
 	})
 }

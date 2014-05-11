@@ -198,7 +198,7 @@ user.get.userBySharing = function(request, response) {
 user.get.fullHistoric = function(request, response) {    
     var params  = request.params;
 
-    historicProvider.get.byUser(parseInt(params.id), function(error, data) {
+    userProvider.get.historic(parseInt(params.id), function(error, data) {
         
         if(!error) {
             response.send(data);

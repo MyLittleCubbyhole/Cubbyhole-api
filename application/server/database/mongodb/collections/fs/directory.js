@@ -2,6 +2,7 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   fileProvider
 ,   userProvider
 ,   sharingProvider
+,   historicProvider
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,   tools
 ,   mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
@@ -18,6 +19,8 @@ provider.init = function() {
         userProvider = require(global.paths.server + '/database/mysql/tables/user');
     if(!sharingProvider)
         sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
+    if(!historicProvider)
+        historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic');
     if(!tools) {
         tools = require(global.paths.server + '/database/tools/mongodb/core');
         tools.init();
@@ -561,6 +564,14 @@ provider.share = function(params, callback) {
                     }
                     sharingProvider.create.sharing(sharingOptions, function(error, data) {
 
+                        historicProvider.create.event({
+                            ownerId: params.userId,
+                            targetOwner: sharingOptions.targetId,
+                            fullPath: params.fullPath,
+                            action: 'share',
+                            name: params.targetEmail,
+                            itemType: params.right
+                        });
                         collection.update({'_id': user.id + '/Shared'}, {$push: { children: params.fullPath}}, { safe : true }, function(error) {
                             callback.call(this, error);
                         })
@@ -586,10 +597,8 @@ provider.unshareAll = function(fullPath, callback) {
                             var started = 0;
                             for(var i = 0;i < sharings.length; i++) {
                                 started++
-                                console.log('unshare', sharings[i].sharedWith + '/Shared')
                                 provider.get.byFullPath(sharings[i].sharedWith + '/Shared', function(error, directory) {
                                     if(!error && directory) {
-                                        console.log(directory.children)
                                         var index = directory.children.indexOf(fullPath)
                                         if(index != -1)
                                             directory.children.splice(index,1);
@@ -625,6 +634,14 @@ provider.unshare = function(params, callback) {
                 sharingProvider.delete.byItemAndTarget(sharingOptions, function(error, data) {
 
                         provider.get.byFullPath(sharingOptions.targetId + '/Shared', function(error, directory) {
+                            historicProvider.create.event({
+                                ownerId: params.userId,
+                                targetOwner: sharingOptions.targetId,
+                                fullPath: params.fullPath,
+                                action: 'unshare',
+                                name: params.targetEmail,
+                                itemType: 'N'
+                            });
                             if(!error && directory) {
                                 var index = directory.children.indexOf(sharingOptions.fullPath)
                                 if(index != -1)

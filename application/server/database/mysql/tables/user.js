@@ -63,32 +63,35 @@ provider.get.userBySharing = function(fullPath, callback) {
 	})
 }
 
-provider.get.historic = function(userId) {
-	historicProvider.get.byUser(userId, function(error, hitoric) {
-		if(!error && hitoric && hitoric.length>0) {
+provider.get.historic = function(userId, callback) {
+	userId = parseInt(userId);
+	historicProvider.get.byUser(userId, function(error, historic) {
+		if(!error && historic && historic.length>0) {
 			var userIds = []
 			,	users = {};
-			for(var i = 0; i<hitoric.length; i++) {
-				userIds.push(hitoric[i].ownerId);
-				userIds.push(hitoric[i].targetOwner);
+			for(var i = 0; i<historic.length; i++) {
+				userIds.push(historic[i].ownerId);
+				userIds.push(historic[i].targetOwner);
 			}
-
-			var usersTab = [];
 
 			provider.get.namesByIds(userIds, function(error, dbUsers) {
 				if(!error && dbUsers) {
-					if(dbUsers.id) {
-						users[dbUsers.id].email = dbUsers.email;
-						usersTab.push(users[dbUsers.id]);
+					if(dbUsers.id)
+						users[dbUsers.id] = dbUsers.creator;
+					else
+						if(dbUsers.length > 0)
+							for(var i = 0; i<dbUsers.length; i++) 
+								users[dbUsers[i].id] = dbUsers[i].creator;
+
+					for(var i = 0; i<historic.length; i++) {
+						historic[i].owner = historic[i].ownerId == userId ? 'You' : users[historic[i].ownerId];
+						historic[i].targetOwner = historic[i].targetOwner == userId ? 'You' : users[historic[i].targetOwner]; 
+						delete historic[i].ownerId
+						delete historic[i]._id;
 					}
-					else if(dbUsers.length > 0)
-						for(var i = 0; i<dbUsers.length; i++) {
-							users[dbUsers[i].id].email = dbUsers[i].email;
-							usersTab.push(users[dbUsers[i].id]);
-						}
 				}
 
-				callback.call(this, '', usersTab);
+				callback.call(this, '', historic);
 			})
 		}
 		else

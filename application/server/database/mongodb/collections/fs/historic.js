@@ -36,8 +36,8 @@ provider.create.event = function(params, callback) {
 		mongo.collection('historic', function(error, collection) {
 
 			collection.insert({
-				ownerId: params.ownerId,
-				targetOwner: params.targetOwner,
+				ownerId: parseInt(params.ownerId),
+				targetOwner: parseInt(params.targetOwner),
 				fullPath: params.fullPath,
 				action: params.action,
 				name: params.name,
