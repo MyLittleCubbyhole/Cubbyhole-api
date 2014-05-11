@@ -19,7 +19,7 @@ provider.get.byEmail = function(email, callback) {
 }
 
 provider.get.namesByIds = function(ids, callback) {
-	var query = 'select concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');'
+	var query = 'select id, concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');'
 
 	Mysql.query(query, callback);
 }
