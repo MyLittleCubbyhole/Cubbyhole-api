@@ -159,13 +159,13 @@ directory.post.copy = function(request, response){
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
 		provider.copy(fullPath, null, parameters.targetPath, parameters.move,  function(error) {
-
+			if(!error)
 			historicProvider.create.event({
 				ownerId: request.userId,
 				targetOwner: fullPath.split('/')[0],
-				fullPath: fullPath,
-				action: 'copy',
-				name: name,
+				fullPath: parameters.targetPath,
+				action: 'move',
+				name: fullPath.split('/').pop(),
 				itemType: type
 			});
 
@@ -324,7 +324,7 @@ directory.delete.byPath		= function(request, response){
 				targetOwner: fullPath.split('/')[0],
 				fullPath: fullPath,
 				action: 'delete',
-				name: path[path.length-1],
+				name: fullPath.split('/').pop(),
 				itemType: type
 			});
 			response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
