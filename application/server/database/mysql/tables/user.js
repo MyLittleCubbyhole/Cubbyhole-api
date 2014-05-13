@@ -80,12 +80,12 @@ provider.get.historic = function(parameters, callback) {
 						users[dbUsers.id] = dbUsers.creator;
 					else
 						if(dbUsers.length > 0)
-							for(var i = 0; i<dbUsers.length; i++) 
+							for(var i = 0; i<dbUsers.length; i++)
 								users[dbUsers[i].id] = dbUsers[i].creator;
 
 					for(var i = 0; i<historic.length; i++) {
 						historic[i].owner = historic[i].ownerId == parameters.userId ? 'You' : users[historic[i].ownerId];
-						historic[i].targetOwner = historic[i].targetOwner == parameters.userId ? 'You' : users[historic[i].targetOwner]; 
+						historic[i].targetOwner = historic[i].targetOwner == parameters.userId ? 'You' : users[historic[i].targetOwner];
 						delete historic[i].ownerId
 						delete historic[i]._id;
 					}
@@ -106,9 +106,9 @@ provider.create.user = function(user, callback) {
 	provider.get.byEmail(user.email, function(error, data) {
 		if(!data || data.length == 0) {
 			try {
-				var query = 'insert into `user` (`password`, `salt`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
+				var query = 'insert into `user` (`password`, `salt`, `photo`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
 				tools.generatePassword(user.password, function(data) {
-					query += '"' + data.password + '","' + data.salt + '","' + user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
+					query += '"' + data.password + '","' + data.salt + '","' + user.photo + '","' +user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 					Mysql.query(query, callback);
 				})
 			}

@@ -195,7 +195,7 @@ user.get.userBySharing = function(request, response) {
     });
 }
 
-user.get.historic = function(request, response) {    
+user.get.historic = function(request, response) {
     var params  = request.params
     ,   query = request.query
     ,   parameters = {};
@@ -209,7 +209,7 @@ user.get.historic = function(request, response) {
     }
 
     userProvider.get.historic(parameters, function(error, data) {
-        
+
         if(!error) {
             response.send(data);
         }
@@ -239,68 +239,85 @@ user.post.create = function(request, response){
 	for(var i in user)
 		witness = typeof user[i] == 'undefined' ? false : witness;
 
+    user.photoData = body.photo;
+
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
-	else
-		userProvider.create.user(user, function(error, data){
-			if(data) {
-				user.id = data.insertId;
+	else {
 
-                var sharedFolder = {
-                    name: 'Shared',
-                    ownerId: user.id,
-                    path: '/',
-                    fullPath: user.id + '/' + 'Shared',
-                    undeletable: true
-                };
+        var callback = function(photo) {
+            user.photo = photo;
+            userProvider.create.user(user, function(error, data){
+                if(data) {
+                    user.id = data.insertId;
 
-                directoryProvider.create.folder(sharedFolder, function(error) {
-                    if(!error) {
+                    var sharedFolder = {
+                        name: 'Shared',
+                        ownerId: user.id,
+                        path: '/',
+                        fullPath: user.id + '/' + 'Shared',
+                        undeletable: true
+                    };
 
+                    directoryProvider.create.folder(sharedFolder, function(error) {
                         if(!error) {
 
-                            var subscribe = {
-                                userId: user.id,
-                                planId: 1,
-                                dateStart: moment().format('YYYY-MM-DD HH:mm:ss'),
-                                dateEnd: moment().add('years', 1000).format('YYYY-MM-DD HH:mm:ss')
-                            };
+                            if(!error) {
 
-                            subscribeProvider.create.subscribe(subscribe, function(error, data) {
-                                if(!error)
-                                    mysqlTools.generateRandomBytes(32, function(tokenId) {
-                                        tokenId = encodeURIComponent(tokenId);
-                                        var token = {
-                                            id: tokenId,
-                                            expirationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-                                            type: 'ACTIVATION',
-                                            origin: request.header("User-Agent"),
-                                            userId: user.id
-                                        };
-                                        tokenProvider.create.token(token, function(error, dataToken) {
-                                            if(!error) {
-                                                response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
-                                                mailer.sendActivationMail(user.email, user.firstname, tokenId);
-                                            } else
-                                                response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                var subscribe = {
+                                    userId: user.id,
+                                    planId: 1,
+                                    dateStart: moment().format('YYYY-MM-DD HH:mm:ss'),
+                                    dateEnd: moment().add('years', 1000).format('YYYY-MM-DD HH:mm:ss')
+                                };
+
+                                subscribeProvider.create.subscribe(subscribe, function(error, data) {
+                                    if(!error)
+                                        mysqlTools.generateRandomBytes(32, function(tokenId) {
+                                            tokenId = encodeURIComponent(tokenId);
+                                            var token = {
+                                                id: tokenId,
+                                                expirationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+                                                type: 'ACTIVATION',
+                                                origin: request.header("User-Agent"),
+                                                userId: user.id
+                                            };
+                                            tokenProvider.create.token(token, function(error, dataToken) {
+                                                if(!error) {
+                                                    response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+                                                    mailer.sendActivationMail(user.email, user.firstname, tokenId);
+                                                } else
+                                                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                            });
                                         });
-                                    });
-                                else
-                                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
-                            });
-                        }
+                                    else
+                                        response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                });
+                            }
 
-                    } else
-                        response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                        } else
+                            response.send({'information': 'An error has occurred - ' + error, 'user' : user });
 
-                })
-			}
-			else {
-				console.log(error);
-				response.send({'information': 'An error has occurred - ' + error, 'user' : user });
-			}
+                    })
+                }
+                else {
+                    console.log(error);
+                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                }
+            })
+        }
 
-		})
+        if(user.photoData) {
+            var name = new directoryProvider.get.objectId();
+            directoryProvider.create.file({fullPath: '1/userPhotos/' + name, path: '/userPhotos/', ownerId: 1, creatorId: 1, name: name, data: user.photoData}, function(error, data) {
+                if(error)
+                    console.log(error);
+                else
+                    callback(error ? null : '1/userPhotos/' + name);
+            })
+        } else
+            callback(null);
+    }
 
 }
 

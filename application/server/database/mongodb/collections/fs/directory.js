@@ -29,6 +29,8 @@ provider.init = function() {
 
 /********************************[  GET   ]********************************/
 
+provider.get.objectId = ObjectID;
+
 provider.get.directory = function(callback){
 	mongo.collection('directories', function(error, collection) {
 		collection.find().toArray(callback);
