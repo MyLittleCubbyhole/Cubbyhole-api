@@ -236,6 +236,8 @@ user.post.create = function(request, response){
 		roleId: 1
 	};
 
+    console.log(body)
+
 	for(var i in user)
 		witness = typeof user[i] == 'undefined' ? false : witness;
 

@@ -13,6 +13,8 @@ uploader.init = function(socket) {
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
 		,	name = data.name;
 
+		if(data.token && data.action == 'addResource')
+
 		if(data.token && logicPath != '/Shared/') 
 			tokenProvider.isValidForAuthentication(data.token, function(error, userId) {
 				if(!error && userId) {
