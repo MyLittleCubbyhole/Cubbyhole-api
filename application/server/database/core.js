@@ -23,8 +23,18 @@ database.init = function() {
 		db.mongo = new database(config['mongodb_auth'].database, server, config['mongodb_auth']['database_options']);
 
 		db.mongo.open(function(error, db) {
-			if(!error)
+			if(!error) {
 				console.log('mongodb connected')
+				db.collection('directories', function(error, collection){
+					collection.findOne({'_id': '1/admin' }, function(error, data) {
+						if(!data)
+							collection.insert({_id: '1/userPhotos', ownerId: 1, creatorId: 1, path: '/', name: 'userPhotos', type: 'folder', size: 0, lastUpdate: new Date(), undeletable: true, children: []}, { safe : true }, function() {
+									collection.insert({_id: '1/admin', ownerId: 1, creatorId: 1, path: '/', name: 'admin', type: 'folder', size: 0, lastUpdate: new Date(), undeletable: true, children: []}, { safe : true }, function() {
+									})
+							})
+					})
+				})
+			}
 			else
 				console.error('unable to connect - mongodb');
 		})

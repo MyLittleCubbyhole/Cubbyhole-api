@@ -40,12 +40,12 @@ routing.init = function(app) {
 	app.post(/^\/api\/move\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.move);
 	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
 	app.post('/api/auth', user.post.authenticate);
-	app.post('/api/users', user.post.create);
+	app.post('/api/users', multipartDecoder, user.post.create);
 	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);
 	app.post('/api/users/:userId/plans/:planId', filters.tokenInterceptor, user.post.subscribe);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, filters.rightInterceptor, directory.put.rename);
-    app.put('/api/users/:id', filters.tokenInterceptor, user.put.byId);
+    app.put('/api/users/:id', multipartDecoder, filters.tokenInterceptor, user.put.byId);
     app.put('/api/plans/:id', filters.tokenInterceptor, filters.adminInterceptor, plan.put.byId);
 	app.put('/api/users/:id/promote', filters.tokenInterceptor, filters.adminInterceptor, user.put.promote);
 	app.put('/api/users/:id/demote', filters.tokenInterceptor, filters.adminInterceptor, user.put.demote);

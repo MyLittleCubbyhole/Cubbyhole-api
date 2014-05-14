@@ -27,27 +27,33 @@ filters.rightInterceptor = function(request, response, next) {
     ,   userId = request.userId
     ,   fullPath = ownerId + '/' + (request.params[1] ? (request.params[1][0] == '/' ? request.params[1].substring(1) : request.params[1] ) : '') ;
 
-    if(ownerId == userId) {
-        request.right = 'W';
-        request.owner = true;
+    if(ownerId == 1) {
+        request.right = 'R';
+        request.owner = false;
         next();
     }
     else {
-        fullPath = fullPath.slice(-1) != '/' || !request.params[1] ? fullPath :fullPath.slice(0, -1);
-        sharingProvider.checkRight({fullPath: fullPath, targetId: userId}, function(error, data) {
-            if(!error && data) {
-                request.right = data.right;
-                request.owner = false;
-                next();
-            }
-            else {
-                response.writeHead(401);
-                response.write('forbiden resource');
-                response.end();
-            }
-        })
+        if(ownerId == userId) {
+            request.right = 'W';
+            request.owner = true;
+            next();
+        }
+        else {
+            fullPath = fullPath.slice(-1) != '/' || !request.params[1] ? fullPath :fullPath.slice(0, -1);
+            sharingProvider.checkRight({fullPath: fullPath, targetId: userId}, function(error, data) {
+                if(!error && data) {
+                    request.right = data.right;
+                    request.owner = false;
+                    next();
+                }
+                else {
+                    response.writeHead(401);
+                    response.write('forbiden resource');
+                    response.end();
+                }
+            })
+        }
     }
-
 }
 
 filters.adminInterceptor = function(request, response, next) {
