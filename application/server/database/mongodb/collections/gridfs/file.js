@@ -118,9 +118,9 @@ provider.upload = function(params, callback){
 }
 
 provider.uploadFromPath = function(data, callback) {
-	var gridFS = new GridStorage(mongo, data.id, 'w', { content_type : data.type, metadata : { name : data.name, owner : parseInt(data.owner, 10) } } );
+	var gridFS = new GridStorage(mongo, data.id, data.name, 'w', { content_type : data.data.type, metadata : { name : data.name, owner : parseInt(data.ownerId, 10) } } );
 
-	gridFS.writeFile(data.path, callback);
+	gridFS.writeFile(data.data.path, callback);
 }
 
 provider.download = function(data, callback){

@@ -175,10 +175,7 @@ provider.create.file = function(params, callback){
                         contentType: params.type
                     };
 
-                    fileProvider.upload(params, function(error){
-                        if(error)
-                            throw 'error during upload - ' + error;
-
+                    var next = function() {
                         fileProvider.get.MD5(params.id, function(error, fileMd5) {
                             if(error)
                                 throw 'error retrieving file created - ' + error;
@@ -204,7 +201,22 @@ provider.create.file = function(params, callback){
                                     callback.call(this, error);
                             });
                         });
-                    })
+                    }
+
+                    if(params.data && params.data.path) {
+                        fileProvider.uploadFromPath(params, function(error, data) {
+                            if(error)
+                                throw 'Error during upload of user photo - ' + error;
+                            next();
+                        });
+                    }
+                    else {
+                        fileProvider.upload(params, function(error){
+                            if(error)
+                                throw 'error during upload - ' + error;
+                            next();
+                        });
+                    }
                 });
             }
             else

@@ -7,6 +7,7 @@ var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,   mailer = require(global.paths.server + '/mailer/mails/core')
+,   fs = require('fs')
 ,   moment = require('moment')
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
 mysqlTools.init();
@@ -224,6 +225,7 @@ user.get.historic = function(request, response) {
 user.post.create = function(request, response){
 	var params = request.params
 	,	body = request.body
+    ,   files = request.files
 	,	witness = true
 	,	user = {
 		password: body.password,
@@ -239,7 +241,8 @@ user.post.create = function(request, response){
 	for(var i in user)
 		witness = typeof user[i] == 'undefined' ? false : witness;
 
-    user.photoData = body.photo;
+    if(files && files.photo)
+        user.photoData = files.photo
 
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
@@ -247,6 +250,7 @@ user.post.create = function(request, response){
 
         var callback = function(photo) {
             user.photo = photo;
+            delete(user.photoData);
             userProvider.create.user(user, function(error, data){
                 if(data) {
                     user.id = data.insertId;
@@ -308,12 +312,12 @@ user.post.create = function(request, response){
         }
 
         if(user.photoData) {
-            var name = new directoryProvider.get.objectId();
+            var name = new directoryProvider.get.objectId() + user.photoData.name.slice(user.photoData.name.lastIndexOf('.'));
             directoryProvider.create.file({fullPath: '1/userPhotos/' + name, path: '/userPhotos/', ownerId: 1, creatorId: 1, name: name, data: user.photoData}, function(error, data) {
                 if(error)
                     console.log(error);
                 else
-                    callback(error ? null : '1/userPhotos/' + name);
+                    callback(error ? null : name);
             })
         } else
             callback(null);
