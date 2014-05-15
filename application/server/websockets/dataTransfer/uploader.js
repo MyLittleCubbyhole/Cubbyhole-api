@@ -114,7 +114,8 @@ uploader.init = function(socket) {
 						delete files[id];
 					}
 					else {
-						var chunk = files[id]['downloaded'] / 524288;
+						// var chunk = files[id]['downloaded'] / 524288;
+						var chunk = files[id]['downloaded'] / 1572864;
 						var percent = (files[id]['downloaded'] / files[id]['size']) * 100;
 						socket.emit('upload_next', {
 							'chunk' : chunk,
