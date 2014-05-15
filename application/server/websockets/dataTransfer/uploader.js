@@ -3,7 +3,9 @@ var uploader = {}
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
-,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
+,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
+,	MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
+,   ObjectID = MongoProvider.objectId;
 
 uploader.init = function(socket) {
 
@@ -11,15 +13,16 @@ uploader.init = function(socket) {
 
 		var path = data.path
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
-		,	name = data.name;
+		,	name = data.name
+		,	id = data.id;
 
-		if(data.token && data.action == 'addResource')
-
-		if(data.token && logicPath != '/Shared/') 
+		if(data.token && logicPath != '/Shared/')
 			tokenProvider.isValidForAuthentication(data.token, function(error, userId) {
 				if(!error && userId) {
-					files[name] = {
+
+					files[id] = {
 						owner: data.owner,
+						name: name,
 						creatorId: userId,
 						size : data.size,
 						type: data.type,
@@ -28,32 +31,41 @@ uploader.init = function(socket) {
 						currentChunkSize: 0,
 						clientSideId: data.id
 					};
+
+					if(data.uploadPhoto) {
+						files[id].owner = 1;
+						files[id].name = new ObjectID() + name.slice(name.lastIndexOf('.'));
+						files[id].logicPath = '/userPhotos/'
+					}
+
 					var chunk = 0;
-					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[name].clientSideId, 'chunkSize': files[name].currentChunkSize  });
+					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
 				} else
-					socket.emit('upload_stopped', { id: files[name].clientSideId, error: 'invalid token' });
+					socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'invalid token' });
 			});
 		else
 			socket.emit('upload_stopped', { id: data.id, error: 'no token send' });
 	});
 
 	socket.on('upload', function(data) {
-		var name = data.name;
-		files[name].currentChunkSize = data.data.length
-		files[name]['downloaded'] += files[name].currentChunkSize;
+		var	id = data.id
+		,	name = data.name;
+
+		files[id].currentChunkSize = data.data.length
+		files[id]['downloaded'] += files[id].currentChunkSize;
 		var parameters = {
-			name: name,
-			type: files[name].type,
+			name: files[id].name,
+			type: files[id].type,
 			data: data.data,
-			size: files[name].size,
-			path: files[name].logicPath,
-			fullPath: files[name].owner + files[name].logicPath + name,
-			ownerId: files[name].owner,
-			creatorId: files[name].creatorId
+			size: files[id].size,
+			path: files[id].logicPath,
+			fullPath: files[id].owner + files[id].logicPath + files[id].name,
+			ownerId: files[id].owner,
+			creatorId: files[id].creatorId
 		};
 
-		if(files[name].id) {
-			parameters.id = files[name].id;
+		if(files[id].id) {
+			parameters.id = files[id].id;
 			parameters.mode = 'w+';
 			fileProvider.upload(parameters, uploadCallback);
 		}
@@ -63,19 +75,19 @@ uploader.init = function(socket) {
 
 		function uploadCallback(error){
 			if(error) {
-				files[name].id = null;
-				socket.emit('upload_stopped', { id: files[name].clientSideId, error: error });
-				delete files[name];
+				files[id].id = null;
+				socket.emit('upload_stopped', { id: files[id].clientSideId, error: error });
+				delete files[id];
 			}
 			else
-				if(name && files[name]) {
-					files[name].id = parameters.id;
-					files[name]._id = parameters.fullPath;
-					if(files[name]['downloaded'] >= files[name]['size']){
-						files[name].id = null;
+				if(id && files[id]) {
+					files[id].id = parameters.id;
+					files[id]._id = parameters.fullPath;
+					if(files[id]['downloaded'] >= files[id]['size']){
+						files[id].id = null;
 
 						historicProvider.create.event({
-							ownerId: files[name].creatorId,
+							ownerId: files[id].creatorId,
 							targetOwner: parameters.fullPath.split('/')[0],
 							fullPath: parameters.fullPath,
 							action: 'create',
@@ -84,24 +96,24 @@ uploader.init = function(socket) {
 						});
 
 						socket.emit('upload_done', {
-							'downloaded': files[name]['downloaded'],
-							'size': files[name]['size'],
-							'chunkSize': files[name].currentChunkSize,
-							'id': files[name].clientSideId,
-							'_id': files[name]._id
+							'downloaded': files[id]['downloaded'],
+							'size': files[id]['size'],
+							'chunkSize': files[id].currentChunkSize,
+							'id': files[id].clientSideId,
+							'_id': files[id]._id
 						});
-						delete files[name];
+						delete files[id];
 					}
 					else {
-						var chunk = files[name]['downloaded'] / 524288;
-						var percent = (files[name]['downloaded'] / files[name]['size']) * 100;
+						var chunk = files[id]['downloaded'] / 524288;
+						var percent = (files[id]['downloaded'] / files[id]['size']) * 100;
 						socket.emit('upload_next', {
 							'chunk' : chunk,
 							'percent' :  percent,
-							'downloaded': files[name]['downloaded'],
-							'size': files[name]['size'],
-							'chunkSize': files[name].currentChunkSize,
-							'id': files[name].clientSideId
+							'downloaded': files[id]['downloaded'],
+							'size': files[id]['size'],
+							'chunkSize': files[id].currentChunkSize,
+							'id': files[id].clientSideId
 						});
 					}
 				}
