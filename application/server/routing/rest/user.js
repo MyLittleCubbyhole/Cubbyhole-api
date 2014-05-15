@@ -50,10 +50,13 @@ user.get.byId = function(request, response) {
 user.get.byEmail = function(request, response) {
     var params  = request.params;
     userProvider.get.byEmail(params.email, function(error, data){
-        if(!error && data && data.id)
-            response.send({"information" : "user exists"})
+        if(!error && data && data.id) {
+            delete (data.password);
+            delete (data.salt);
+            response.send(data);
+        }
         else
-            response.send({"information": "user does not exists"})
+            response.send({"information": "user does not exists"});
     })
 }
 
