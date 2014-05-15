@@ -437,7 +437,6 @@ user.post.subscribe = function(request, response) {
 user.post.paypalNotify = function(request, response) {
 
     var body = request.body;
-    console.log(body)
 
     httpTools.processPaypalIpn(request, response, function(error) {
         if(!error) {
