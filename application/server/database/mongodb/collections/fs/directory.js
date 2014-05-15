@@ -189,12 +189,13 @@ provider.create.file = function(params, callback){
                                 if(folderPath != "/")
 
                                     collection.update({'_id': folderPath}, { $push: { children: params.fullPath} }, { safe : true }, function(error) {
-                                        if(error)
-                                            throw 'error updating children - ' + error;
-
-                                            provider.update.size(folderPath, directoryFile.size, function(error) {
-                                                callback.call(this, error);
-                                            });
+                                        if(error) {
+                                            console.error(error);
+                                            throw 'error updating children - ';
+                                        }
+                                        provider.update.size(folderPath, directoryFile.size, function(error) {
+                                            callback.call(this, error);
+                                        });
 
                                     });
                                 else
@@ -205,15 +206,19 @@ provider.create.file = function(params, callback){
 
                     if(params.data && params.data.path) {
                         fileProvider.uploadFromPath(params, function(error, data) {
-                            if(error)
-                                throw 'Error during upload of user photo - ' + error;
+                            if(error) {
+                                console.error(error);
+                                throw 'Error during upload of user photo - '; {
+                            }
                             next();
                         });
                     }
                     else {
                         fileProvider.upload(params, function(error){
-                            if(error)
-                                throw 'error during upload - ' + error;
+                            if(error) {
+                                console.error(error);
+                                throw 'error during upload - ';
+                            }
                             next();
                         });
                     }
