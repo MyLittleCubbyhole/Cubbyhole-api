@@ -16,7 +16,7 @@ httpTools.processPaypalIpn = function(request, response, callback) {
         host: (body.test_ipn) ? 'www.sandbox.paypal.com' : 'www.paypal.com',
         method: 'POST',
         path: '/cgi-bin/webscr',
-        headers: {'Content-Length': body.length}
+        headers: {'Content-Length': body.length, 'Content-Type': 'application/x-www-form-urlencoded'}
     };
 
     var req = https.request(req_options, function paypal_request(res) {
