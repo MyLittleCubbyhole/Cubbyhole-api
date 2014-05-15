@@ -446,14 +446,12 @@ user.post.paypalNotify = function(request, response) {
                 amount: parseFloat(body.mc_gross),
                 duration: parseInt(body.quantity, 10),
                 currency: body.mc_currency,
-                date: moment(body.payment_date, 'HH:mm:ss MMMM DD, YYYY z').format('YYYY-MM-DD HH:mm:ss'),
+                date: moment(new Date(body.payment_date)).format('YYYY-MM-DD HH:mm:ss'),
                 email: body.payer_email,
                 businessEmail: body.business,
                 userId: parseInt(body.custom, 10),
                 planId: parseInt(body.item_number, 10)
             }
-
-            console.log(result);
 
             if(result.status == 'Completed')
                 if(result.businessEmail == config['paypal_business_email'])
@@ -473,6 +471,8 @@ user.post.paypalNotify = function(request, response) {
                                                     subscribeProvider.create.subscribe(result, function(error, subscribe) {
                                                         if(error)
                                                             console.log('An error has occurred - registration of the subscription has failed')
+                                                        else
+                                                            console.log('Payment processed - ' + result.amount + ' from ' + result.email);
                                                     })
                                                 })
                                             else
