@@ -379,6 +379,19 @@ provider.update.name = function(params, callback){
     provider.copy(params.fullPath, {name: params.newName}, "/" + (params.path.length ? params.path + "/" : ""), true, callback);
 };
 
+provider.update.userPhoto = function(user, callback) {
+    userProvider.get.byId(user.id, function(error, userData) {
+        if(!error && userData)
+            provider.delete.byPath('1/userPhotos/' + userData.photo, function(error, data) {
+                userProvider.update.photo(user, function(error, data) {
+                    callback.call(this, error, data);
+                })
+            })
+        else
+            callback.call(this, error, null);
+    })
+}
+
 
 /********************************[ UPDATE ]********************************/
 

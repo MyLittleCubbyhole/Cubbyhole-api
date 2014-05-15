@@ -147,6 +147,10 @@ provider.update.role = function(user, callback) {
 	Mysql.query('update `user` set `roleid`=' + parseInt(user.roleId, 10) + ' where `id`=' + parseInt(user.id, 10) + ';', callback);
 }
 
+provider.update.photo = function(user, callback) {
+	 Mysql.query('update `user` set `photo`="' + user.photo + '" where `id`=' + parseInt(user.id, 10) + ';', callback);
+}
+
 /********************************[  OTHERS   ]********************************/
 
 provider.connect = function(email, password, callback) {

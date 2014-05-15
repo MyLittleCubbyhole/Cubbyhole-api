@@ -35,7 +35,8 @@ uploader.init = function(socket) {
 					if(data.uploadPhoto) {
 						files[id].owner = 1;
 						files[id].name = new ObjectID() + name.slice(name.lastIndexOf('.'));
-						files[id].logicPath = '/userPhotos/'
+						files[id].logicPath = '/userPhotos/';
+						files[id].uploadPhoto = true;
 					}
 
 					var chunk = 0;
@@ -86,21 +87,29 @@ uploader.init = function(socket) {
 					if(files[id]['downloaded'] >= files[id]['size']){
 						files[id].id = null;
 
-						historicProvider.create.event({
-							ownerId: files[id].creatorId,
-							targetOwner: parameters.fullPath.split('/')[0],
-							fullPath: parameters.fullPath,
-							action: 'create',
-							name: name,
-							itemType: 'file'
-						});
+						if(files[id].uploadPhoto)
+							directoryProvider.update.userPhoto({id: files[id].creatorId, photo: files[id].name}, function(error, data) {
+								if(error)
+									console.log(error);
+							});
+						else
+							historicProvider.create.event({
+								ownerId: files[id].creatorId,
+								targetOwner: parameters.fullPath.split('/')[0],
+								fullPath: parameters.fullPath,
+								action: 'create',
+								name: name,
+								itemType: 'file'
+							});
+
 
 						socket.emit('upload_done', {
 							'downloaded': files[id]['downloaded'],
 							'size': files[id]['size'],
 							'chunkSize': files[id].currentChunkSize,
 							'id': files[id].clientSideId,
-							'_id': files[id]._id
+							'_id': files[id]._id,
+							'name': files[id].uploadPhoto ? files[id].name : ''
 						});
 						delete files[id];
 					}
