@@ -289,29 +289,44 @@ user.post.create = function(request, response){
                                             };
                                             tokenProvider.create.token(token, function(error, dataToken) {
                                                 if(!error) {
-                                                    if(query.redirect)
-                                                        response.redirect(query.redirect);
+                                                    if(query.redirectSuccess)
+                                                        response.redirect(query.redirectSuccess);
                                                     else
                                                         response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
 
                                                     mailer.sendActivationMail(user.email, user.firstname, tokenId);
-                                                } else
-                                                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                                } else {
+                                                    if(query.redirectError)
+                                                        response.redirect(query.redirectError);
+                                                    else
+                                                        response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                                }
                                             });
                                         });
-                                    else
-                                        response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                    else {
+                                        if(query.redirectError)
+                                            response.redirect(query.redirectError);
+                                        else
+                                            response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                                    }
                                 });
                             }
 
-                        } else
-                            response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                        } else {
+                            if(query.redirectError)
+                                response.redirect(query.redirectError);
+                            else
+                                response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                        }
 
                     })
                 }
                 else {
                     console.log(error);
-                    response.send({'information': 'An error has occurred - ' + error, 'user' : user });
+                    if(query.redirectError)
+                        response.redirect(query.redirectError);
+                    else
+                        response.send({'information': 'An error has occurred - ' + error, 'user' : user });
                 }
             })
         }
