@@ -1,4 +1,5 @@
 var MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
+,	fs = require('fs')
 ,	GridStorage = MongoProvider.gridStore
 ,	ObjectID = MongoProvider.objectId
 ,	mongo = MongoProvider.db
@@ -120,7 +121,12 @@ provider.upload = function(params, callback){
 provider.uploadFromPath = function(data, callback) {
 	var gridFS = new GridStorage(mongo, data.id, data.name, 'w', { content_type : data.data.type, metadata : { name : data.name, owner : parseInt(data.ownerId, 10) } } );
 
-	gridFS.writeFile(data.data.path, callback);
+	gridFS.writeFile(data.data.path, function(error, file) {
+		if(!error)
+			fs.unlink(data.data.path, callback);
+		else
+			callback.call(this, error, files);
+	});
 }
 
 provider.download = function(data, callback){

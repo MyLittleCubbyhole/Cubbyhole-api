@@ -224,6 +224,7 @@ user.get.historic = function(request, response) {
 
 user.post.create = function(request, response){
 	var params = request.params
+    ,   query = request.query
 	,	body = request.body
     ,   files = request.files
 	,	witness = true
@@ -238,13 +239,11 @@ user.post.create = function(request, response){
 		roleId: 1
 	};
 
-    console.log(body)
-
 	for(var i in user)
 		witness = typeof user[i] == 'undefined' ? false : witness;
 
-    if(files && files.photo)
-        user.photoData = files.photo
+    if(files && files.photo && files.photo.originalFilename)
+        user.photoData = files.photo;
 
 	if(!witness)
 		response.send({'information': 'An error has occurred - missing information', 'user' : user });
@@ -290,7 +289,11 @@ user.post.create = function(request, response){
                                             };
                                             tokenProvider.create.token(token, function(error, dataToken) {
                                                 if(!error) {
-                                                    response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+                                                    if(query.redirect)
+                                                        response.redirect(query.redirect);
+                                                    else
+                                                        response.send({'information': (!error ? 'user created' : 'An error has occurred - ' + error), 'user': user });
+
                                                     mailer.sendActivationMail(user.email, user.firstname, tokenId);
                                                 } else
                                                     response.send({'information': 'An error has occurred - ' + error, 'user' : user });
