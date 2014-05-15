@@ -57,6 +57,7 @@ filters.rightInterceptor = function(request, response, next) {
 }
 
 filters.adminInterceptor = function(request, response, next) {
+
     userProvider.get.byId(request.userId, function(error, user) {
         if(!error && user && user.roleid == 2)
             next();

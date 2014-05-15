@@ -28,6 +28,7 @@ routing.init = function(app) {
 	app.get('/api/users/:id/historic', filters.tokenInterceptor, user.get.historic);
 	app.get('/api/activation', user.get.activateAccount);
 	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
+	app.get('/api/checkAdminToken', filters.tokenInterceptor, filters.adminInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);
 	app.get('/api/plans', plan.get.all);
 
