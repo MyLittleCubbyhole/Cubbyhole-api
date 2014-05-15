@@ -208,7 +208,7 @@ provider.create.file = function(params, callback){
                         fileProvider.uploadFromPath(params, function(error, data) {
                             if(error) {
                                 console.error(error);
-                                throw 'Error during upload of user photo - '; {
+                                throw 'Error during upload of user photo - ';
                             }
                             next();
                         });
