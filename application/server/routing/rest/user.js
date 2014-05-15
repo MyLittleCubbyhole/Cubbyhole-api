@@ -458,7 +458,7 @@ user.post.paypalNotify = function(request, response) {
             if(result.status == 'Completed')
                 if(result.businessEmail == config['paypal_business_email'])
                     paymentProvider.get.byId(result.id, function(error, payment) {
-                        if(error || !payment)
+                        if(error || !payment || !payment.id)
                             userProvider.get.byId(result.userId, function(error, user) {
                                 if(!error && user)
                                     planProvider.get.byId(result.planId, function(error, plan) {
