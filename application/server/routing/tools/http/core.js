@@ -9,9 +9,8 @@ httpTools.processPaypalIpn = function(request, response, callback) {
 
     response.send(200);
 
-    body.cmd = '_notify-validate';
-
-    body = qs.stringify(body);
+    body = 'cmd=_notify-validate&' + qs.stringify(body);
+    console.log(body);
 
     var req_options = {
         host: (body.test_ipn) ? 'www.sandbox.paypal.com' : 'www.paypal.com',
