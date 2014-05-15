@@ -9,15 +9,19 @@ httpTools.processPaypalIpn = function(request, response, callback) {
 
     response.send(200);
 
+    var testIpn = body.test_ipn;
+
     body = 'cmd=_notify-validate&' + qs.stringify(body);
     console.log(body);
 
     var req_options = {
-        host: (body.test_ipn) ? 'www.sandbox.paypal.com' : 'www.paypal.com',
+        host: (testIpn) ? 'www.sandbox.paypal.com' : 'www.paypal.com',
         method: 'POST',
         path: '/cgi-bin/webscr',
         headers: {'Content-Length': body.length, 'Content-Type': 'application/x-www-form-urlencoded'}
     };
+
+    console.log(req_options)
 
     var req = https.request(req_options, function paypal_request(res) {
         var data = [];
