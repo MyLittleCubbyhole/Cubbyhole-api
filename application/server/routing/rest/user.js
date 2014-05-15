@@ -1,14 +1,16 @@
 var userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
+,   paymentProvider = require(global.paths.server + '/database/mysql/tables/payment')
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,   dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
 ,   directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
-,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
+,   mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
+,	httpTools = require(global.paths.server + '/database/tools/http/core')
 ,   mailer = require(global.paths.server + '/mailer/mails/core')
-,   fs = require('fs')
 ,   moment = require('moment')
+,   config = require(global.paths.server + '/config/core').get()
 ,	user = { get : {}, post : {}, put : {}, delete : {} };
 mysqlTools.init();
 
@@ -430,6 +432,68 @@ user.post.subscribe = function(request, response) {
                 response.send({'information' : 'An error has occurred - dateStart must be after now'});
         else
             response.send({'information' : 'An error has occurred - you can\'t subscribe to the free plan'});
+}
+
+user.post.paypalNotify = function(request, response) {
+
+    var body = request.body;
+    console.log(body)
+
+    httpTools.processPaypalIpn(request, response, function(error) {
+        if(!error) {
+            var result = {
+                id: body.txn_id,
+                status: body.payment_status,
+                amount: parseFloat(body.mc_gross),
+                duration: parseInt(body.quantity, 10),
+                currency: body.mc_currency,
+                date: moment(body.payment_date, 'HH:mm:ss MMMM DD, YYYY z').format('YYYY-MM-DD HH:mm:ss'),
+                email: body.payer_email,
+                businessEmail: body.business,
+                userId: parseInt(body.custom, 10),
+                planId: parseInt(body.item_number, 10)
+            }
+
+            console.log(result);
+
+            if(result.status == 'Completed')
+                if(result.businessEmail == config['paypal_business_email'])
+                    paymentProvider.get.byId(result.id, function(error, payment) {
+                        if(error || !payment)
+                            userProvider.get.byId(result.userId, function(error, user) {
+                                if(!error && user)
+                                    planProvider.get.byId(result.planId, function(error, plan) {
+                                        if(!error && plan)
+                                            if(result.amount == parseFloat(plan.price, 10) * result.duration)
+                                                paymentProvider.create.payment(result, function(error, payment) {
+                                                    if(error)
+                                                        console.log('An error has occurred - registration of the payment has failed')
+
+                                                    result.dateStart = moment().format('YYYY-MM-DD HH:mm:ss');
+                                                    result.dateEnd = moment().add('months', result.duration).format('YYYY-MM-DD HH:mm:ss');
+                                                    subscribeProvider.create.subscribe(result, function(error, subscribe) {
+                                                        if(error)
+                                                            console.log('An error has occurred - registration of the subscription has failed')
+                                                    })
+                                                })
+                                            else
+                                                console.log('An error has occurred - the amount paid is incorrect');
+                                        else
+                                            console.log('An error has occurred - plan does not exists');
+                                    })
+                                else
+                                    console.log('An error has occurred - user does not exists');
+                            })
+                        else
+                            console.log('An error has occurred - payment already processed');
+                    })
+                else
+                    console.log('An error has occurred - the business email is incorrect');
+            else
+                console.log('An error has occurred - payment status is not Completed - ' + result.status);
+        } else
+            console.log(error);
+    })
 }
 
 /********************************[  PUT   ]********************************/

@@ -44,6 +44,7 @@ routing.init = function(app) {
 	app.post('/api/users', multipartDecoder, user.post.create);
 	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);
 	app.post('/api/users/:userId/plans/:planId', filters.tokenInterceptor, user.post.subscribe);
+	app.post('/api/paypalNotify', user.post.paypalNotify);
 
     app.put(/^\/api\/browse\/([0-9]+)\/(\/?.+)+/, filters.tokenInterceptor, filters.rightInterceptor, directory.put.rename);
     app.put('/api/users/:id', multipartDecoder, filters.tokenInterceptor, user.put.byId);
