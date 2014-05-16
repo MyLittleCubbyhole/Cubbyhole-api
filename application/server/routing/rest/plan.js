@@ -25,6 +25,7 @@ plan.post.create = function(request, response) {
     ,   plan = {
         price: body.price,
         name: body.name,
+        description: body.description,
         storage: body.storage,
         duration: body.duration,
         uploadBandWidth: body.uploadBandWidth,
@@ -57,6 +58,7 @@ plan.put.byId = function(request, response) {
         id: params.id,
         price: body.price,
         name: body.name,
+        description: body.description,
         storage: body.storage,
         duration: body.duration,
         uploadBandWidth: body.uploadBandWidth,
