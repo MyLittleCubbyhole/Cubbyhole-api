@@ -472,7 +472,7 @@ user.post.paypalNotify = function(request, response) {
                                                         if(error)
                                                             console.log('An error has occurred - registration of the subscription has failed')
                                                         else
-                                                            console.log('Payment processed - ' + result.amount + ' from ' + result.email);
+                                                            console.log('Payment processed - ' + result.amount + result.currency + ' from ' + result.email);
                                                     })
                                                 })
                                             else

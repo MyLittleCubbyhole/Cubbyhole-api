@@ -6,7 +6,12 @@ var planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 
 plan.get.all = function(request, response) {
     planProvider.get.all(function(error, data){
-        response.send( (!error ? data : error ) );
+        var plans = [];
+        if(data && data.id)
+            plans.push(data);
+        else if(data && data.length > 0)
+            plans = data;
+        response.send( (!error ? plans : error ) );
     })
 }
 
