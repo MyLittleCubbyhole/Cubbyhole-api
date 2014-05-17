@@ -93,6 +93,12 @@ provider.get.size = function(ownerId, callback) {
     })
 }
 
+provider.get.totalSize = function(ownerId, callback) {
+    mongo.collection('directories', function(error, collection) {
+        collection.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }], callback);
+    })
+}
+
 /********************************[ CREATE ]********************************/
 
 /**
