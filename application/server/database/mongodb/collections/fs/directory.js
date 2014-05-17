@@ -171,6 +171,7 @@ provider.create.file = function(params, callback){
                         type: 'file',
                         lastUpdate: new Date(),
                         lastUpdateName: params.creatorName,
+                        downloads: params.downloads ? parseInt(params.downloads, 10) : 0,
                         size: params.size ? parseInt(params.size, 10) : 0,
                         shared: false,
                         itemId: params.id,
@@ -396,6 +397,12 @@ provider.update.userPhoto = function(user, callback) {
     })
 }
 
+provider.update.downloads = function(fullPath, callback) {
+    mongo.collection('directories', function(error, collection) {
+        collection.update({'_id': fullPath}, {$inc: { downloads: 1 }}, { safe : true }, callback);
+    })
+}
+
 
 /********************************[ UPDATE ]********************************/
 
@@ -422,7 +429,8 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                 path: newItem.path,
                 name: newItem.name,
                 creatorId: newItem.creatorId,
-                creatorName: userName
+                creatorName: userName,
+                downloads: newItem.downloads || 0
             };
 
             if(item.type == 'folder')

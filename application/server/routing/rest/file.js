@@ -126,6 +126,11 @@ file.get.shared 	= function(request, response) {
 										if(!error && plan && plan.id) {
 											dailyQuotaProvider.get.current(subscription.id, function(error, dailyQuota) {
 
+												directoryProvider.update.downloads(itemFile[0]._id, function(error, data) {
+								                    if(error)
+								                        console.log('error updating downloads number ' - error);
+								                });
+
 												request.params[0] = itemFile[0].ownerId;
 												request.params[1] = itemFile[0].path.substring(1) + itemFile[0].name;
 												request.planQuota = plan.quota;
