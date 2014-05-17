@@ -487,32 +487,37 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
 
     if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
         fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
-        mongo.collection('directories', function(error, collection) {
+        sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
+            if(!error && data && data.length > 0)
+                callback.call(this, 'An error has occurred - method not allowed');
+            else
+                mongo.collection('directories', function(error, collection) {
 
-            function start() {
-                started++;
-            };
-            function stop(error) {
-                if(--started <= 0)
-                    end(error);
-            };
-            function end(error) {
-                if(move)
-                    provider.delete.byPath(fullPath, function(error) {
-                        callback.call(this, error);
+                    function start() {
+                        started++;
+                    };
+                    function stop(error) {
+                        if(--started <= 0)
+                            end(error);
+                    };
+                    function end(error) {
+                        if(move)
+                            provider.delete.byPath(fullPath, function(error) {
+                                callback.call(this, error);
+                            });
+                        else
+                            callback.call(this, error);
+                    };
+
+                    collection.findOne({"_id": fullPath}, function(error, item) {
+                        if(!error && item) {
+                            start();
+                            provider.copyItem(collection, item, updatedItem, targetPath, move, start, stop);
+                        }
+                        else
+                            callback.call(this, error);
                     });
-                else
-                    callback.call(this, error);
-            };
-
-            collection.findOne({"_id": fullPath}, function(error, item) {
-                if(!error && item) {
-                    start();
-                    provider.copyItem(collection, item, updatedItem, targetPath, move, start, stop);
-                }
-                else
-                    callback.call(this, error);
-            });
+                });
         });
     }
     else
