@@ -108,6 +108,7 @@ directory.post.create = function(request, response){
 
 	parameters.name = body.name;
 	parameters.fullPath = parameters.ownerId + parameters.path + parameters.name;
+	parameters.creatorName = request.userName;
 
 	if(request.right != 'W') {
 		response.send({'information': 'An error has occurred - method not allowed'});
@@ -159,7 +160,7 @@ directory.post.copy = function(request, response){
 	if(!parameters.path)
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
-		provider.copy(fullPath, null, parameters.targetPath, parameters.move,  function(error) {
+		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error) {
 			if(!error)
 			historicProvider.create.event({
 				ownerId: request.userId,
@@ -249,6 +250,7 @@ directory.put.rename = function(request, response){
     parameters.currentName = parameters.path.pop();
     parameters.newName 	= body.name;
     parameters.path = parameters.path.join('/');
+    parameters.userName = request.userName;
 
 
 	if(request.right != 'W') {
@@ -323,7 +325,7 @@ directory.delete.byPath		= function(request, response){
 			if(!params[1])
 				response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
 			else
-				provider.delete.byPath(fullPath, function(error, data){
+				provider.delete.byPath(fullPath, request.userName, function(error, data){
 					historicProvider.create.event({
 						ownerId: request.userId,
 						targetOwner: fullPath.split('/')[0],

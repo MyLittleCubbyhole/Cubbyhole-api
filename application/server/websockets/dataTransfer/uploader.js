@@ -17,13 +17,14 @@ uploader.init = function(socket) {
 		,	id = data.id;
 
 		if(data.token && logicPath != '/Shared/')
-			tokenProvider.isValidForAuthentication(data.token, function(error, userId) {
-				if(!error && userId) {
+			tokenProvider.isValidForAuthentication(data.token, function(error, tokenInfos) {
+				if(!error && tokenInfos && tokenInfos.userid) {
 
 					files[id] = {
 						owner: data.owner,
 						name: name,
-						creatorId: userId,
+						creatorId: tokenInfos.userid,
+						creatorName: tokenInfos.firstname + ' ' + tokenInfos.lastname,
 						size : data.size,
 						type: data.type,
 						logicPath: logicPath,
@@ -62,7 +63,8 @@ uploader.init = function(socket) {
 			path: files[id].logicPath,
 			fullPath: files[id].owner + files[id].logicPath + files[id].name,
 			ownerId: files[id].owner,
-			creatorId: files[id].creatorId
+			creatorId: files[id].creatorId,
+			creatorName: files[id].creatorName
 		};
 
 		if(files[id].id) {

@@ -11,6 +11,10 @@ provider.get.byId = function(id, callback) {
 	Mysql.query('select * from `token` where `id` = "'+ id +'";', callback);
 }
 
+provider.get.byIdWithUserName = function(id, callback) {
+    Mysql.query('select * from `token` t join `user` u on t.`userid` = u.`id` where t.`id` = "'+ id +'";', callback);
+}
+
 provider.get.byFileId = function(id, callback) {
     Mysql.query('select * from `token` where `fileid` = "'+ id +'";', callback);
 }
@@ -19,7 +23,7 @@ provider.isValidForAuthentication = function(id, callback) {
 
     var witness = false;
 
-    provider.get.byId(id, function(error, data) {
+    provider.get.byIdWithUserName(id, function(error, data) {
         if(data) {
             var currentDate = new Date()
             ,   expirationDate = new Date(data.expirationdate)
@@ -35,7 +39,7 @@ provider.isValidForAuthentication = function(id, callback) {
         }
 
         if(witness)
-            callback.call(this, null, data.userid);
+            callback.call(this, null, data);
         else
             callback.call(this, 'bad token', null);
     });
