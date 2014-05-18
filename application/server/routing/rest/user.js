@@ -473,6 +473,8 @@ user.post.paypalNotify = function(request, response) {
                                                                 actualSubscription.paused = true;
                                                             }
 
+                                                            actualSubscription.dateend = moment(actualSubscription.dateend).format('YYYY-MM-DD HH:mm:ss');
+
                                                             subscribeProvider.update.pause(actualSubscription, function(error, data) {
                                                                 if(!error && data) {
                                                                     result.dateStart = moment().format('YYYY-MM-DD HH:mm:ss');
