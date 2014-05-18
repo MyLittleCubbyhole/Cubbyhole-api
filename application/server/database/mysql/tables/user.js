@@ -8,7 +8,7 @@ tools.init();
 /********************************[  GET   ]********************************/
 
 provider.get.all = function(callback) {
-	Mysql.query('select * from `user`;', callback);
+	Mysql.query('select * from `user` where id >1;', callback);
 }
 
 provider.get.byId = function(id, callback) {
