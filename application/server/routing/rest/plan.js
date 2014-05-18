@@ -21,30 +21,21 @@ plan.get.all = function(request, response) {
 plan.post.create = function(request, response) {
     var params = request.params
     ,   body = request.body
-    ,   witness = true
     ,   plan = {
         price: body.price,
         name: body.name,
         description: body.description,
-        storage: body.storage,
-        duration: body.duration,
-        uploadBandWidth: body.uploadBandWidth,
-        downloadBandWidth: body.downloadBandWidth,
+        storage: parseInt(body.storage, 10),
+        duration: parseInt(body.duration, 10),
+        uploadBandWidth: parseInt(body.uploadBandwidth, 10),
+        downloadBandWidth: parseInt(body.downloadBandwidth, 10),
         quota: body.quota
     };
-
-    for(var i in plan)
-        witness = typeof plan[i] == 'undefined' ? false : witness;
-
-    if(!witness)
-        response.send({'information': 'An error has occurred - missing information', 'plan' : plan });
-    else {
-        planProvider.create.plan(plan, function(error, planData) {
-            if(!error && planData)
-                plan.id = planData.insertId;
-            response.send({'information': (!error ? 'plan created' : 'An error has occurred - ' + error), 'plan': plan });
-        })
-    }
+    planProvider.create.plan(plan, function(error, planData) {
+        if(!error && planData)
+            plan.id = planData.insertId;
+        response.send({'information': (!error ? 'plan created' : 'An error has occurred - ' + error), 'plan': plan });
+    })
 }
 
 
@@ -61,11 +52,10 @@ plan.put.byId = function(request, response) {
         description: body.description,
         storage: body.storage,
         duration: body.duration,
-        uploadBandWidth: body.uploadBandWidth,
-        downloadBandWidth: body.downloadBandWidth,
+        uploadBandWidth: body.uploadBandwidth,
+        downloadBandWidth: body.downloadBandwidth,
         quota: body.quota
     };
-
     for(var i in plan)
         witness = typeof plan[i] == 'undefined' ? false : witness;
 
