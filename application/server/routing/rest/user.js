@@ -187,11 +187,11 @@ user.get.logout = function(request, response) {
 
 };
 
-user.get.userBySharing = function(request, response) {
+user.get.usersBySharing = function(request, response) {
     var params  = request.params
     ,   fullPath  = params[0];
 
-    userProvider.get.userBySharing(fullPath, function(error, data) {
+    userProvider.get.usersBySharing(fullPath, function(error, data) {
         if(!error) {
             response.send(data);
         }

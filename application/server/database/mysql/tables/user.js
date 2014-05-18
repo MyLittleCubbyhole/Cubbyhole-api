@@ -27,10 +27,10 @@ provider.get.namesByIds = function(ids, callback) {
 }
 
 provider.get.emailsbyIds = function(ids, callback) {
-	Mysql.query('select id, photo, email from `user` where `id`in('+ ids.join(',') +');', callback);
+	Mysql.query('select id, photo, email, firstname, lastname from `user` where `id`in('+ ids.join(',') +');', callback);
 }
 
-provider.get.userBySharing = function(fullPath, callback) {
+provider.get.usersBySharing = function(fullPath, callback) {
 	sharingProvider.get.byItemFullPath(fullPath, function(error, items) {
 		if(!error && items && items.length>0) {
 			var userIds = []
@@ -47,12 +47,16 @@ provider.get.userBySharing = function(fullPath, callback) {
 					if(dbUsers.id) {
 						users[dbUsers.id].email = dbUsers.email;
 						users[dbUsers.id].photo = dbUsers.photo;
+						users[dbUsers.id].firstname = dbUsers.firstname;
+						users[dbUsers.id].lastname = dbUsers.lastname;
 						usersTab.push(users[dbUsers.id]);
 					}
 					else if(dbUsers.length > 0)
 						for(var i = 0; i<dbUsers.length; i++) {
 							users[dbUsers[i].id].email = dbUsers[i].email;
 							users[dbUsers[i].id].photo = dbUsers[i].photo;
+							users[dbUsers[i].id].firstname = dbUsers[i].firstname;
+							users[dbUsers[i].id].lastname = dbUsers[i].lastname;
 							usersTab.push(users[dbUsers[i].id]);
 						}
 				}
