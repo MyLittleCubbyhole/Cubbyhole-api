@@ -1,4 +1,5 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
+,   moment = require('moment')
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 
 /********************************[  GET   ]********************************/
@@ -36,9 +37,10 @@ provider.get.actualSubscription = function(userId, callback) {
                         if(subscriptions[i].paused && (!subscriptionToUnpause || (moment(subscriptionToUnpause.datestart).isBefore(moment(subscriptions[i].datestart)))))
                             subscriptionToUnpause = subscriptions[i];
 
-                    if(!subscriptionToUnpause) {
+                    if(subscriptionToUnpause) {
                         subscriptionToUnpause.paused = false;
                         subscriptionToUnpause.dateend = moment(moment().valueOf() + subscriptionToUnpause.remainingtime).format('YYYY-MM-DD HH:mm:ss');
+                        subscriptionToUnpause.remainingtime = 0;
                         provider.update.pause(subscriptionToUnpause, function(error, data) {
                             callback.call(this, error, subscriptionToUnpause);
                         });
