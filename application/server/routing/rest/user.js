@@ -556,14 +556,17 @@ user.put.promote = function(request, response) {
 
     userProvider.get.byId(params.id, function(error, user) {
         if(!error && user && user.id) {
-            user.roleId = 2;
-            userProvider.update.role(user, function(error, data) {
-                user.roleid = user.roleId;
-                delete(user.roleId);
-                delete(user.password);
-                delete(user.salt);
-                response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
-            });
+            if(request.userId != user.id) {
+                user.roleId = 2;
+                userProvider.update.role(user, function(error, data) {
+                    user.roleid = user.roleId;
+                    delete(user.roleId);
+                    delete(user.password);
+                    delete(user.salt);
+                    response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
+                });
+            } else
+                response.send({'information' : 'An error has occurred - you can`t update your own role'});
         }
         else
             response.send({'information' : 'An error has occurred - user not found'});
@@ -576,14 +579,17 @@ user.put.demote = function(request, response) {
 
     userProvider.get.byId(params.id, function(error, user) {
         if(!error && user && user.id) {
-            user.roleId = 1;
-            userProvider.update.role(user, function(error, data) {
-                user.roleid = user.roleId;
-                delete(user.roleId);
-                delete(user.password);
-                delete(user.salt);
-                response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
-            });
+            if(request.userId != user.id) {
+                user.roleId = 1;
+                userProvider.update.role(user, function(error, data) {
+                    user.roleid = user.roleId;
+                    delete(user.roleId);
+                    delete(user.password);
+                    delete(user.salt);
+                    response.send({'information': (!error ? 'user role updated' : 'An error has occurred - ' + error), 'user': user });
+                });
+            } else
+                response.send({'information' : 'An error has occurred - you can`t update your own role'});
         }
         else
             response.send({'information' : 'An error has occurred - user not found'});
