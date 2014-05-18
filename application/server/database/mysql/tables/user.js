@@ -27,7 +27,7 @@ provider.get.namesByIds = function(ids, callback) {
 }
 
 provider.get.emailsbyIds = function(ids, callback) {
-	Mysql.query('select id, email from `user` where `id`in('+ ids.join(',') +');', callback);
+	Mysql.query('select id, photo, email from `user` where `id`in('+ ids.join(',') +');', callback);
 }
 
 provider.get.userBySharing = function(fullPath, callback) {
@@ -46,11 +46,13 @@ provider.get.userBySharing = function(fullPath, callback) {
 				if(!error && dbUsers) {
 					if(dbUsers.id) {
 						users[dbUsers.id].email = dbUsers.email;
+						users[dbUsers.id].photo = dbUsers.photo;
 						usersTab.push(users[dbUsers.id]);
 					}
 					else if(dbUsers.length > 0)
 						for(var i = 0; i<dbUsers.length; i++) {
 							users[dbUsers[i].id].email = dbUsers[i].email;
+							users[dbUsers[i].id].photo = dbUsers[i].photo;
 							usersTab.push(users[dbUsers[i].id]);
 						}
 				}

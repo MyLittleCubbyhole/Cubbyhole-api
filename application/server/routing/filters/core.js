@@ -10,9 +10,10 @@ filters.tokenInterceptor = function(request, response, next) {
     var token = query.token || 0;
     token = encodeURIComponent(token);
 
-    tokenProvider.isValidForAuthentication(token, function(error, userId) {
-        if(!error && userId) {
-            request.userId = userId;
+    tokenProvider.isValidForAuthentication(token, function(error, data) {
+        if(!error && data && data.userid) {
+            request.userId = data.userid;
+            request.userName = data.firstname + ' ' + data.lastname;
             next();
         } else {
             response.writeHead(401);

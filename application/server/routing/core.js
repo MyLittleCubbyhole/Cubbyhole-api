@@ -8,7 +8,7 @@ var file = require(global.paths.server + '/routing/rest/file')
 
 routing.init = function(app) {
 
-	app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
+	//app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, filters.rightInterceptor, directory.get.byOwner);
 	app.get(/^\/api\/browse\/([0-9]+)\/size$/, filters.tokenInterceptor, filters.rightInterceptor, directory.get.size);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor,filters.rightInterceptor, directory.get.byPath);

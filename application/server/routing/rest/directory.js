@@ -1,5 +1,6 @@
 var provider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
+,   sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
 ,	mongoTools = require(global.paths.server + '/database/tools/mongodb/core')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
@@ -107,6 +108,7 @@ directory.post.create = function(request, response){
 
 	parameters.name = body.name;
 	parameters.fullPath = parameters.ownerId + parameters.path + parameters.name;
+	parameters.creatorName = request.userName;
 
 	if(request.right != 'W') {
 		response.send({'information': 'An error has occurred - method not allowed'});
@@ -158,7 +160,7 @@ directory.post.copy = function(request, response){
 	if(!parameters.path)
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
-		provider.copy(fullPath, null, parameters.targetPath, parameters.move,  function(error) {
+		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error) {
 			if(!error)
 			historicProvider.create.event({
 				ownerId: request.userId,
@@ -248,6 +250,7 @@ directory.put.rename = function(request, response){
     parameters.currentName = parameters.path.pop();
     parameters.newName 	= body.name;
     parameters.path = parameters.path.join('/');
+    parameters.userName = request.userName;
 
 
 	if(request.right != 'W') {
@@ -315,20 +318,27 @@ directory.delete.byPath		= function(request, response){
 		return;
 	}
 
-	if(!params[1])
-		response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
-	else
-		provider.delete.byPath(fullPath, function(error, data){
-			historicProvider.create.event({
-				ownerId: request.userId,
-				targetOwner: fullPath.split('/')[0],
-				fullPath: fullPath,
-				action: 'delete',
-				name: fullPath.split('/').pop(),
-				itemType: type
-			});
-			response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
-		})
+	sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
+		if(!error && data && data.length > 0)
+			response.send({'information': 'An error has occurred - method not allowed'});
+		else {
+			if(!params[1])
+				response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
+			else
+				provider.delete.byPath(fullPath, request.userName, function(error, data){
+					historicProvider.create.event({
+						ownerId: request.userId,
+						targetOwner: fullPath.split('/')[0],
+						fullPath: fullPath,
+						action: 'delete',
+						name: fullPath.split('/').pop(),
+						itemType: type
+					});
+					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
+				})
+		}
+	})
+
 }
 
 module.exports = directory;

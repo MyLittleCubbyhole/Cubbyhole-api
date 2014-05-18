@@ -1,6 +1,8 @@
 var uploader = {}
 ,	files = {}
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
+,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
+,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
@@ -16,34 +18,57 @@ uploader.init = function(socket) {
 		,	name = data.name
 		,	id = data.id;
 
-		if(data.token && logicPath != '/Shared/')
-			tokenProvider.isValidForAuthentication(data.token, function(error, userId) {
-				if(!error && userId) {
+		if(data.token && logicPath != '/Shared/') {
 
-					files[id] = {
-						owner: data.owner,
-						name: name,
-						creatorId: userId,
-						size : data.size,
-						type: data.type,
-						logicPath: logicPath,
-						downloaded : 0,
-						currentChunkSize: 0,
-						clientSideId: data.id
-					};
+			files[id] = {
+				owner: data.owner,
+				name: name,
+				size : data.size,
+				type: data.type,
+				logicPath: logicPath,
+				downloaded : 0,
+				currentChunkSize: 0,
+				clientSideId: data.id
+			};
+
+			tokenProvider.isValidForAuthentication(data.token, function(error, tokenInfos) {
+				if(!error && tokenInfos && tokenInfos.userid) {
+
+					files[id].creatorId = tokenInfos.userid;
+					files[id].creatorName = tokenInfos.firstname + ' ' + tokenInfos.lastname;
 
 					if(data.uploadPhoto) {
 						files[id].owner = 1;
 						files[id].name = new ObjectID() + name.slice(name.lastIndexOf('.'));
 						files[id].logicPath = '/userPhotos/';
 						files[id].uploadPhoto = true;
-					}
-
-					var chunk = 0;
-					socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
+						var chunk = 0;
+						socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
+					} else
+						subscribeProvider.get.actualSubscription(data.owner, function(error, subscribe) {
+							if(!error && subscribe && subscribe.id)
+								planProvider.get.byId(subscribe.planid, function(error, plan) {
+									if(!error && plan && plan.id)
+										directoryProvider.get.totalSize(data.owner, function(error, totalSize) {
+											if(!error && totalSize) {
+												if((totalSize.length == 0 && files[id].size <= plan.storage) || (totalSize[0] && (totalSize[0].size + files[id].size) <= plan.storage)) {
+													var chunk = 0;
+													socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
+												} else
+													socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'your cubbyhole is full' });
+											} else
+												socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting the current used space' });
+										})
+									else
+										socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting your actual plan' });
+								})
+							else
+								socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting your actual subscription' });
+						})
 				} else
 					socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'invalid token' });
 			});
+		}
 		else
 			socket.emit('upload_stopped', { id: data.id, error: 'no token send' });
 	});
@@ -62,7 +87,8 @@ uploader.init = function(socket) {
 			path: files[id].logicPath,
 			fullPath: files[id].owner + files[id].logicPath + files[id].name,
 			ownerId: files[id].owner,
-			creatorId: files[id].creatorId
+			creatorId: files[id].creatorId,
+			creatorName: files[id].creatorName
 		};
 
 		if(files[id].id) {

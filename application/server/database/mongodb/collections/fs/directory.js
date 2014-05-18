@@ -93,6 +93,12 @@ provider.get.size = function(ownerId, callback) {
     })
 }
 
+provider.get.totalSize = function(ownerId, callback) {
+    mongo.collection('directories', function(error, collection) {
+        collection.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }], callback);
+    })
+}
+
 /********************************[ CREATE ]********************************/
 
 /**
@@ -119,6 +125,7 @@ provider.create.folder = function(params, callback){
 							type: "folder",
 							size: params.size ? parseInt(params.size, 10) : 0,
 							lastUpdate: new Date(),
+                            lastUpdateName: params.creatorName,
                             undeletable: typeof params.undeletable != 'undefined' && params.undeletable === true,
 							children: []
 						}, { safe : true }, function() {
@@ -169,6 +176,8 @@ provider.create.file = function(params, callback){
                         name: params.name,
                         type: 'file',
                         lastUpdate: new Date(),
+                        lastUpdateName: params.creatorName,
+                        downloads: params.downloads ? parseInt(params.downloads, 10) : 0,
                         size: params.size ? parseInt(params.size, 10) : 0,
                         shared: false,
                         itemId: params.id,
@@ -193,7 +202,7 @@ provider.create.file = function(params, callback){
                                             console.error(error);
                                             throw 'error updating children - ';
                                         }
-                                        provider.update.size(folderPath, directoryFile.size, function(error) {
+                                        provider.update.size(folderPath, directoryFile.size, directoryFile.lastUpdateName, function(error) {
                                             callback.call(this, error);
                                         });
 
@@ -272,10 +281,11 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 
 /**
  * Delete an item and update corresponding sizes and children of the folders
- * @param  {string}   fullPath fullPath of the item to delete
- * @param  {Function} callback
+ * @param  {string}     fullPath    fullPath of the item to delete
+ * @param  {string}     userName    name of the user who make the update
+ * @param  {Function}   callback
  */
-provider.delete.byPath = function(fullPath, callback){
+provider.delete.byPath = function(fullPath, userName, callback){
 
 	var started = 0
 	,	size = 0
@@ -294,7 +304,7 @@ provider.delete.byPath = function(fullPath, callback){
 			if(folderPath != '/')
                 setTimeout(function() {
 
-                    provider.update.size(folderPath, size, function() {
+                    provider.update.size(folderPath, size, userName, function() {
                         provider.get.byFullPath(folderPath, function(error, directory) {
                             if(!error && directory) {
                                 var index = directory.children.indexOf(fullPath)
@@ -331,11 +341,12 @@ provider.delete.byPath = function(fullPath, callback){
 
 /**
  * Update the size of an item and all his parents
- * @param  {string}     fullFolderPath path of the item to update (ownerId + path)
- * @param  {integer}    sizeUpdate     value to add to the curent size of the item
+ * @param  {string}     fullFolderPath  path of the item to update (ownerId + path)
+ * @param  {integer}    sizeUpdate      value to add to the curent size of the item
+ * @param  {string}     userName        name of the user who make the update
  * @param  {Function}   callback
  */
-provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
+provider.update.size = function(fullFolderPath, sizeUpdate, userName, callback) {
 
     if(fullFolderPath == '/' || fullFolderPath.length == 2)
         callback.call(this, null);
@@ -357,7 +368,7 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
                 paths.pop();
 
                 started++;
-                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $set: {lastUpdate: new Date()} }, { safe : true }, function(error) {
+                collection.update({'_id': path}, {$inc: { size: parseInt(sizeUpdate, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: userName} }, { safe : true }, function(error) {
                     started--;
                     if(error)
                         callback.call(this, 'error updating size - ' + error);
@@ -376,13 +387,13 @@ provider.update.size = function(fullFolderPath, sizeUpdate, callback) {
  * @param  {Function}   callback
  */
 provider.update.name = function(params, callback){
-    provider.copy(params.fullPath, {name: params.newName}, "/" + (params.path.length ? params.path + "/" : ""), true, callback);
+    provider.copy(params.fullPath, {name: params.newName}, "/" + (params.path.length ? params.path + "/" : ""), true, params.userName, callback);
 };
 
 provider.update.userPhoto = function(user, callback) {
     userProvider.get.byId(user.id, function(error, userData) {
         if(!error && userData)
-            provider.delete.byPath('1/userPhotos/' + userData.photo, function(error, data) {
+            provider.delete.byPath('1/userPhotos/' + userData.photo, userData.firstname + ' ' + userData.lastname, function(error, data) {
                 userProvider.update.photo(user, function(error, data) {
                     callback.call(this, error, data);
                 })
@@ -392,10 +403,16 @@ provider.update.userPhoto = function(user, callback) {
     })
 }
 
+provider.update.downloads = function(fullPath, callback) {
+    mongo.collection('directories', function(error, collection) {
+        collection.update({'_id': fullPath}, {$inc: { downloads: 1 }}, { safe : true }, callback);
+    })
+}
+
 
 /********************************[ UPDATE ]********************************/
 
-provider.copyItem = function(collection, item, updatedItem, targetPath, move, start, stop) {
+provider.copyItem = function(collection, item, updatedItem, targetPath, move, userName, start, stop) {
     updatedItem = updatedItem || {};
 
     var newItem = {};
@@ -417,7 +434,9 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                 ownerId: newItem.ownerId,
                 path: newItem.path,
                 name: newItem.name,
-                creatorId: newItem.creatorId
+                creatorId: newItem.creatorId,
+                creatorName: userName,
+                downloads: newItem.downloads || 0
             };
 
             if(item.type == 'folder')
@@ -435,7 +454,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
                                     collection.findOne({'_id': item.children[i]}, function(error, data) {
                                         if(error)
                                             console.error('item not found');
-                                        provider.copyItem(collection, data, null, path, move, start, stop);
+                                        provider.copyItem(collection, data, null, path, move, userName, start, stop);
                                     });
                                 }
                                 stop();
@@ -479,40 +498,46 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, st
  * @param  {document}   updatedItem new item to create if you want to process a rename
  * @param  {string}     targetPath  destination of the item
  * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
+ * @param  {string}     userName    name of the user who make the update
  * @param  {Function}   callback
  */
-provider.copy = function(fullPath, updatedItem, targetPath, move, callback) {
+provider.copy = function(fullPath, updatedItem, targetPath, move, userName, callback) {
     var started = 0;
 
 
     if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
         fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
-        mongo.collection('directories', function(error, collection) {
+        sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
+            if(!error && data && data.length > 0)
+                callback.call(this, 'An error has occurred - method not allowed');
+            else
+                mongo.collection('directories', function(error, collection) {
 
-            function start() {
-                started++;
-            };
-            function stop(error) {
-                if(--started <= 0)
-                    end(error);
-            };
-            function end(error) {
-                if(move)
-                    provider.delete.byPath(fullPath, function(error) {
-                        callback.call(this, error);
+                    function start() {
+                        started++;
+                    };
+                    function stop(error) {
+                        if(--started <= 0)
+                            end(error);
+                    };
+                    function end(error) {
+                        if(move)
+                            provider.delete.byPath(fullPath, userName, function(error) {
+                                callback.call(this, error);
+                            });
+                        else
+                            callback.call(this, error);
+                    };
+
+                    collection.findOne({"_id": fullPath}, function(error, item) {
+                        if(!error && item) {
+                            start();
+                            provider.copyItem(collection, item, updatedItem, targetPath, move, userName, start, stop);
+                        }
+                        else
+                            callback.call(this, error);
                     });
-                else
-                    callback.call(this, error);
-            };
-
-            collection.findOne({"_id": fullPath}, function(error, item) {
-                if(!error && item) {
-                    start();
-                    provider.copyItem(collection, item, updatedItem, targetPath, move, start, stop);
-                }
-                else
-                    callback.call(this, error);
-            });
+                });
         });
     }
     else
