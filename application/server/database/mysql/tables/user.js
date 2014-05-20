@@ -112,9 +112,9 @@ provider.create.user = function(user, callback) {
 	provider.get.byEmail(user.email, function(error, data) {
 		if(!data || data.length == 0) {
 			try {
-				var query = 'insert into `user` (`password`, `salt`, `photo`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
+				var query = 'insert into `user` (`password`, `salt`, `photo`, `firstname`, `lastname`, `inscriptiondate`, `storage`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
 				tools.generatePassword(user.password, function(data) {
-					query += '"' + data.password + '","' + data.salt + '","' + user.photo + '","' +user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
+					query += '"' + data.password + '","' + data.salt + '","' + user.photo + '","' +user.firstname + '","' + user.lastname + '", NOW(), 0,"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 					Mysql.query(query, callback);
 				})
 			}
@@ -157,6 +157,12 @@ provider.update.photo = function(user, callback) {
 	 Mysql.query('update `user` set `photo`="' + user.photo + '" where `id`=' + parseInt(user.id, 10) + ';', callback);
 }
 
+provider.update.storage = function(userId, amount, callback) {
+	amount = amount ||0;
+	console.log('update `user` set `storage`= `storage` + "' + parseInt(amount, 10) + '" where `id`=' + parseInt(userId, 10) + ';')
+	Mysql.query('update `user` set `storage`= `storage` + "' + parseInt(amount, 10) + '" where `id`=' + parseInt(userId, 10) + ';', callback);
+}
+ 
 /********************************[  OTHERS   ]********************************/
 
 provider.connect = function(email, password, callback) {
