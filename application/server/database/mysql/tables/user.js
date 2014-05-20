@@ -112,9 +112,9 @@ provider.create.user = function(user, callback) {
 	provider.get.byEmail(user.email, function(error, data) {
 		if(!data || data.length == 0) {
 			try {
-				var query = 'insert into `user` (`password`, `salt`, `photo`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `activated`, `roleid`) values (';
+				var query = 'insert into `user` (`password`, `salt`, `photo`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `countrycode`, `activated`, `roleid`) values (';
 				tools.generatePassword(user.password, function(data) {
-					query += '"' + data.password + '","' + data.salt + '","' + user.photo + '","' +user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "'+user.email+'", "' + user.country + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
+					query += '"' + data.password + '","' + data.salt + '","' + user.photo + '","' +user.firstname + '","' + user.lastname + '", NOW(),"' + user.birthdate + '", "' + user.email + '", "' + user.country + '", "' + user.countryCode + '", ' + (user.activated ? 1 : 0) + ', ' + user.roleId + ')';
 					Mysql.query(query, callback);
 				})
 			}
@@ -142,7 +142,7 @@ provider.update.password = function(user, callback) {
 }
 
 provider.update.informations = function(user, callback) {
-	Mysql.query('update `user` set `firstname`="' + user.firstname + '", `lastname`="' + user.lastname + '", `birthdate`="' + user.birthdate + '", `country`="' + user.country + '" where `id`=' + parseInt(user.id, 10) + ';', callback);
+	Mysql.query('update `user` set `firstname`="' + user.firstname + '", `lastname`="' + user.lastname + '", `birthdate`="' + user.birthdate + '", `country`="' + user.country + '", `countrycode`="' + user.countryCode + '" where `id`=' + parseInt(user.id, 10) + ';', callback);
 }
 
 provider.update.activated = function(user, callback) {

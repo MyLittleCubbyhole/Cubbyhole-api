@@ -240,6 +240,7 @@ user.post.create = function(request, response){
 		email: body.email,
 		birthdate: moment(body.birthdate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
 		country: body.country,
+        countryCode: body.countryCode,
         activated: false,
 		roleId: 1
 	};
@@ -525,7 +526,8 @@ user.put.byId = function(request, response){
         firstname: body.firstname,
         lastname: body.lastname,
         birthdate: moment(body.birthdate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
-        country: body.country
+        country: body.country,
+        countryCode: body.countryCode
     };
 
     for(var i in user)
@@ -547,6 +549,7 @@ user.put.byId = function(request, response){
                         dataUser.lastname = user.lastname;
                         dataUser.birthdate = user.birthdate;
                         dataUser.country = user.country;
+                        dataUser.countryCode = user.countryCode;
 
                         if(dataUser.password) {
                             userProvider.update.password(dataUser, function(error, data) {
