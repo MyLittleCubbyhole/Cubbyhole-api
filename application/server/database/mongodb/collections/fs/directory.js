@@ -160,6 +160,7 @@ provider.create.file = function(params, callback){
             if(!data) {
 
                 var folderPath = params.path == '/' ? params.path : (params.ownerId + params.path).slice(0, -1);
+                var userId = params.ownerId;
 
 
                 provider.checkExist(folderPath, function(error, exist) {
@@ -202,13 +203,16 @@ provider.create.file = function(params, callback){
                                             console.error(error);
                                             throw 'error updating children - ';
                                         }
-                                        provider.update.size(folderPath, directoryFile.size, directoryFile.lastUpdateName, function(error) {
+                                        provider.update.size(userId, folderPath, directoryFile.size, directoryFile.lastUpdateName, function(error) {
                                             callback.call(this, error);
                                         });
 
                                     });
                                 else
-                                    callback.call(this, error);
+                                    userProvider.update.storage(userId, directoryFile.size, function() {
+                                        callback.call(this, error);
+                                    });
+                                    
                             });
                         });
                     }
@@ -289,7 +293,8 @@ provider.delete.byPath = function(fullPath, userName, callback){
 
 	var started = 0
 	,	size = 0
-	,	folderPath = '/';
+	,	folderPath = '/'
+    ,   userId = parseInt(fullPath[0], 10);
 
 	mongo.collection('directories', function(error, collection) {
 
@@ -304,7 +309,7 @@ provider.delete.byPath = function(fullPath, userName, callback){
 			if(folderPath != '/')
                 setTimeout(function() {
 
-                    provider.update.size(folderPath, size, userName, function() {
+                    provider.update.size(userId, folderPath, size, userName, function() {
                         provider.get.byFullPath(folderPath, function(error, directory) {
                             if(!error && directory) {
                                 var index = directory.children.indexOf(fullPath)
@@ -321,7 +326,9 @@ provider.delete.byPath = function(fullPath, userName, callback){
 
                 },Math.random() * 150);
 			else
-				callback.call(this);
+                userProvider.update.storage(userId, size, function() {
+                    callback.call(this);
+                });
 		};
 
 		collection.findOne({"_id": fullPath}, function(error, data) {
@@ -346,8 +353,9 @@ provider.delete.byPath = function(fullPath, userName, callback){
  * @param  {string}     userName        name of the user who make the update
  * @param  {Function}   callback
  */
-provider.update.size = function(fullFolderPath, sizeUpdate, userName, callback) {
-
+provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, callback) {
+    if(userId && sizeUpdate)
+        userProvider.update.storage(userId, sizeUpdate, function() { console.log('done') });
     if(fullFolderPath == '/' || fullFolderPath.length == 2)
         callback.call(this, null);
     else {
