@@ -209,7 +209,10 @@ provider.create.file = function(params, callback){
 
                                     });
                                 else
-                                    callback.call(this, error);
+                                    userProvider.update.storage(userId, directoryFile.size, function() {
+                                        callback.call(this, error);
+                                    });
+                                    
                             });
                         });
                     }
@@ -323,7 +326,9 @@ provider.delete.byPath = function(fullPath, userName, callback){
 
                 },Math.random() * 150);
 			else
-				callback.call(this);
+                userProvider.update.storage(userId, size, function() {
+                    callback.call(this);
+                });
 		};
 
 		collection.findOne({"_id": fullPath}, function(error, data) {

@@ -159,8 +159,7 @@ provider.update.photo = function(user, callback) {
 
 provider.update.storage = function(userId, amount, callback) {
 	amount = amount ||0;
-	console.log('update `user` set `storage`= `storage` + "' + parseInt(amount, 10) + '" where `id`=' + parseInt(userId, 10) + ';')
-	Mysql.query('update `user` set `storage`= `storage` + "' + parseInt(amount, 10) + '" where `id`=' + parseInt(userId, 10) + ';', callback);
+	Mysql.query('update `user` set `storage`= `storage` + ' + parseInt(amount, 10) + ' where `id`=' + parseInt(userId, 10) + ';', callback);
 }
  
 /********************************[  OTHERS   ]********************************/
