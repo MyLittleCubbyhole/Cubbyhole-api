@@ -463,37 +463,42 @@ user.post.paypalNotify = function(request, response) {
                                     planProvider.get.byId(result.planId, function(error, plan) {
                                         if(!error && plan)
                                             if(result.amount == parseFloat(plan.price, 10) * result.duration)
-                                                paymentProvider.create.payment(result, function(error, payment) {
-                                                    if(error)
-                                                        console.log('An error has occurred - registration of the payment has failed')
 
-                                                    subscribeProvider.get.actualSubscription(result.userId, function(error, actualSubscription) {
-                                                        if(!error && actualSubscription && actualSubscription.id) {
-                                                            if(actualSubscription.id != 1) {
-                                                                actualSubscription.remainingtime = moment(actualSubscription.dateend).valueOf() - moment().valueOf();
-                                                                actualSubscription.paused = true;
-                                                            }
+                                                subscribeProvider.get.actualSubscription(result.userId, function(error, actualSubscription) {
 
-                                                            actualSubscription.dateend = moment(actualSubscription.dateend).format('YYYY-MM-DD HH:mm:ss');
-
-                                                            subscribeProvider.update.pause(actualSubscription, function(error, data) {
-                                                                if(!error && data) {
-                                                                    result.dateStart = moment().format('YYYY-MM-DD HH:mm:ss');
-                                                                    result.dateEnd = moment().add('months', result.duration).format('YYYY-MM-DD HH:mm:ss');
-                                                                    subscribeProvider.create.subscribe(result, function(error, subscribe) {
-                                                                        if(error)
-                                                                            console.log('An error has occurred - registration of the subscription has failed')
-                                                                        else
-                                                                            console.log('Payment processed - ' + result.amount + result.currency + ' from ' + result.email);
-                                                                    })
-                                                                } else
-                                                                    console.log('An error has occurred - error pausing actual subscription');
-                                                            })
+                                                    if(!error && actualSubscription && actualSubscription.id) {
+                                                        if(actualSubscription.id != 1) {
+                                                            actualSubscription.remainingtime = moment(actualSubscription.dateend).valueOf() - moment().valueOf();
+                                                            actualSubscription.paused = true;
                                                         }
-                                                        else
-                                                            console.log('An error has occurred - error getting actual subscription - ' + error);
-                                                    })
+
+                                                        actualSubscription.dateend = moment(actualSubscription.dateend).format('YYYY-MM-DD HH:mm:ss');
+
+                                                        subscribeProvider.update.pause(actualSubscription, function(error, data) {
+                                                            if(!error && data) {
+                                                                result.dateStart = moment().format('YYYY-MM-DD HH:mm:ss');
+                                                                result.dateEnd = moment().add('months', result.duration).format('YYYY-MM-DD HH:mm:ss');
+                                                                subscribeProvider.create.subscribe(result, function(error, subscribe) {
+                                                                    if(error)
+                                                                        console.log('An error has occurred - registration of the subscription has failed')
+                                                                    else {
+                                                                        result.subscribeId = subscribe.insertId;
+                                                                        paymentProvider.create.payment(result, function(error, payment) {
+                                                                            if(error)
+                                                                                console.log('An error has occurred - registration of the payment has failed')
+                                                                            else
+                                                                                console.log('Payment processed - ' + result.amount + result.currency + ' from ' + result.email);
+                                                                        })
+                                                                    }
+                                                                })
+                                                            } else
+                                                                console.log('An error has occurred - error pausing actual subscription');
+                                                        })
+                                                    }
+                                                    else
+                                                        console.log('An error has occurred - error getting actual subscription - ' + error);
                                                 })
+
                                             else
                                                 console.log('An error has occurred - the amount paid is incorrect');
                                         else
