@@ -355,7 +355,7 @@ provider.delete.byPath = function(fullPath, userName, callback){
  */
 provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, callback) {
     if(userId && sizeUpdate)
-        userProvider.update.storage(userId, sizeUpdate, function() { console.log('done') });
+        userProvider.update.storage(userId, sizeUpdate, function() {});
     if(fullFolderPath == '/' || fullFolderPath.length == 2)
         callback.call(this, null);
     else {
