@@ -108,7 +108,9 @@ provider.upload = function(params, callback){
 			gridStore.write(new Buffer(params.data, 'binary'), function(error, gridStore) {
 				gridStore.close(function(error, result) {
 					GridStorage.read(mongo, params.id, function(error, file) {
-						callback.call(this, error);
+						provider.get.MD5(params.id, function(error, md5) {
+							callback.call(this, error, md5);
+						})
 					});
 				});
 			});

@@ -74,86 +74,95 @@ uploader.init = function(socket) {
 	});
 
 	socket.on('upload', function(data) {
-		var	id = data.id
-		,	name = data.name;
+		upload();
+		function upload() {
+			var	id = data.id
+			,	name = data.name;
 
-		files[id].currentChunkSize = data.data.length
-		files[id]['downloaded'] += files[id].currentChunkSize;
-		var parameters = {
-			name: files[id].name,
-			type: files[id].type,
-			data: data.data,
-			size: files[id].size,
-			path: files[id].logicPath,
-			fullPath: files[id].owner + files[id].logicPath + files[id].name,
-			ownerId: files[id].owner,
-			creatorId: files[id].creatorId,
-			creatorName: files[id].creatorName
-		};
+			files[id].currentChunkSize = data.data.length
+			files[id]['downloaded'] += files[id].currentChunkSize;
+			var parameters = {
+				name: files[id].name,
+				type: files[id].type,
+				data: data.data,
+				size: files[id].size,
+				path: files[id].logicPath,
+				fullPath: files[id].owner + files[id].logicPath + files[id].name,
+				ownerId: files[id].owner,
+				creatorId: files[id].creatorId,
+				creatorName: files[id].creatorName
+			};
 
-		if(files[id].id) {
-			parameters.id = files[id].id;
-			parameters.mode = 'w+';
-			fileProvider.upload(parameters, uploadCallback);
-		}
-		else {
-			directoryProvider.create.file(parameters, uploadCallback)
-		}
-
-		function uploadCallback(error){
-			if(error) {
-				files[id].id = null;
-				socket.emit('upload_stopped', { id: files[id].clientSideId, error: error });
-				delete files[id];
+			if(files[id].id) {
+				parameters.id = files[id].id;
+				parameters.mode = 'w+';
+				fileProvider.upload(parameters, uploadCallback);
 			}
-			else
-				if(id && files[id]) {
-					files[id].id = parameters.id;
-					files[id]._id = parameters.fullPath;
-					if(files[id]['downloaded'] >= files[id]['size']){
-						files[id].id = null;
+			else {
+				directoryProvider.create.file(parameters, uploadCallback);
+			}
 
-						if(files[id].uploadPhoto)
-							directoryProvider.update.userPhoto({id: files[id].creatorId, photo: files[id].name}, function(error, data) {
-								if(error)
-									console.log(error);
-							});
-						else
-							historicProvider.create.event({
-								ownerId: files[id].creatorId,
-								targetOwner: parameters.fullPath.split('/')[0],
-								fullPath: parameters.fullPath,
-								action: 'create',
-								name: name,
-								itemType: 'file'
-							});
-
-
-						socket.emit('upload_done', {
-							'downloaded': files[id]['downloaded'],
-							'size': files[id]['size'],
-							'chunkSize': files[id].currentChunkSize,
-							'id': files[id].clientSideId,
-							'_id': files[id]._id,
-							'name': files[id].uploadPhoto ? files[id].name : ''
-						});
-						delete files[id];
-					}
-					else {
-						// var chunk = files[id]['downloaded'] / 524288;
-						var chunk = files[id]['downloaded'] / 1572864;
-						var percent = (files[id]['downloaded'] / files[id]['size']) * 100;
-						socket.emit('upload_next', {
-							'chunk' : chunk,
-							'percent' :  percent,
-							'downloaded': files[id]['downloaded'],
-							'size': files[id]['size'],
-							'chunkSize': files[id].currentChunkSize,
-							'id': files[id].clientSideId
-						});
-					}
+			function uploadCallback(error, fileMd5){
+				if(error) {
+					files[id].id = null;
+					socket.emit('upload_stopped', { id: files[id].clientSideId, error: error });
+					delete files[id];
 				}
+				else
+					if(id && files[id]) {
+						files[id].id = parameters.id;
+						files[id]._id = parameters.fullPath;
+						if(files[id]['downloaded'] >= files[id]['size']){
+							files[id].id = null;
 
+							if(files[id].uploadPhoto)
+								directoryProvider.update.userPhoto({id: files[id].creatorId, photo: files[id].name}, function(error, data) {
+									if(error)
+										console.log(error);
+								});
+							else
+								historicProvider.create.event({
+									ownerId: files[id].creatorId,
+									targetOwner: parameters.fullPath.split('/')[0],
+									fullPath: parameters.fullPath,
+									action: 'create',
+									name: name,
+									itemType: 'file'
+								});
+
+							if(fileMd5)
+								directoryProvider.update.md5({fullPath: parameters.fullPath, md5: fileMd5}, function(error, data) {
+									if(error)
+										console.log(error);
+								});
+
+
+							socket.emit('upload_done', {
+								'downloaded': files[id]['downloaded'],
+								'size': files[id]['size'],
+								'chunkSize': files[id].currentChunkSize,
+								'id': files[id].clientSideId,
+								'_id': files[id]._id,
+								'name': files[id].uploadPhoto ? files[id].name : ''
+							});
+							delete files[id];
+						}
+						else {
+							// var chunk = files[id]['downloaded'] / 524288;
+							var chunk = files[id]['downloaded'] / 1572864;
+							var percent = (files[id]['downloaded'] / files[id]['size']) * 100;
+							socket.emit('upload_next', {
+								'chunk' : chunk,
+								'percent' :  percent,
+								'downloaded': files[id]['downloaded'],
+								'size': files[id]['size'],
+								'chunkSize': files[id].currentChunkSize,
+								'id': files[id].clientSideId
+							});
+						}
+					}
+
+			}
 		}
 	});
 }

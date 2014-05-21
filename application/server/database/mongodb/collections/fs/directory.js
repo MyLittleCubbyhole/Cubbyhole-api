@@ -212,7 +212,7 @@ provider.create.file = function(params, callback){
                                     userProvider.update.storage(userId, directoryFile.size, function() {
                                         callback.call(this, error);
                                     });
-                                    
+
                             });
                         });
                     }
@@ -396,6 +396,12 @@ provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, ca
  */
 provider.update.name = function(params, callback){
     provider.copy(params.fullPath, {name: params.newName}, "/" + (params.path.length ? params.path + "/" : ""), true, params.userName, callback);
+};
+
+provider.update.md5 = function(params, callback){
+    mongo.collection('directories', function(error, collection) {
+        collection.update({'_id': params.fullPath}, {$set: { md5: params.md5 }}, { safe : true }, callback);
+    })
 };
 
 provider.update.userPhoto = function(user, callback) {
