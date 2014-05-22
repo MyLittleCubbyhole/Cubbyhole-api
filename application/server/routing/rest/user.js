@@ -478,18 +478,28 @@ user.post.paypalNotify = function(request, response) {
                                                             if(!error && data) {
                                                                 result.dateStart = moment().format('YYYY-MM-DD HH:mm:ss');
                                                                 result.dateEnd = moment().add('months', result.duration).format('YYYY-MM-DD HH:mm:ss');
-                                                                subscribeProvider.create.subscribe(result, function(error, subscribe) {
-                                                                    if(error)
-                                                                        console.log('An error has occurred - registration of the subscription has failed')
-                                                                    else {
-                                                                        result.subscribeId = subscribe.insertId;
-                                                                        paymentProvider.create.payment(result, function(error, payment) {
+
+                                                                subscribeProvider.get.paidSubscriptionsLastDays(result.userId, function(error, nbSubscriptions) {
+                                                                    console.log(nbSubscriptions);
+                                                                    if(!error && nbSubscriptions) {
+
+                                                                        result.renew = true;
+
+                                                                        subscribeProvider.create.subscribe(result, function(error, subscribe) {
                                                                             if(error)
-                                                                                console.log('An error has occurred - registration of the payment has failed')
-                                                                            else
-                                                                                console.log('Payment processed - ' + result.amount + result.currency + ' from ' + result.email);
+                                                                                console.log('An error has occurred - registration of the subscription has failed')
+                                                                            else {
+                                                                                result.subscribeId = subscribe.insertId;
+                                                                                paymentProvider.create.payment(result, function(error, payment) {
+                                                                                    if(error)
+                                                                                        console.log('An error has occurred - registration of the payment has failed')
+                                                                                    else
+                                                                                        console.log('Payment processed - ' + result.amount + result.currency + ' from ' + result.email);
+                                                                                })
+                                                                            }
                                                                         })
-                                                                    }
+                                                                    } else
+                                                                        console.log('An error has occurred - error getting previous subscriptions');
                                                                 })
                                                             } else
                                                                 console.log('An error has occurred - error pausing actual subscription');

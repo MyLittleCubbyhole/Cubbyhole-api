@@ -54,12 +54,17 @@ provider.get.actualSubscription = function(userId, callback) {
     });
 }
 
+provider.get.paidSubscriptionsLastDays = function(userId, callback) {
+    var query = 'select count(*) from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1 and (select DATEDIFF(NOW(), MAX(`dateend`)) from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1) <= 5;'
+    Mysql.query(query, callback);
+}
+
 /********************************[  CREATE   ]********************************/
 
 
 provider.create.subscribe = function(subscribe, callback) {
-	var query = 'insert into `subscribe` (`userid`,`planid`,`datestart`,`dateend`, `paused`, `remainingtime`) values (';
-	query += parseInt(subscribe.userId, 10) + ',' + parseInt(subscribe.planId, 10) + ',"' + subscribe.dateStart + '","' + subscribe.dateEnd + '", 0, 0)';
+	var query = 'insert into `subscribe` (`userid`,`planid`,`datestart`,`dateend`, `paused`, `remainingtime`, `renew`) values (';
+	query += parseInt(subscribe.userId, 10) + ',' + parseInt(subscribe.planId, 10) + ',"' + subscribe.dateStart + '","' + subscribe.dateEnd + '", 0, 0, ' + (subscribe.renew ? 1 : 0) + ')';
 	Mysql.query(query, callback);
 
 }
