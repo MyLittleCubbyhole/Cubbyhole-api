@@ -458,7 +458,6 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                     var newPath = params.fullPath;
                     if(!error)
                         sharingProvider.get.byItemFullPath(oldFullPath, function(error, sharings) {
-                            console.log(oldFullPath, error, sharings)
 
                             var callMeBaby = function() {
 
