@@ -480,10 +480,10 @@ user.post.paypalNotify = function(request, response) {
                                                                 result.dateEnd = moment().add('months', result.duration).format('YYYY-MM-DD HH:mm:ss');
 
                                                                 subscribeProvider.get.paidSubscriptionsLastDays(result.userId, function(error, nbSubscriptions) {
-                                                                    console.log(nbSubscriptions);
-                                                                    if(!error && nbSubscriptions) {
+                                                                    if(!error && nbSubscriptions && nbSubscriptions.count !== undefined && nbSubscriptions.count != null) {
 
-                                                                        result.renew = true;
+                                                                        if(nbSubscriptions.count >= 1)
+                                                                            result.renew = true;
 
                                                                         subscribeProvider.create.subscribe(result, function(error, subscribe) {
                                                                             if(error)

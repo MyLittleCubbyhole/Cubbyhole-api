@@ -55,7 +55,7 @@ provider.get.actualSubscription = function(userId, callback) {
 }
 
 provider.get.paidSubscriptionsLastDays = function(userId, callback) {
-    var query = 'select count(*) from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1 and (select DATEDIFF(NOW(), MAX(`dateend`)) from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1) <= 5;'
+    var query = 'select count(*) as count from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1 and (select DATEDIFF(NOW(), MAX(`dateend`)) from `subscribe` where `userid` = ' + parseInt(userId, 10) + ' and `planid` <> 1) <= 5;'
     Mysql.query(query, callback);
 }
 
