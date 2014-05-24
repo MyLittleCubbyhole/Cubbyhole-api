@@ -134,7 +134,7 @@ directory.post.create = function(request, response){
 			if(!error) {
 				sharingProvider.isShared(parameters.fullPath, function(data) {
 					if(data.length > 0)
-						for(var i = 0; i<data.length; i++) 
+						for(var i = 0; i<data.length; i++)
 							socket.send(data[i]._id, 'create_folder', parameters);
 				});
 
@@ -188,7 +188,7 @@ directory.post.copy = function(request, response){
 			if(!error) {
 				sharingProvider.isShared(parameters.baseFullPath, function(data) {
 					if(data.length > 0)
-						for(var i = 0; i<data.length; i++) 
+						for(var i = 0; i<data.length; i++)
 							socket.send(data[i]._id, 'copy', parameters);
 				});
 
@@ -300,7 +300,7 @@ directory.put.rename = function(request, response){
 			if(!error) {
 				sharingProvider.isShared(parameters.fullPath, function(data) {
 					if(data.length > 0)
-						for(var i = 0; i<data.length; i++) 
+						for(var i = 0; i<data.length; i++)
 							socket.send(data[i]._id, 'rename', parameters);
 				});
 
@@ -376,7 +376,7 @@ directory.delete.byPath		= function(request, response){
 					if(!error) {
 						sharingProvider.isShared(fullPath, function(data) {
 							if(data.length > 0)
-								for(var i = 0; i<data.length; i++) 
+								for(var i = 0; i<data.length; i++)
 									socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
 						});
 
