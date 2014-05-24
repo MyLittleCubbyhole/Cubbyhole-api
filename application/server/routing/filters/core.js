@@ -45,6 +45,7 @@ filters.rightInterceptor = function(request, response, next) {
                 if(!error && data) {
                     request.right = data.right;
                     request.owner = false;
+                    request.sharingId = data._id;
                     next();
                 }
                 else {

@@ -29,6 +29,12 @@ provider.get.byItemAndTarget = function(parameters, callback){
     })
 }
 
+provider.get.bySharedWith = function(userId, callback) {
+    mongo.collection('sharings', function(error, collection) {
+		collection.find({"sharedWith":userId}).toArray(callback);
+    })
+}
+
 
 /********************************[ CREATE ]********************************/
 
@@ -50,10 +56,10 @@ provider.create.sharing = function(params, callback) {
 	mongo.collection('sharings', function(error, collection) {
 
 		collection.insert({
-			ownerId: params.ownerId,
+			ownerId: parseInt(params.ownerId),
 			itemId: params.fullPath,
 			right: params.right,
-			sharedWith: params.targetId
+			sharedWith: parseInt(params.targetId)
 		},
 		{ safe : true }, callback);
 
@@ -97,6 +103,26 @@ provider.delete.byItemAndTarget = function(parameters, callback) {
 }
 
 /********************************[ OTHER  ]********************************/
+
+provider.isShared = function(fullPath, callback) {
+
+	var splitPath = fullPath.split('/')
+	,	current = ""
+	,	sharings = new Array()
+	,	started = 0;
+
+	for(var i = 0; i< splitPath.length; i++) {
+		current += splitPath[i] + ( i == 0 ? '/' : '' );
+		started++;
+		provider.get.byItemFullPath(current, function(error, data) {
+			
+			if(!error && data.length > 0)
+				sharings = _.union(sharings, data)
+
+			!--started && callback && callback.call(this, sharings);
+		})
+	}
+}
 
 provider.checkRight = function(parameters, callback) {
 	var fullPath = parameters.fullPath;

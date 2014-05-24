@@ -3,6 +3,8 @@ var provider = require(global.paths.server + '/database/mongodb/collections/fs/d
 ,   sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
 ,	mongoTools = require(global.paths.server + '/database/tools/mongodb/core')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
+,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
+,	socket = require(global.paths.server + '/websockets/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 mysqlTools.init();
@@ -129,6 +131,15 @@ directory.post.create = function(request, response){
 				itemType: 'folder'
 			});
 
+			sharingProvider.isShared(parameters.fullPath, function(data) {
+				if(data.length > 0)
+					for(var i = 0; i<data.length; i++) 
+						socket.send(data[i]._id, 'create_folder', parameters);
+			});
+
+			if(request.owner)
+				socket.send('user_'+request.userId, 'create_folder', parameters);
+
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
 			response.end();
 		})
@@ -153,6 +164,7 @@ directory.post.copy = function(request, response){
 
 	var fullPath = parameters.ownerId + parameters.path
 	,	arrayPath = fullPath.split('/');
+	parameters.baseFullPath = fullPath;
 
 	var name = arrayPath[arrayPath.length-1] != '/' ? arrayPath[arrayPath.length-1] : arrayPath[arrayPath.length-2]
 	,	type = arrayPath[arrayPath.length-1] != '/' ? 'file' : 'folder';
@@ -170,6 +182,16 @@ directory.post.copy = function(request, response){
 				name: fullPath.split('/').pop(),
 				itemType: type
 			});
+
+			sharingProvider.isShared(parameters.baseFullPath, function(data) {
+				if(data.length > 0)
+					for(var i = 0; i<data.length; i++) 
+						socket.send(data[i]._id, 'copy', parameters);
+			});
+
+			if(request.owner)
+				socket.send('user_'+request.userId, 'copy', parameters);
+
 
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
 			response.end();
@@ -271,6 +293,16 @@ directory.put.rename = function(request, response){
 				name: parameters.newName,
 				itemType: 'file|folder'
 			});
+
+			sharingProvider.isShared(parameters.fullPath, function(data) {
+				if(data.length > 0)
+					for(var i = 0; i<data.length; i++) 
+						socket.send(data[i]._id, 'rename', parameters);
+			});
+
+			if(request.owner)
+				socket.send('user_'+request.userId, 'rename', parameters);
+
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
             response.end();
         });
@@ -334,6 +366,17 @@ directory.delete.byPath		= function(request, response){
 						name: fullPath.split('/').pop(),
 						itemType: type
 					});
+
+
+					sharingProvider.isShared(fullPath, function(data) {
+						if(data.length > 0)
+							for(var i = 0; i<data.length; i++) 
+								socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
+					});
+
+					if(request.owner)
+						socket.send('user_'+request.userId, 'delete', {'fullpath': fullPath});
+
 					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
 				})
 		}

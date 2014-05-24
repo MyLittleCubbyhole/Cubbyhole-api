@@ -23,13 +23,13 @@ provider.get.byUser = function(parameters, callback) {
 	parameters.offset = parameters.offset || 0;
 	parameters.limit = parameters.limit || 50;
 
-    mongo.collection('historic', function(error, collection) {
-        collection.find({ $or: [ {"ownerId":parameters.userId}, {"targetOwner":parameters.userId} ] }).
-        	skip(parseInt(parameters.offset)).
-        	limit(parseInt(parameters.limit)).
-        	sort( { date: -1 } ).
-        	toArray(callback);
-    })
+	mongo.collection('historic', function(error, collection) {
+		collection.find({ $or: [ {"ownerId":parameters.userId}, {"targetOwner":parameters.userId} ] }).
+			skip(parseInt(parameters.offset)).
+			limit(parseInt(parameters.limit)).
+			sort( { date: -1 } ).
+			toArray(callback);
+	})
 	
 }
 
