@@ -377,11 +377,11 @@ directory.delete.byPath		= function(request, response){
 						sharingProvider.isShared(fullPath, function(data) {
 							if(data.length > 0)
 								for(var i = 0; i<data.length; i++)
-									socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
+									socket.send(data[i]._id, 'delete', {'fullPath': fullPath});
 						});
 
 						if(request.owner)
-							socket.send('user_'+request.userId, 'delete', {'fullpath': fullPath});
+							socket.send('user_'+request.userId, 'delete', {'fullPath': fullPath});
 					}
 
 					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });

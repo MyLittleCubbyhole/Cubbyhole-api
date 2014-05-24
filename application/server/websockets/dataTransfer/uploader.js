@@ -46,7 +46,7 @@ uploader.init = function(socket, sockets) {
 						files[id].uploadPhoto = true;
 						var chunk = 0;
 						socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
-					} else 
+					} else
 						subscribeProvider.get.actualSubscription(data.owner, function(error, subscribe) {
 							if(!error && subscribe && subscribe.id)
 								planProvider.get.byId(subscribe.planid, function(error, plan) {
@@ -167,16 +167,6 @@ uploader.init = function(socket, sockets) {
 							if(fileMd5)
 								files[id].md5 = fileMd5;
 
-							var fileToSend = files[id];
-							sharingProvider.isShared(parameters.fullPath, function(data) {
-								if(data.length > 0)
-									for(var i = 0; i<data.length; i++) 
-										sockets.in(data[i]._id).emit( 'create_file', fileToSend);
-							});
-
-							if(files[id].owner)
-								sockets.in('user_'+files[id].creatorId).emit('create_file', fileToSend);
-
 							socket.emit('upload_done', {
 								'downloaded': files[id]['downloaded'],
 								'size': files[id]['size'],
@@ -185,6 +175,17 @@ uploader.init = function(socket, sockets) {
 								'_id': files[id]._id,
 								'name': files[id].uploadPhoto ? files[id].name : ''
 							});
+
+							var fileToSend = files[id];
+							sharingProvider.isShared(parameters.fullPath, function(data) {
+								if(data.length > 0)
+									for(var i = 0; i<data.length; i++)
+										sockets.in(data[i]._id).emit( 'create_file', fileToSend);
+							});
+
+							if(files[id].owner)
+								sockets.in('user_'+files[id].creatorId).emit('create_file', fileToSend);
+
 							delete files[id];
 						}
 						else {
