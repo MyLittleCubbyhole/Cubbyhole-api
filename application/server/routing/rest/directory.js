@@ -131,14 +131,16 @@ directory.post.create = function(request, response){
 				itemType: 'folder'
 			});
 
-			sharingProvider.isShared(parameters.fullPath, function(data) {
-				if(data.length > 0)
-					for(var i = 0; i<data.length; i++) 
-						socket.send(data[i]._id, 'create_folder', parameters);
-			});
+			if(!error) {
+				sharingProvider.isShared(parameters.fullPath, function(data) {
+					if(data.length > 0)
+						for(var i = 0; i<data.length; i++) 
+							socket.send(data[i]._id, 'create_folder', parameters);
+				});
 
-			if(request.owner)
-				socket.send('user_'+request.userId, 'create_folder', parameters);
+				if(request.owner)
+					socket.send('user_'+request.userId, 'create_folder', parameters);
+			}
 
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
 			response.end();
@@ -183,15 +185,16 @@ directory.post.copy = function(request, response){
 				itemType: type
 			});
 
-			sharingProvider.isShared(parameters.baseFullPath, function(data) {
-				if(data.length > 0)
-					for(var i = 0; i<data.length; i++) 
-						socket.send(data[i]._id, 'copy', parameters);
-			});
+			if(!error) {
+				sharingProvider.isShared(parameters.baseFullPath, function(data) {
+					if(data.length > 0)
+						for(var i = 0; i<data.length; i++) 
+							socket.send(data[i]._id, 'copy', parameters);
+				});
 
-			if(request.owner)
-				socket.send('user_'+request.userId, 'copy', parameters);
-
+				if(request.owner)
+					socket.send('user_'+request.userId, 'copy', parameters);
+			}
 
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
 			response.end();
@@ -294,14 +297,16 @@ directory.put.rename = function(request, response){
 				itemType: 'file|folder'
 			});
 
-			sharingProvider.isShared(parameters.fullPath, function(data) {
-				if(data.length > 0)
-					for(var i = 0; i<data.length; i++) 
-						socket.send(data[i]._id, 'rename', parameters);
-			});
+			if(!error) {
+				sharingProvider.isShared(parameters.fullPath, function(data) {
+					if(data.length > 0)
+						for(var i = 0; i<data.length; i++) 
+							socket.send(data[i]._id, 'rename', parameters);
+				});
 
-			if(request.owner)
-				socket.send('user_'+request.userId, 'rename', parameters);
+				if(request.owner)
+					socket.send('user_'+request.userId, 'rename', parameters);
+			}
 
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
             response.end();
@@ -368,14 +373,16 @@ directory.delete.byPath		= function(request, response){
 					});
 
 
-					sharingProvider.isShared(fullPath, function(data) {
-						if(data.length > 0)
-							for(var i = 0; i<data.length; i++) 
-								socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
-					});
+					if(!error) {
+						sharingProvider.isShared(fullPath, function(data) {
+							if(data.length > 0)
+								for(var i = 0; i<data.length; i++) 
+									socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
+						});
 
-					if(request.owner)
-						socket.send('user_'+request.userId, 'delete', {'fullpath': fullPath});
+						if(request.owner)
+							socket.send('user_'+request.userId, 'delete', {'fullpath': fullPath});
+					}
 
 					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
 				})

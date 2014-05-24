@@ -24,7 +24,7 @@ websocket.init = function(server) {
 		} 
 
 		console.log('user connected');
-		uploader.init(socket);
+		uploader.init(socket, sockets);
 
 		socket.on('socket-authentication', function(data) {
 			data.token = data.token || '';

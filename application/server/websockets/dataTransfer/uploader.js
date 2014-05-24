@@ -5,11 +5,12 @@ var uploader = {}
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
+,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
 ,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 ,	MongoProvider = require(global.paths.server + '/database/mongodb/core').get()
 ,   ObjectID = MongoProvider.objectId;
 
-uploader.init = function(socket) {
+uploader.init = function(socket, sockets) {
 
 	socket.on('upload_init', function (data) {
 
@@ -33,6 +34,7 @@ uploader.init = function(socket) {
 
 			tokenProvider.isValidForAuthentication(data.token, function(error, tokenInfos) {
 				if(!error && tokenInfos && tokenInfos.userid) {
+					var fullPath = files[id].owner + files[id].logicPath + files[id].name;
 
 					files[id].creatorId = tokenInfos.userid;
 					files[id].creatorName = tokenInfos.firstname + ' ' + tokenInfos.lastname;
@@ -44,7 +46,7 @@ uploader.init = function(socket) {
 						files[id].uploadPhoto = true;
 						var chunk = 0;
 						socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
-					} else
+					} else 
 						subscribeProvider.get.actualSubscription(data.owner, function(error, subscribe) {
 							if(!error && subscribe && subscribe.id)
 								planProvider.get.byId(subscribe.planid, function(error, plan) {
@@ -52,21 +54,46 @@ uploader.init = function(socket) {
 										directoryProvider.get.totalSize(data.owner, function(error, totalSize) {
 											if(!error && totalSize) {
 												if((totalSize.length == 0 && files[id].size <= plan.storage) || (totalSize[0] && (totalSize[0].size + files[id].size) <= plan.storage)) {
+
 													var chunk = 0;
-													socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
-												} else
+
+													if(files[id].creatorId == files[id].owner) {
+														socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
+													}
+													else {
+														fullPath = fullPath.slice(-1) != '/' || !request.params[1] ? fullPath :fullPath.slice(0, -1);
+														sharingProvider.checkRight({fullPath: fullPath, targetId: files[id].creatorId}, function(error, data) {
+															if(!error && data && data.right == 'W')
+																socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
+															else {
+																socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'cubby-storage forbiden' });
+																delete files[id];
+															}
+														})
+													}
+												} else{
 													socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'your cubbyhole is full' });
-											} else
+													delete files[id];
+												}
+											} else{
 												socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting the current used space' });
+												delete files[id];
+											}
 										})
-									else
+									else{
 										socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting your actual plan' });
+										delete files[id];
+									}
 								})
-							else
+							else{
 								socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'error getting your actual subscription' });
+								delete files[id];
+							}
 						})
-				} else
+				} else{
 					socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'invalid token' });
+					delete files[id];
+				}
 			});
 		}
 		else
@@ -136,6 +163,19 @@ uploader.init = function(socket) {
 										console.log(error);
 								});
 
+							files[id].fullPath = parameters.fullPath;
+							if(fileMd5)
+								files[id].md5 = fileMd5;
+
+							var fileToSend = files[id];
+							sharingProvider.isShared(parameters.fullPath, function(data) {
+								if(data.length > 0)
+									for(var i = 0; i<data.length; i++) 
+										sockets.in(data[i]._id).emit( 'create_file', fileToSend);
+							});
+
+							if(files[id].owner)
+								sockets.in('user_'+files[id].creatorId).emit('create_file', fileToSend);
 
 							socket.emit('upload_done', {
 								'downloaded': files[id]['downloaded'],
