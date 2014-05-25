@@ -10,9 +10,9 @@ websocket.init = function(server) {
 	uploader = require(global.paths.server + '/websockets/dataTransfer/uploader');
 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token');
 	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
-	
+
 	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
-	
+
 	sockets.on('connection', function(socket) {
 		var roomSubscribe = new Array();
 
@@ -21,14 +21,15 @@ websocket.init = function(server) {
 				console.log('(-) user leave the room n°'+roomSubscribe[i]);
 				socket.leave(roomSubscribe[i]);
 			}
-		} 
+		}
 
 		console.log('user connected');
 		uploader.init(socket, sockets);
 
 		socket.on('socket-authentication', function(data) {
+			console.log(data)
 			data.token = data.token || '';
-			tokenProvider.isValidForAuthentication(data.token, function(error, token) {				
+			tokenProvider.isValidForAuthentication(data.token, function(error, token) {
 				if(!error && token && token.userid) {
 					clean();
 					roomSubscribe.push('user_' + token.userid);

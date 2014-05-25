@@ -180,7 +180,7 @@ directory.post.copy = function(request, response){
 			if(!error) {
 
 				parameters.newName = data.name;
-				parameters.fullPath  = data.fullPath;
+				parameters.fullPath  = data._id;
 
 				historicProvider.create.event({
 					ownerId: request.userId,

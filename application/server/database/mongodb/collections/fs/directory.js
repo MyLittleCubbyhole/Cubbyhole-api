@@ -426,7 +426,7 @@ provider.update.downloads = function(fullPath, callback) {
 
 /********************************[ UPDATE ]********************************/
 
-provider.copyItem = function(collection, item, updatedItem, targetPath, move, userName, start, stop) {
+provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, userName, start, stop) {
     updatedItem = updatedItem || {};
 
     var newItem = {};
@@ -442,6 +442,9 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
 
             newItem.name = newName;
             newItem._id = newItem.ownerId + newItem.path + newItem.name;
+
+            if(!targetItem)
+                targetItem = newItem;
 
             var params = {
                 fullPath: newItem._id,
@@ -467,10 +470,10 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                                     collection.findOne({'_id': item.children[i]}, function(error, data) {
                                         if(error)
                                             console.error('item not found');
-                                        provider.copyItem(collection, data, null, path, move, userName, start, stop);
+                                        provider.copyItem(collection, data, null, path, targetItem, move, userName, start, stop);
                                     });
                                 }
-                                stop(error, params);
+                                stop(error, targetItem);
 
                             }
 
@@ -496,7 +499,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                         if(error)
                             console.error(error);
 
-                        stop(error, params);
+                        stop(error, targetItem);
                     });
 
                 });
@@ -545,7 +548,7 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, userName, call
                     collection.findOne({"_id": fullPath}, function(error, item) {
                         if(!error && item) {
                             start();
-                            provider.copyItem(collection, item, updatedItem, targetPath, move, userName, start, stop);
+                            provider.copyItem(collection, item, updatedItem, targetPath, null, move, userName, start, stop);
                         }
                         else
                             callback.call(this, error);
