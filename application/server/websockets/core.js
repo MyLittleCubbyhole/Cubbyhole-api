@@ -27,7 +27,6 @@ websocket.init = function(server) {
 		uploader.init(socket, sockets);
 
 		socket.on('socket-authentication', function(data) {
-			console.log(data)
 			data.token = data.token || '';
 			tokenProvider.isValidForAuthentication(data.token, function(error, token) {
 				if(!error && token && token.userid) {
@@ -57,8 +56,7 @@ websocket.init = function(server) {
 		})
 
 
-
-		socket.emit('socket-authentication');
+		socket.emit('socket-authentication', {});
 	});
 
 	return sockets;
@@ -70,6 +68,7 @@ websocket.get = function() {
 
 websocket.send = function(roomId, type, data) {
 	type = type || 'message';
+	console.log(roomId, type, data);
 	sockets.in(roomId).emit(type, data);
 }
 

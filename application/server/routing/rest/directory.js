@@ -196,7 +196,7 @@ directory.post.copy = function(request, response){
 							socket.send(data[i]._id, 'copy', parameters);
 				});
 
-				socket.send('user_'+request.ownerId, 'create_folder', parameters);
+				socket.send('user_'+request.ownerId, 'copy', parameters);
 			}
 
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -307,7 +307,7 @@ directory.put.rename = function(request, response){
 							socket.send(data[i]._id, 'rename', parameters);
 				});
 
-				socket.send('user_'+request.ownerId, 'create_folder', parameters);
+				socket.send('user_'+request.ownerId, 'rename', parameters);
 			}
 
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -379,7 +379,7 @@ directory.delete.byPath		= function(request, response){
 											socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
 								});
 
-								socket.send('user_'+request.ownerId, 'create_folder', parameters);
+								socket.send('user_'+request.ownerId, 'delete', parameters);
 							}
 
 							response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -389,7 +389,7 @@ directory.delete.byPath		= function(request, response){
 					response.send({'information': 'An error has occurred - method not allowed'});
 			})
 	})
-	
+
 
 }
 
