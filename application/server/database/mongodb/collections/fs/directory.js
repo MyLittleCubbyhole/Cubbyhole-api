@@ -477,7 +477,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                                         provider.copyItem(collection, data, null, path, move, userName, start, stop);
                                     });
                                 }
-                                stop();
+                                stop(error, params);
 
                             }
 
@@ -503,7 +503,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, move, us
                         if(error)
                             console.error(error);
 
-                        stop();
+                        stop(error, params);
                     });
 
                 });
@@ -536,17 +536,17 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, userName, call
                     function start() {
                         started++;
                     };
-                    function stop(error) {
+                    function stop(error, data) {
                         if(--started <= 0)
-                            end(error);
+                            end(error, data);
                     };
-                    function end(error) {
+                    function end(error, data) {
                         if(move)
                             provider.delete.byPath(fullPath, userName, function(error) {
-                                callback.call(this, error);
+                                callback.call(this, error, data);
                             });
                         else
-                            callback.call(this, error);
+                            callback.call(this, error, data);
                     };
 
                     collection.findOne({"_id": fullPath}, function(error, item) {

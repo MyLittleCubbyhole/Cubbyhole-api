@@ -138,8 +138,7 @@ directory.post.create = function(request, response){
 							socket.send(data[i]._id, 'create_folder', parameters);
 				});
 
-				// if(!request.ownerId)
-					socket.send('user_'+request.ownerId, 'create_folder', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -152,7 +151,9 @@ directory.post.copy = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
 	,	parameters 	= {};
-	parameters.ownerId 	= params[0]
+	parameters.ownerId 	= params[0];
+	parameters.creatorId = request.userId;
+	parameters.creator = request.userName;
 	parameters.path = params[1] || '/' ;
 	parameters.move = params.move || false;
 
@@ -174,26 +175,28 @@ directory.post.copy = function(request, response){
 	if(!parameters.path)
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
-		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error) {
-			if(!error)
-			historicProvider.create.event({
-				ownerId: request.userId,
-				targetOwner: fullPath.split('/')[0],
-				fullPath: parameters.targetPath,
-				action: 'move',
-				name: fullPath.split('/').pop(),
-				itemType: type
-			});
-
+		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error, data) {
 			if(!error) {
+
+				parameters.newName = data.name;
+				parameters.fullPath  = data.fullPath;
+
+				historicProvider.create.event({
+					ownerId: request.userId,
+					targetOwner: fullPath.split('/')[0],
+					fullPath: parameters.targetPath,
+					action: 'move',
+					name: fullPath.split('/').pop(),
+					itemType: type
+				});
+
 				sharingProvider.isShared(parameters.baseFullPath, function(data) {
 					if(data.length > 0)
 						for(var i = 0; i<data.length; i++)
 							socket.send(data[i]._id, 'copy', parameters);
 				});
 
-				if(request.owner)
-					socket.send('user_'+request.userId, 'copy', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -304,8 +307,7 @@ directory.put.rename = function(request, response){
 							socket.send(data[i]._id, 'rename', parameters);
 				});
 
-				if(request.owner)
-					socket.send('user_'+request.userId, 'rename', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -377,8 +379,7 @@ directory.delete.byPath		= function(request, response){
 											socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
 								});
 
-								if(request.owner)
-									socket.send('user_'+request.userId, 'delete', {'fullpath': fullPath});
+								socket.send('user_'+request.ownerId, 'create_folder', parameters);
 							}
 
 							response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
