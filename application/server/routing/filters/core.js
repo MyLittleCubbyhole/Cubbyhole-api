@@ -27,7 +27,6 @@ filters.rightInterceptor = function(request, response, next) {
     var ownerId = request.params[0]
     ,   userId = request.userId
     ,   fullPath = ownerId + '/' + (request.params[1] ? (request.params[1][0] == '/' ? request.params[1].substring(1) : request.params[1] ) : '') ;
-
     if(ownerId == 1) {
         request.right = 'R';
         request.owner = false;

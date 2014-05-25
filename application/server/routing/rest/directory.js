@@ -356,9 +356,7 @@ directory.delete.byPath		= function(request, response){
 	}
 
 	sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
-		if(!error && data && data.length > 0)
-			response.send({'information': 'An error has occurred - method not allowed'});
-		else {
+		if(request.owner && !error){
 			if(!params[1])
 				response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
 			else
@@ -387,6 +385,8 @@ directory.delete.byPath		= function(request, response){
 					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
 				})
 		}
+		else
+			response.send({'information': 'An error has occurred - method not allowed'});
 	})
 
 }

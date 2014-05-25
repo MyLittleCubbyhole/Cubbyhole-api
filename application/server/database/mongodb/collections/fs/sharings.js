@@ -2,17 +2,13 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   fileProvider
 ,   directoryProvider
 ,   tools = require(global.paths.server + '/database/tools/mongodb/core')
+,   socket = require(global.paths.server + '/websockets/core')
 ,   _ = require('lodash')
 ,   ObjectID = MongoProvider.objectId
 ,   mongo = MongoProvider.db
 ,   provider = { get: {}, create: {}, delete: {}, update: {} };
 
-provider.init = function() {
-    if(!fileProvider)
-    fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file');
-    if(!directoryProvider)
-    directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory');
-}
+provider.init = function() {}
 
 
 /********************************[  GET   ]********************************/
@@ -61,7 +57,12 @@ provider.create.sharing = function(params, callback) {
 			right: params.right,
 			sharedWith: parseInt(params.targetId)
 		},
-		{ safe : true }, callback);
+		{ safe : true }, function(error, data) {
+
+        	console.log('user_'+parseInt(params.targetId))
+			socket.send('user_'+parseInt(params.targetId), 'socket-authentication', {});
+			callback.call(this, error, data)
+		});
 
 	})
 
@@ -92,13 +93,22 @@ provider.update.right = function(params, callback) {
 
 provider.delete.byItemFullPath = function(fullPath, callback) {
 	mongo.collection('sharings', function(error, collection) {
-        collection.remove({'itemId':fullPath}, {safe:true}, callback);
+		provider.get.byItemFullPath(fullPath, function(error, items) {
+        	for(var i = 0; i<items.length; i++)
+				socket.send('user_'+parseInt(items[i].sharedWith), 'socket-authentication', {});
+        	collection.remove({'itemId':fullPath}, {safe:true}, callback);
+
+		})
     });
 }
 
 provider.delete.byItemAndTarget = function(parameters, callback) {
 	mongo.collection('sharings', function(error, collection) {
-        collection.remove({'itemId': parameters.fullPath, 'sharedWith': parameters.targetId}, {safe:true}, callback);
+        collection.remove({'itemId': parameters.fullPath, 'sharedWith': parameters.targetId}, {safe:true}, function(error, data) {
+        	console.log('user_'+parseInt(parameters.targetId))
+			socket.send('user_'+parseInt(parameters.targetId), 'socket-authentication', {});
+        	callback.call(this, error, data)
+        });
     });
 }
 
