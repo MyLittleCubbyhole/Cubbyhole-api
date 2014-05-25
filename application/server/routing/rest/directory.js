@@ -138,8 +138,7 @@ directory.post.create = function(request, response){
 							socket.send(data[i]._id, 'create_folder', parameters);
 				});
 
-				if(request.owner)
-					socket.send('user_'+request.userId, 'create_folder', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
 			response.send({'information': (!error ? 'folder created' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -197,8 +196,7 @@ directory.post.copy = function(request, response){
 							socket.send(data[i]._id, 'copy', parameters);
 				});
 
-				if(request.owner)
-					socket.send('user_'+request.userId, 'copy', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
 			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -309,8 +307,7 @@ directory.put.rename = function(request, response){
 							socket.send(data[i]._id, 'rename', parameters);
 				});
 
-				if(request.owner)
-					socket.send('user_'+request.userId, 'rename', parameters);
+				socket.send('user_'+request.ownerId, 'create_folder', parameters);
 			}
 
             response.send({'information': (!error ? 'file or folder renamed' : 'An error has occurred - ' + error), 'params' : parameters });
@@ -354,45 +351,45 @@ directory.delete.byPath		= function(request, response){
 	fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
 	var path = params[1].split('/');
 
-
 	if(request.right != 'W') {
 		response.send({'information': 'An error has occurred - method not allowed'});
 		return;
 	}
+	provider.get.byId(fullPath, function(error, item) {
+		sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
+				if((request.owner || item.creatorId == request.userId) && !error){
+					if(!params[1])
+						response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
+					else
+						provider.delete.byPath(fullPath, request.userName, function(error, data){
+							historicProvider.create.event({
+								ownerId: request.userId,
+								targetOwner: fullPath.split('/')[0],
+								fullPath: fullPath,
+								action: 'delete',
+								name: fullPath.split('/').pop(),
+								itemType: type
+							});
 
-	sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
-		if(request.owner && !error){
-			if(!params[1])
-				response.send({'information': 'An error has occurred - target name must be defined', 'params' : parameters });
-			else
-				provider.delete.byPath(fullPath, request.userName, function(error, data){
-					historicProvider.create.event({
-						ownerId: request.userId,
-						targetOwner: fullPath.split('/')[0],
-						fullPath: fullPath,
-						action: 'delete',
-						name: fullPath.split('/').pop(),
-						itemType: type
-					});
 
+							if(!error) {
+								sharingProvider.isShared(fullPath, function(data) {
+									if(data.length > 0)
+										for(var i = 0; i<data.length; i++)
+											socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
+								});
 
-					if(!error) {
-						sharingProvider.isShared(fullPath, function(data) {
-							if(data.length > 0)
-								for(var i = 0; i<data.length; i++)
-									socket.send(data[i]._id, 'delete', {'fullPath': fullPath});
-						});
+								socket.send('user_'+request.ownerId, 'create_folder', parameters);
+							}
 
-						if(request.owner)
-							socket.send('user_'+request.userId, 'delete', {'fullPath': fullPath});
-					}
-
-					response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
-				})
-		}
-		else
-			response.send({'information': 'An error has occurred - method not allowed'});
+							response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
+						})
+				}
+				else
+					response.send({'information': 'An error has occurred - method not allowed'});
+			})
 	})
+	
 
 }
 
