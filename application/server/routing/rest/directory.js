@@ -152,7 +152,9 @@ directory.post.copy = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
 	,	parameters 	= {};
-	parameters.ownerId 	= params[0]
+	parameters.ownerId 	= params[0];
+	parameters.creatorId = request.userId;
+	parameters.creator = request.userName;
 	parameters.path = params[1] || '/' ;
 	parameters.move = params.move || false;
 
@@ -174,18 +176,21 @@ directory.post.copy = function(request, response){
 	if(!parameters.path)
 		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
 	else
-		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error) {
-			if(!error)
-			historicProvider.create.event({
-				ownerId: request.userId,
-				targetOwner: fullPath.split('/')[0],
-				fullPath: parameters.targetPath,
-				action: 'move',
-				name: fullPath.split('/').pop(),
-				itemType: type
-			});
-
+		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error, data) {
 			if(!error) {
+
+				parameters.newName = data.name;
+				parameters.fullPath  = data.fullPath;
+
+				historicProvider.create.event({
+					ownerId: request.userId,
+					targetOwner: fullPath.split('/')[0],
+					fullPath: parameters.targetPath,
+					action: 'move',
+					name: fullPath.split('/').pop(),
+					itemType: type
+				});
+
 				sharingProvider.isShared(parameters.baseFullPath, function(data) {
 					if(data.length > 0)
 						for(var i = 0; i<data.length; i++)
