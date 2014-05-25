@@ -43,6 +43,13 @@ provider.get.byOwner = function(ownerId, callback){
     });
 };
 
+provider.get.byId = function(id, callback) {
+
+    mongo.collection('directories', function(error, collection) {
+        collection.findOne({"_id": id}, callback);
+    })
+}
+
 provider.get.byItemId = function(itemId, callback){
     mongo.collection('directories', function(error, collection) {
         collection.find({"itemId": ObjectID(itemId)}).toArray(callback);

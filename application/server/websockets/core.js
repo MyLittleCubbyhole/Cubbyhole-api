@@ -55,6 +55,9 @@ websocket.init = function(server) {
 			console.log('user disconnected')
 		})
 
+
+
+		socket.emit('socket-authentication');
 	});
 
 	return sockets;
