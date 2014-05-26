@@ -379,7 +379,7 @@ directory.delete.byPath		= function(request, response){
 											socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
 								});
 
-								socket.send('user_'+request.ownerId, 'delete', parameters);
+								socket.send('user_'+request.ownerId, 'delete', {'fullpath': fullPath});
 							}
 
 							response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
