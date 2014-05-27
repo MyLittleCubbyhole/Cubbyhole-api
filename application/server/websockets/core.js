@@ -68,7 +68,6 @@ websocket.get = function() {
 
 websocket.send = function(roomId, type, data) {
 	type = type || 'message';
-	console.log(roomId, type, data);
 	sockets.in(roomId).emit(type, data);
 }
 

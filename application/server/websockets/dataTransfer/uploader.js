@@ -183,8 +183,7 @@ uploader.init = function(socket, sockets) {
 										sockets.in(data[i]._id).emit( 'create_file', fileToSend);
 							});
 
-							if(files[id].owner)
-								sockets.in('user_'+files[id].creatorId).emit('create_file', fileToSend);
+							sockets.in('user_'+files[id].owner).emit('create_file', fileToSend);
 
 							delete files[id];
 						}

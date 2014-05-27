@@ -176,30 +176,39 @@ directory.post.copy = function(request, response){
 	else
 		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error, data) {
 			if(!error) {
+				provider.get.byId(data._id, function(error, data) {
+					if(!error && data) {
+						parameters.newName = data.name;
+						parameters.size = data.size;
+						parameters.type = data.type;
+						parameters.fullPath  = data._id;
 
-				parameters.newName = data.name;
-				parameters.fullPath  = data._id;
+						historicProvider.create.event({
+							ownerId: request.userId,
+							targetOwner: fullPath.split('/')[0],
+							fullPath: parameters.targetPath,
+							action: 'move',
+							name: fullPath.split('/').pop(),
+							itemType: type
+						});
 
-				historicProvider.create.event({
-					ownerId: request.userId,
-					targetOwner: fullPath.split('/')[0],
-					fullPath: parameters.targetPath,
-					action: 'move',
-					name: fullPath.split('/').pop(),
-					itemType: type
+						sharingProvider.isShared(parameters.baseFullPath, function(data) {
+							if(data.length > 0)
+								for(var i = 0; i<data.length; i++)
+									socket.send(data[i]._id, 'copy', parameters);
+						});
+
+						socket.send('user_'+request.ownerId, 'copy', parameters);
+					}
+
+					response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
+					response.end();
 				});
-
-				sharingProvider.isShared(parameters.baseFullPath, function(data) {
-					if(data.length > 0)
-						for(var i = 0; i<data.length; i++)
-							socket.send(data[i]._id, 'copy', parameters);
-				});
-
-				socket.send('user_'+request.ownerId, 'copy', parameters);
+			} else {
+				response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
+				response.end();
 			}
 
-			response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
-			response.end();
 		})
 
 }
@@ -375,10 +384,10 @@ directory.delete.byPath		= function(request, response){
 								sharingProvider.isShared(fullPath, function(data) {
 									if(data.length > 0)
 										for(var i = 0; i<data.length; i++)
-											socket.send(data[i]._id, 'delete', {'fullpath': fullPath});
+											socket.send(data[i]._id, 'delete', {'fullPath': fullPath});
 								});
 
-								socket.send('user_'+request.ownerId, 'delete', {'fullpath': fullPath});
+								socket.send('user_'+request.ownerId, 'delete', {'fullPath': fullPath});
 							}
 
 							response.send({'information': (!error ? 'target deleted' : 'An error has occurred - ' + error), 'params' : parameters });
