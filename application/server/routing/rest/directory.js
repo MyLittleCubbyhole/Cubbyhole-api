@@ -3,7 +3,6 @@ var provider = require(global.paths.server + '/database/mongodb/collections/fs/d
 ,   sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
 ,	mongoTools = require(global.paths.server + '/database/tools/mongodb/core')
 ,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
-,	mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
 ,	socket = require(global.paths.server + '/websockets/core')
 ,	directory = { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
