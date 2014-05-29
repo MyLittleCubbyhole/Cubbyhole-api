@@ -171,66 +171,94 @@ directory.post.copy = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
 	,	parameters 	= {};
-	parameters.ownerId 	= params[0];
+	parameters.ownerId 	= request.ownerId;
 	parameters.creatorId = request.userId;
 	parameters.creator = request.userName;
 	parameters.path = params[1] || '/' ;
 	parameters.move = params.move || false;
 
 	parameters.targetPath = body.path;
+	var targetId = parseInt(parameters.targetPath.substring(0, parameters.targetPath.indexOf('/')), 10);
 
 
-	if(request.right != 'W') {
-		response.send({'information': 'An error has occurred - method not allowed'});
-		return;
-	}
+    if(targetId == 1) {
+        request.right = 'R';
+        request.owner = false;
+        next();
+    }
+    else {
+        if(targetId == parameters.creatorId) {
+            request.right = 'W';
+            request.owner = true;
+            next();
+        }
+        else {
+            sharingProvider.checkRight({fullPath: parameters.targetPath.slice(0, -1), targetId: parameters.creatorId}, function(error, data) {
+                if(!error && data) {
+                    request.right = data.right;
+                    request.owner = false;
+                }
+                else
+                    request.right = null;
 
-	var fullPath = parameters.ownerId + parameters.path
-	,	arrayPath = fullPath.split('/');
-	parameters.baseFullPath = fullPath;
+                next();
+            });
+        }
+    }
 
-	var name = arrayPath[arrayPath.length-1] != '/' ? arrayPath[arrayPath.length-1] : arrayPath[arrayPath.length-2]
-	,	type = arrayPath[arrayPath.length-1] != '/' ? 'file' : 'folder';
+	function next() {
+		if(request.right != 'W') {
+			response.send({'information': 'An error has occurred - method not allowed'});
+			return;
+		}
 
-	if(!parameters.path)
-		response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
-	else
-		provider.copy(fullPath, null, parameters.targetPath, parameters.move, request.userName, function(error, data) {
-			if(!error) {
-				provider.get.byId(data._id, function(error, data) {
-					if(!error && data) {
-						parameters.newName = data.name;
-						parameters.size = data.size;
-						parameters.type = data.type;
-						parameters.fullPath  = data._id;
+		var fullPath = parameters.ownerId + parameters.path
+		,	arrayPath = fullPath.split('/');
+		parameters.baseFullPath = fullPath;
 
-						historicProvider.create.event({
-							ownerId: request.userId,
-							targetOwner: fullPath.split('/')[0],
-							fullPath: parameters.targetPath,
-							action: 'move',
-							name: fullPath.split('/').pop(),
-							itemType: type
-						});
+		var name = arrayPath[arrayPath.length-1] != '/' ? arrayPath[arrayPath.length-1] : arrayPath[arrayPath.length-2]
+		,	type = arrayPath[arrayPath.length-1] != '/' ? 'file' : 'folder';
 
-						sharingProvider.isShared(parameters.baseFullPath, function(data) {
-							if(data.length > 0)
-								for(var i = 0; i<data.length; i++)
-									socket.send(data[i]._id, 'copy', parameters);
-						});
+		if(!parameters.path)
+			response.send({'information': 'An error has occurred - target path must be defined', 'params' : parameters });
+		else
+			provider.copy(fullPath, null, parameters.targetPath, parameters.move, parameters.creatorId, request.userName, function(error, data) {
+				if(!error) {
+					provider.get.byId(data._id, function(error, data) {
+						if(!error && data) {
+							parameters.newName = data.name;
+							parameters.size = data.size;
+							parameters.type = data.type;
+							parameters.fullPath  = data._id;
 
-						socket.send('user_'+request.ownerId, 'copy', parameters);
-					}
+							historicProvider.create.event({
+								ownerId: request.userId,
+								targetOwner: fullPath.split('/')[0],
+								fullPath: parameters.targetPath,
+								action: 'move',
+								name: fullPath.split('/').pop(),
+								itemType: type
+							});
 
+							sharingProvider.isShared(parameters.baseFullPath, function(data) {
+								if(data.length > 0)
+									for(var i = 0; i<data.length; i++)
+										socket.send(data[i]._id, 'copy', parameters);
+							});
+
+							socket.send('user_'+request.ownerId, 'copy', parameters);
+						}
+
+						response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
+						response.end();
+					});
+				} else {
 					response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
 					response.end();
-				});
-			} else {
-				response.send({'information': (!error ? 'copy done' : 'An error has occurred - ' + error), 'params' : parameters });
-				response.end();
-			}
+				}
 
-		})
+			})
+	}
 
 }
 

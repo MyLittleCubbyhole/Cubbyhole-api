@@ -433,7 +433,7 @@ provider.update.downloads = function(fullPath, callback) {
 
 /********************************[ UPDATE ]********************************/
 
-provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, userName, start, stop) {
+provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, creatorId, userName, start, stop) {
     updatedItem = updatedItem || {};
 
     var newItem = {};
@@ -441,7 +441,8 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
 
     var oldFullPath = newItem._id;
 
-    newItem.path = targetPath;
+    newItem.path = targetPath.substring(targetPath.indexOf('/'));
+    newItem.ownerId = targetPath.substring(0, targetPath.indexOf('/'));
     newItem._id = newItem.ownerId + newItem.path + newItem.name;
     newItem.lastUpdate = new Date();
     provider.getNewName(newItem._id, function(error, newName) {
@@ -458,7 +459,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
                 ownerId: newItem.ownerId,
                 path: newItem.path,
                 name: newItem.name,
-                creatorId: newItem.creatorId,
+                creatorId: creatorId,
                 creatorName: userName,
                 downloads: newItem.downloads || 0
             };
@@ -473,11 +474,11 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
 
                                 for(var i = 0; i < item.children.length; i++) {
                                     start();
-                                    var path = newItem.path + newItem.name + "/";
+                                    var path = newItem.ownerId + newItem.path + newItem.name + "/";
                                     collection.findOne({'_id': item.children[i]}, function(error, data) {
                                         if(error)
                                             console.error('item not found');
-                                        provider.copyItem(collection, data, null, path, targetItem, move, userName, start, stop);
+                                        provider.copyItem(collection, data, null, path, targetItem, move, creatorId, userName, start, stop);
                                     });
                                 }
                                 stop(error, targetItem);
@@ -519,16 +520,17 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
  * Copy or move an item
  * @param  {string}     fullPath    fullPath of the item to copy
  * @param  {document}   updatedItem new item to create if you want to process a rename
- * @param  {string}     targetPath  destination of the item
+ * @param  {string}     targetPath  destination of the item (ex: 15/folder/)
  * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
+ * @param  {boolean}    creatorId   id of the creator
  * @param  {string}     userName    name of the user who make the update
  * @param  {Function}   callback
  */
-provider.copy = function(fullPath, updatedItem, targetPath, move, userName, callback) {
+provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, userName, callback) {
     var started = 0;
 
 
-    if(fullPath.substring(fullPath.indexOf('/')) + '/' != targetPath) {
+    if(fullPath + '/' != targetPath) {
         fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
         sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
             if(!error && data && data.length > 0)
@@ -554,11 +556,18 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, userName, call
 
                     collection.findOne({"_id": fullPath}, function(error, item) {
                         if(!error && item) {
-                            start();
-                            provider.copyItem(collection, item, updatedItem, targetPath, null, move, userName, start, stop);
+                            collection.findOne({"_id": targetPath.slice(0, -1)}, function(error, data) {
+                                var pathLength = targetPath.indexOf('/') != -1 ? targetPath.split('/').length : 0;
+                                if((!error && data) || pathLength <= 2) {
+                                    start();
+                                    provider.copyItem(collection, item, updatedItem, targetPath, null, move, parseInt(creatorId, 10), userName, start, stop);
+                                } else
+                                    callback.call(this, 'target path not found');
+                            })
+
                         }
                         else
-                            callback.call(this, error);
+                            callback.call(this, 'item to copy not found');
                     });
                 });
         });

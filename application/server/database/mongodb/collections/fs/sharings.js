@@ -125,7 +125,7 @@ provider.isShared = function(fullPath, callback) {
 		current += splitPath[i] + ( i == 0 ? '/' : '' );
 		started++;
 		provider.get.byItemFullPath(current, function(error, data) {
-			
+
 			if(!error && data.length > 0)
 				sharings = _.union(sharings, data)
 
