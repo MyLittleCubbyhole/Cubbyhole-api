@@ -34,8 +34,15 @@ directory.get.byPath = function(request, response){
 	var params 	= request.params
 	,	parameters 	= {};
 	parameters.ownerId 	= params[0]
-	parameters.path = params[1] ? params[1].slice(0, -1) : '/' ;
+	parameters.path = params[1] || '/' ;
 	parameters.arrayPath = params[1] && params[1] != '/' ? params[1].match(/[^\/\\]+/g) : []
+
+	var details = true;
+	if(parameters.path.slice(-1) == "/") {
+		details = false;
+		parameters.path = parameters.path == '/' ? parameters.path : parameters.path.slice(0, -1);
+	}
+
 	parameters.fullPath = parameters.ownerId + '/' + parameters.path;
 
 	params[1] && params[1].slice(-1) == '/' && parameters.arrayPath.push('/');
@@ -57,16 +64,30 @@ directory.get.byPath = function(request, response){
 			parameters.path = fullPath.join('/');
 		}
 
-		provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
-			if(!error && data && data.length > 0) {
-				mysqlTools.setCreatorsNames(data, function(error, data) {
+		if(!details)
+			provider.get.byPath(parameters.ownerId, (parameters.path == '/' ? parameters.path : '/' + parameters.path + '/'), function(error, data) {
+				if(!error && data && data.length > 0) {
+					mysqlTools.setCreatorsNames(data, function(error, data) {
+						response.send( (!error && data ? data : error ) );
+					})
+				} else {
 					response.send( (!error && data ? data : error ) );
-				})
-			} else {
-				response.send( (!error && data ? data : error ) );
-				response.end();
-			}
-		})
+					response.end();
+				}
+			})
+		else
+			provider.get.byFullPath(parameters.fullPath, function(error, data) {
+				var array = [];
+				if(!error && data && data._id) {
+					array.push(data);
+					mysqlTools.setCreatorsNames(array, function(error, data) {
+						response.send( (!error && data ? data : error ) );
+					})
+				} else {
+					response.send( (!error && array ? array : error ) );
+					response.end();
+				}
+			})
 	}
 	else {
 		provider.get.childrenByFullPath(parameters.fullPath, function(error, data) {
@@ -78,7 +99,7 @@ directory.get.byPath = function(request, response){
 
 directory.get.size = function(request, response) {
 	var params = request.params
-	,	parameters 	= {};;
+	,	parameters 	= {};
 	parameters.ownerId = params[0];
 	if(!request.owner) {
 		response.send({'information': 'An error has occurred - method not allowed'});

@@ -14,6 +14,7 @@ websocket.init = function(server) {
 	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
 
 	sockets.on('connection', function(socket) {
+		console.log('client : ' + socket.handshake.address.address + ':' + socket.handshake.address.port);
 		var roomSubscribe = new Array();
 
 		function clean() {
