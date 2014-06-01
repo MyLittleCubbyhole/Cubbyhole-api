@@ -16,9 +16,7 @@ file.get.download = function(request, response){
 	,	data 	= {}
 	,	header 	= {};
 
-	console.log(request.client);
-	console.log(request.client._peername);
-	//console.log('client : ' + request.client._peername.address + ':' + request.client._peername.port);
+	console.log('client : ' + request.client._peername.address + ':' + request.client._peername.port);
 
 	if(typeof request.headers.range !== 'undefined')
 	{
