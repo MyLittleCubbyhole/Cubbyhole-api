@@ -3,6 +3,7 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 ,   userProvider
 ,   sharingProvider
 ,   historicProvider
+,   storageProvider
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,   tools
 ,   mysqlTools = require(global.paths.server + '/database/tools/mysql/core')
@@ -21,6 +22,8 @@ provider.init = function() {
         sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
     if(!historicProvider)
         historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic');
+    if(!storageProvider)
+        storageProvider = require(global.paths.server + '/database/mysql/tables/storage');
     if(!tools) {
         tools = require(global.paths.server + '/database/tools/mongodb/core');
         tools.init();
@@ -216,9 +219,7 @@ provider.create.file = function(params, callback){
 
                                     });
                                 else
-                                    userProvider.update.storage(userId, directoryFile.size, function() {
-                                        callback.call(this, error);
-                                    });
+                                    storageProvider.update.value(userId, directoryFile.size, callback);
 
                             });
                         });
@@ -333,9 +334,7 @@ provider.delete.byPath = function(fullPath, userName, callback){
 
                 },Math.random() * 150);
 			else
-                userProvider.update.storage(userId, size, function() {
-                    callback.call(this);
-                });
+                storageProvider.update.value(userId, size, callback);
 		};
 
 		collection.findOne({"_id": fullPath}, function(error, data) {
@@ -362,7 +361,7 @@ provider.delete.byPath = function(fullPath, userName, callback){
  */
 provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, callback) {
     if(userId && sizeUpdate)
-        userProvider.update.storage(userId, sizeUpdate, function() {});
+        storageProvider.update.value(userId, sizeUpdate, function() {});
     if(fullFolderPath == '/' || fullFolderPath.length == 2)
         callback.call(this, null);
     else {

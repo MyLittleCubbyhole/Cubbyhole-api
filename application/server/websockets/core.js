@@ -19,12 +19,10 @@ websocket.init = function(server) {
 
 		function clean() {
 			for(var i = 0; i<roomSubscribe.length; i++) {
-				console.log('(-) user leave the room n°'+roomSubscribe[i]);
 				socket.leave(roomSubscribe[i]);
 			}
 		}
 
-		console.log('user connected');
 		uploader.init(socket, sockets);
 
 		socket.on('socket-authentication', function(data) {
@@ -34,11 +32,9 @@ websocket.init = function(server) {
 					clean();
 					roomSubscribe.push('user_' + token.userid);
 					socket.join('user_' + token.userid);
-					console.log('(+) user join the room n°user_'+token.userid);
 					sharingProvider.get.bySharedWith(token.userid, function(error, sharings) {
 						if(!error && sharings && sharings.length > 0)
 							for(var i = 0; i<sharings.length; i++) {
-								console.log('(+) user join the room n°'+sharings[i]._id);
 								roomSubscribe.push(sharings[i]._id);
 								socket.join(sharings[i]._id);
 							}
@@ -53,7 +49,6 @@ websocket.init = function(server) {
 
 		socket.on('disconnect', function() {
 			clean();
-			console.log('user disconnected')
 		})
 
 

@@ -3,6 +3,7 @@ var uploader = {}
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,   planProvider = require(global.paths.server + '/database/mysql/tables/plan')
+,   storageProvider = require(global.paths.server + '/database/mysql/tables/storage')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
@@ -147,7 +148,7 @@ uploader.init = function(socket, sockets) {
 									if(error)
 										console.log(error);
 								});
-							else
+							else {
 								historicProvider.create.event({
 									ownerId: files[id].creatorId,
 									targetOwner: parameters.fullPath.split('/')[0],
@@ -156,6 +157,11 @@ uploader.init = function(socket, sockets) {
 									name: name,
 									itemType: 'file'
 								});
+
+								storageProvider.update.value(files[id].owner, files[id]['size'], function(error, updated) {
+									if(error) console.log(error);
+								});
+							}
 
 							if(fileMd5)
 								directoryProvider.update.md5({fullPath: parameters.fullPath, md5: fileMd5}, function(error, data) {
@@ -191,7 +197,6 @@ uploader.init = function(socket, sockets) {
 							var chunk = files[id]['downloaded'] / 524288;
 							// var chunk = files[id]['downloaded'] / 1572864;
 							var percent = (files[id]['downloaded'] / files[id]['size']) * 100;
-							console.log('upload_next ' + percent + '%')
 							socket.emit('upload_next', {
 								'chunk' : chunk,
 								'percent' :  percent,
