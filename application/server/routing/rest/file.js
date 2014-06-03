@@ -33,7 +33,7 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	userProvider.bandwidth(data.userId, function(error, user) {
-		var row = 'download;add;'+ socket.handshake.address.port +';'+ user.download + "\n";
+		var row = 'download;add;'+ request.client.remotePort +';'+ user.download + "\n";
 		if(config.limit_file && !error && user.download)
 			fs.appendFile(config.limit_file, row, function (error) {
 				if(error)
