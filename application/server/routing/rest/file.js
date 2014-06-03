@@ -5,6 +5,8 @@ var provider 	= require(global.paths.server + '/database/mongodb/collections/gri
 ,	subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,	planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
+,	userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,	fs = require('fs')
 ,   moment = require('moment')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
@@ -29,6 +31,16 @@ file.get.download = function(request, response){
 	data.path 	= params[1];
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 	data.fullPath = data.userId + '/' + data.path;
+
+	userProvider.bandwidth(data.userId, function(error, user) {
+		var row = 'download;add;'+ socket.handshake.address.port +';'+ user.download + "\n";
+		if(config.limit_file && !error && user.download)
+			fs.appendFile(config.limit_file, row, function (error) {
+				if(error)
+					throw 'an error occured';
+			});
+	})
+
 	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {
 

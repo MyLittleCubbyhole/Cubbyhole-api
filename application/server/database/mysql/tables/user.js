@@ -26,6 +26,12 @@ provider.get.namesByIds = function(ids, callback) {
 	Mysql.query(query, callback);
 }
 
+provider.bandwidth = function(id, callback) {
+	var query = "select p.downloadbandwidth as download, p.uploadbandwidth as upload from cubbyhole.plan p inner join cubbyhole.subscribe s on p.id = s.planid inner join cubbyhole.user u on u.id = s.userid where  s.paused = 0 and NOW() between s.datestart and s.dateend;";
+
+	Mysql.query(query, callback);
+}
+
 provider.get.emailsbyIds = function(ids, callback) {
 	Mysql.query('select id, photo, email, firstname, lastname from `user` where `id`in('+ ids.join(',') +');', callback);
 }
