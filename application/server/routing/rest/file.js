@@ -6,6 +6,7 @@ var provider 	= require(global.paths.server + '/database/mongodb/collections/gri
 ,	planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 ,	dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
 ,	userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,   config = require(global.paths.server + '/config/core').get()
 ,	fs = require('fs')
 ,   moment = require('moment')
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
