@@ -18,7 +18,7 @@ websocket.init = function(server) {
 	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
 
 	sockets.on('connection', function(socket) {
-		console.log('client : ' + socket.handshake.address.address + ':' + socket.handshake.address.port);
+		console.log('client port connection: ' + socket.handshake.address.port);
 		var roomSubscribe = new Array()
 		,	userId = -1;
 
@@ -53,8 +53,8 @@ websocket.init = function(server) {
 								roomSubscribe.push(sharings[i]._id);
 								socket.join(sharings[i]._id);
 							}
-						else
-							console.log('no sharing found');
+						//else
+						//	console.log('no sharing found');
 					})
 				}
 				else
