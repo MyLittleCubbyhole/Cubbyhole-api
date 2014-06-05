@@ -15,6 +15,8 @@ uploader.init = function(socket, sockets) {
 
 	socket.on('upload_init', function (data) {
 
+		console.log('client port upload_init: ' + socket.handshake.address.port);
+
 		var path = data.path
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
 		,	name = data.name
@@ -102,9 +104,6 @@ uploader.init = function(socket, sockets) {
 	});
 
 	socket.on('upload', function(data) {
-
-		console.log('client port - upload: ' + socket.handshake.address.port);
-		console.log('client port - upload 2: ' + socket.manager, socket.handshaken);
 		upload();
 		function upload() {
 			var	id = data.id
