@@ -18,7 +18,7 @@ websocket.init = function(server) {
 	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
 
 	sockets.on('connection', function(socket) {
-		console.log('client port connection: ' + socket.handshake.address.port);
+		console.log('client port connection: ' + socket.manager.remotePort);
 		var roomSubscribe = new Array()
 		,	userId = -1;
 
@@ -36,7 +36,7 @@ websocket.init = function(server) {
 				if(!error && token && token.userid) {
 					userId = token.userid;
 					userProvider.bandwidth(userId, function(error, user) {
-						var row = 'upload;add;'+ socket.handshake.address.port +';'+ user.upload + "\n";
+						var row = 'upload;add;'+ socket.manager.remotePort +';'+ user.upload + "\n";
 						if(config.limit_file && !error && user.upload)
 							fs.appendFile(config.limit_file, row, function (error) {
 								if(error)
@@ -64,7 +64,7 @@ websocket.init = function(server) {
 
 		socket.on('disconnect', function() {
 			if(userId != -1) {
-				var row = 'upload;del;'+ socket.handshake.address.port +";0\n";
+				var row = 'upload;del;'+ socket.manager.remotePort +";0\n";
 				if(config.limit_file)
 					fs.appendFile(config.limit_file, row, function (error) {
 						if(error)
