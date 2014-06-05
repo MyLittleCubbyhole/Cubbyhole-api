@@ -6,6 +6,7 @@ var socketIO = require('socket.io')
 ,   sharingProvider
 ,   userProvider
 ,	websocket = {}
+,	IO
 ,	sockets;
 
 websocket.init = function(server) {
@@ -15,7 +16,13 @@ websocket.init = function(server) {
 	userProvider = require(global.paths.server + '/database/mysql/tables/user');
 	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
 
-	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
+	IO = socketIO.listen(server, { log: false });
+	sockets = IO.of('/cubbyhole');
+
+	IO.set('authorization', function(handshakeData, callback) {
+		console.log('authorization', handshakeData.address.port);
+		callback(null, true)
+	})
 
 	sockets.on('connection', function(socket) {
 		console.log('client : ' + socket.handshake.address.address + ':' + socket.handshake.address.port);

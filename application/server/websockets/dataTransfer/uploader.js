@@ -102,6 +102,9 @@ uploader.init = function(socket, sockets) {
 	});
 
 	socket.on('upload', function(data) {
+
+		console.log('client port - upload: ' + socket.handshake.address.port);
+		console.log('client port - upload 2: ' + socket.manager, socket.handshaken);
 		upload();
 		function upload() {
 			var	id = data.id
