@@ -15,10 +15,10 @@ websocket.init = function(server) {
 	userProvider = require(global.paths.server + '/database/mysql/tables/user');
 	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings');
 
-	sockets = socketIO.listen(server, { log: false }).of('/cubbyhole');
+	sockets = socketIO(server, { log: false, origins: '*:*'}).of('/cubbyhole');
 
 	sockets.on('connection', function(socket) {
-		console.log('client port connection: ' + socket.handshake.address.port);
+		console.log('client port connection: ' + socket.client.request.client.remotePort);
 		var roomSubscribe = new Array()
 		,	userId = -1;
 
