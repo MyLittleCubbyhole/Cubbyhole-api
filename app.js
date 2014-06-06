@@ -35,7 +35,7 @@ app.configure(function(){
     app.use(express.cookieParser());
     app.use(express.compress());
     app.use(allowCrossDomain);
-    app.use(express.timeout(120000));
+    app.use(express.timeout(1800000));
 });
 
 app.configure('production', function () {
