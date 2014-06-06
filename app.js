@@ -14,7 +14,7 @@ global.paths = { app: __dirname, server: __dirname + '/application/server' };
 
 var config = require(global.paths.server + '/config/core').init();
 
-server.setTimeout(1800000);
+server.setTimeout(21600000);
 
 module.exports = { app: app, server: server };
 
