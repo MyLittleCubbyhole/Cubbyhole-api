@@ -14,6 +14,8 @@ global.paths = { app: __dirname, server: __dirname + '/application/server' };
 
 var config = require(global.paths.server + '/config/core').init();
 
+server.setTimeout(1800000);
+
 module.exports = { app: app, server: server };
 
 var allowCrossDomain = function(request, response, next) {
@@ -35,7 +37,6 @@ app.configure(function(){
     app.use(express.cookieParser());
     app.use(express.compress());
     app.use(allowCrossDomain);
-    app.use(express.timeout(1800000));
 });
 
 app.configure('production', function () {
