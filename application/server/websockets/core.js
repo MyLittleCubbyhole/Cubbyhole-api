@@ -19,13 +19,7 @@ websocket.init = function(server) {
 	IO = socketIO.listen(server, { log: false });
 	sockets = IO.of('/cubbyhole');
 
-	IO.set('authorization', function(handshakeData, callback) {
-		console.log('authorization', handshakeData.address.port);
-		callback(null, true)
-	})
-
 	sockets.on('connection', function(socket) {
-		console.log('client port connection: ' + socket.manager.remotePort);
 		var roomSubscribe = new Array()
 		,	userId = -1;
 
