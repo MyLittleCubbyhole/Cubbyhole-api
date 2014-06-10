@@ -19,7 +19,7 @@ file.get.download = function(request, response){
 	,	data 	= {}
 	,	header 	= {};
 
-	console.log('client : ' + request.client.remoteAddress + ':' + request.client.remotePort);
+	//console.log('client : ' + request.client.remoteAddress + ':' + request.client.remotePort);
 
 	if(typeof request.headers.range !== 'undefined')
 	{
@@ -48,7 +48,7 @@ file.get.download = function(request, response){
 			var total 	= download.length;
 
 			if(request.quotaAvailable === undefined || request.quotaAvailable - total >= 0) {
-				header['Content-Type'] = download.type;
+				header['Content-Type'] = download.type + '; charset=ISO-8859-15';
 				header['Accept-Ranges'] = "bytes";
 
 				if(typeof request.headers.range !== 'undefined' && typeof query.nostream === 'undefined') {

@@ -1,5 +1,6 @@
 var Mysql = require(global.paths.server + '/database/mysql/core')
 ,   subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
+,   userProvider = require(global.paths.server + '/database/mysql/tables/user')
 ,   moment = require('moment')
 ,	provider = { get: {}, create: {}, delete: {}, update: {} };
 
@@ -62,14 +63,19 @@ provider.delete.byId = function(id, callback) {
 /********************************[  UPDATE   ]********************************/
 
 provider.update.value = function(userId, value, callback) {
-	subscribeProvider.get.actualSubscription(userId, function(error, subscribe) {
+
+    var updateUserValue = function() {
+        userProvider.update.storage(userId, value, callback);
+    };
+
+    subscribeProvider.get.actualSubscription(userId, function(error, subscribe) {
         if(!error && subscribe && subscribe.id)
             provider.get.current(subscribe.id, function(error, storage) {
                 if(!error && storage && storage.id) {
                     storage.value += value;
-                    Mysql.query('update `storage` set `value`=' + parseInt(storage.value, 10) + ' where `id`=' + parseInt(storage.id, 10) + ';', callback);
+                    Mysql.query('update `storage` set `value`=' + parseInt(storage.value, 10) + ' where `id`=' + parseInt(storage.id, 10) + ';', function() {updateUserValue()});
                 } else
-                    provider.create.storage({value: value, day: moment().format('YYYY-MM-DD'), subscribeId: subscribe.id}, callback);
+                    provider.create.storage({value: value, day: moment().format('YYYY-MM-DD'), subscribeId: subscribe.id}, function() {updateUserValue()});
             });
         else {
             console.log(error);
