@@ -336,7 +336,7 @@ directory.put.rename = function(request, response){
     parameters.newName 	= body.name;
     parameters.path = parameters.path.join('/');
     parameters.userName = request.userName;
-
+    parameters.creatorId = request.userId;
 
 	if(request.right != 'W') {
 		response.send({'information': 'An error has occurred - method not allowed'});

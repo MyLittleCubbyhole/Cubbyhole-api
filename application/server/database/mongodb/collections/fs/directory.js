@@ -401,7 +401,7 @@ provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, ca
  * @param  {Function}   callback
  */
 provider.update.name = function(params, callback){
-    provider.copy(params.fullPath, {name: params.newName}, "/" + (params.path.length ? params.path + "/" : ""), true, params.userName, callback);
+    provider.copy(params.fullPath, {name: params.newName}, params.userId + "/" + (params.path.length ? params.path + "/" : ""), true, params.creatorId, params.userName, callback);
 };
 
 provider.update.md5 = function(params, callback){
@@ -439,7 +439,6 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
     _.extend(newItem, item, updatedItem);
 
     var oldFullPath = newItem._id;
-
     newItem.path = targetPath.substring(targetPath.indexOf('/'));
     newItem.ownerId = targetPath.substring(0, targetPath.indexOf('/'));
     newItem._id = newItem.ownerId + newItem.path + newItem.name;
@@ -527,7 +526,6 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
  */
 provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, userName, callback) {
     var started = 0;
-
 
     if(fullPath + '/' != targetPath) {
         fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;

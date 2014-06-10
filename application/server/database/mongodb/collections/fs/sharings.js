@@ -59,7 +59,6 @@ provider.create.sharing = function(params, callback) {
 		},
 		{ safe : true }, function(error, data) {
 
-        	console.log('user_'+parseInt(params.targetId))
 			socket.send('user_'+parseInt(params.targetId), 'socket-authentication', {});
 			callback.call(this, error, data)
 		});
@@ -105,7 +104,6 @@ provider.delete.byItemFullPath = function(fullPath, callback) {
 provider.delete.byItemAndTarget = function(parameters, callback) {
 	mongo.collection('sharings', function(error, collection) {
         collection.remove({'itemId': parameters.fullPath, 'sharedWith': parameters.targetId}, {safe:true}, function(error, data) {
-        	console.log('user_'+parseInt(parameters.targetId))
 			socket.send('user_'+parseInt(parameters.targetId), 'socket-authentication', {});
         	callback.call(this, error, data)
         });

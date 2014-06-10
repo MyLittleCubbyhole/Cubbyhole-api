@@ -15,8 +15,6 @@ uploader.init = function(socket, sockets) {
 
 	socket.on('upload_init', function (data) {
 
-		console.log('client port upload_init: ' + socket.handshake.address.port);
-
 		var path = data.path
 		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
 		,	name = data.name
@@ -69,7 +67,7 @@ uploader.init = function(socket, sockets) {
 															if(!error && data && data.right == 'W')
 																socket.emit('upload_next', { 'chunk' : chunk, percent : 0, 'id': files[id].clientSideId, 'chunkSize': files[id].currentChunkSize  });
 															else {
-																socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'cubby-storage forbiden' });
+																socket.emit('upload_stopped', { id: files[id].clientSideId, error: 'An error has occured - method not allowed' });
 																delete files[id];
 															}
 														})
