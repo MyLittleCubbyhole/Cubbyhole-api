@@ -31,6 +31,7 @@ routing.init = function(app) {
 	app.get('/api/checkAdminToken', filters.tokenInterceptor, filters.adminInterceptor, user.get.checkToken);
 	app.get('/api/logout', user.get.logout);
 	app.get('/api/plans', plan.get.all);
+	app.get('/api/plans/images', plan.get.images);
 
 	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
 	app.post(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, filters.rightInterceptor, file.post.zip);

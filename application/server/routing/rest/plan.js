@@ -1,4 +1,5 @@
 var planProvider = require(global.paths.server + '/database/mysql/tables/plan')
+,   directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
 ,   plan = { get : {}, post : {}, put : {}, delete : {} };
 
 
@@ -12,6 +13,18 @@ plan.get.all = function(request, response) {
         else if(data && data.length > 0)
             plans = data;
         response.send( (!error ? plans : error ) );
+    })
+}
+
+plan.get.images = function(request, response) {
+    directoryProvider.get.byPath(1, '/admin/', function(error, data) {
+        if(!error && data) {
+            var plans = []
+            for(var i = 0; i < data.length; i++)
+                plans.push(data[i].name);
+            response.send(plans);
+        } else
+            response.send({'information': 'An error has occurred - ' + error});
     })
 }
 
