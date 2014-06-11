@@ -37,6 +37,7 @@ plan.post.create = function(request, response) {
     ,   plan = {
         price: body.price,
         name: body.name,
+        photo: body.photo,
         description: body.description,
         storage: parseInt(body.storage, 10),
         duration: parseInt(body.duration, 10),
@@ -62,6 +63,7 @@ plan.put.byId = function(request, response) {
         id: params.id,
         price: body.price,
         name: body.name,
+        photo: body.photo,
         description: body.description,
         storage: body.storage,
         duration: body.duration,
