@@ -1,5 +1,6 @@
 var mongoTools = {}
 ,	nodeZip = new require('node-zip')
+,	JSZip = new require('jszip')
 ,	providerFile
 ,	providerDirectory;
 
@@ -105,7 +106,7 @@ mongoTools.format = function(rows) {
 mongoTools.zipItems = function(itemsToZip, callback) {
 	var itemsCounter = itemsToZip.length
 	,	self = this
-	,	archiver = nodeZip();
+	,	archiver = new JSZip();
 
 	archiver.file('read.me', 'powered by cubbyhole, \n cordialement, \n le trou du cube');
 
@@ -153,8 +154,7 @@ mongoTools.zipFolder = function(folder, options) {
 	options = options || {};
 	var filesCounter = 0
 	,	self = this
-	,	archiver = options.archiver || nodeZip();
-
+	,	archiver = options.archiver || new JSZip();
 	archiver.file('read.me', 'powered by cubbyhole, \n cordialement, \n le trou du cube');
 
 	var start =  function() { filesCounter++; }
