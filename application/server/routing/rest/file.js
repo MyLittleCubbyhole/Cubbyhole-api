@@ -38,8 +38,8 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	userProvider.bandwidth(data.userId, function(error, user) {
-		var row = 'download;add;'+ request.client.remotePort +';'+ user.download + "\n";
-		if(config.limit_file && !error && user.download)
+		var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';download\n';
+		if(config.limit_file && !error && user.id)
 			fs.appendFile(config.limit_file, row, function (error) {
 				if(error)
 					throw 'an error occured';
@@ -316,8 +316,8 @@ file.post.upload = function(request, response) {
 	function uploadAuthorized() {
 
 		userProvider.bandwidth(uploadData.creatorId, function(error, user) {
-			var row = 'upload;add;'+ request.client.remotePort +';'+ user.upload + "\n";
-			if(config.limit_file && !error && user.upload)
+			var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';upload\n';
+			if(config.limit_file && !error && user.id)
 				fs.appendFile(config.limit_file, row, function (error) {
 					if(error)
 						throw 'an error occured';

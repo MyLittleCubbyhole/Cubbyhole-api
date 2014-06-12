@@ -38,8 +38,8 @@ websocket.init = function(server) {
 				if(!error && token && token.userid) {
 					userId = token.userid;
 					userProvider.bandwidth(userId, function(error, user) {
-						var row = 'upload;add;'+ socket.manager.remotePort +';'+ user.upload + "\n";
-						if(config.limit_file && !error && user.upload)
+						var row = user.id + ';' + user.upload + ';' + useer.download + ';' + socket.manager.remotePort + ';upload\n';
+						if(config.limit_file && !error && user.id)
 							fs.appendFile(config.limit_file, row, function (error) {
 								if(error)
 									throw 'an error occured';
@@ -65,15 +65,6 @@ websocket.init = function(server) {
 		})
 
 		socket.on('disconnect', function() {
-			/*if(userId != -1) {
-				var row = 'upload;del;'+ socket.manager.remotePort +";0\n";
-				if(config.limit_file)
-					fs.appendFile(config.limit_file, row, function (error) {
-						if(error)
-							throw 'an error occured';
-					});
-			}*/
-
 			clean();
 		})
 
