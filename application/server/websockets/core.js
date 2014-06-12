@@ -18,6 +18,7 @@ websocket.init = function(server) {
 
 	IO = socketIO.listen(server, { log: false });
 	sockets = IO.of('/cubbyhole');
+	//sockets = IO;
 
 	sockets.on('connection', function(socket) {
 		var roomSubscribe = new Array()
