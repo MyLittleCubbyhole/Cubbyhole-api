@@ -65,14 +65,14 @@ websocket.init = function(server) {
 		})
 
 		socket.on('disconnect', function() {
-			if(userId != -1) {
+			/*if(userId != -1) {
 				var row = 'upload;del;'+ socket.manager.remotePort +";0\n";
 				if(config.limit_file)
 					fs.appendFile(config.limit_file, row, function (error) {
 						if(error)
 							throw 'an error occured';
 					});
-			}
+			}*/
 
 			clean();
 		})
