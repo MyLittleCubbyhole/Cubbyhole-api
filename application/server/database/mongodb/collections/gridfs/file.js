@@ -100,7 +100,6 @@ provider.upload = function(params, callback){
 		}
 	});
 
-
 	params.data = params.data != '' ? params.data : ' ';
 
 	gridStore.open(function(error, gridStore) {

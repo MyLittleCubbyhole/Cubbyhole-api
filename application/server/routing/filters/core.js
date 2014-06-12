@@ -14,6 +14,7 @@ filters.tokenInterceptor = function(request, response, next) {
         if(!error && data && data.userid) {
             request.userId = data.userid;
             request.userName = data.firstname + ' ' + data.lastname;
+            request.origin = data.origin;
             next();
         } else {
             response.writeHead(401);
@@ -71,6 +72,16 @@ filters.adminInterceptor = function(request, response, next) {
             response.end();
         }
     })
+}
+
+filters.mobileInterceptor = function(request, response, next) {
+    if(request.origin.match(/CubbyHole/i))
+        next();
+    else {
+        response.writeHead(401);
+        response.write('This method is only available on mobile');
+        response.end();
+    }
 }
 
 module.exports = filters;

@@ -40,7 +40,7 @@ routing.init = function(app) {
 	app.post(/^\/api\/browse\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.create);
 	app.post(/^\/api\/copy\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.copy);
 	app.post(/^\/api\/move\/([0-9]+)(\/?.+)*$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.move);
-	//app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, directory.post.upload);
+	app.post(/^\/api\/upload\/([0-9]+)(\/?.+)*\/$/, multipartDecoder, filters.tokenInterceptor, filters.rightInterceptor,  file.post.upload);
 	app.post('/api/auth', user.post.authenticate);
 	app.post('/api/users', multipartDecoder, user.post.create);
 	app.post('/api/plans', filters.tokenInterceptor, filters.adminInterceptor, plan.post.create);

@@ -1,11 +1,15 @@
 var provider 	= require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 , 	tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,	directoryProvider = require(global.paths.server + '/database/mongodb/collections/fs/directory')
+,	sharingProvider = require(global.paths.server + '/database/mongodb/collections/fs/sharings')
+,	fileProvider = require(global.paths.server + '/database/mongodb/collections/gridfs/file')
 ,	historicProvider = require(global.paths.server + '/database/mongodb/collections/fs/historic')
 ,	subscribeProvider = require(global.paths.server + '/database/mysql/tables/subscribe')
 ,	planProvider = require(global.paths.server + '/database/mysql/tables/plan')
+,	storageProvider = require(global.paths.server + '/database/mysql/tables/storage')
 ,	dailyQuotaProvider = require(global.paths.server + '/database/mysql/tables/dailyQuota')
 ,	userProvider = require(global.paths.server + '/database/mysql/tables/user')
+,	socket = require(global.paths.server + '/websockets/core')
 ,   config = require(global.paths.server + '/config/core').get()
 ,	fs = require('fs')
 ,   moment = require('moment')
@@ -34,8 +38,8 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	userProvider.bandwidth(data.userId, function(error, user) {
-		var row = 'download;add;'+ request.client.remotePort +';'+ user.download + "\n";
-		if(config.limit_file && !error && user.download)
+		var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';download\n';
+		if(config.limit_file && !error && user.id)
 			fs.appendFile(config.limit_file, row, function (error) {
 				if(error)
 					throw 'an error occured';
@@ -251,9 +255,116 @@ file.get.zip = function(request, response) {
 		response.end();
 	}
 
+}
 
+file.post.upload = function(request, response) {
+	var params = request.params
+    ,   query = request.query
+	,	body = request.body
+    ,   files = request.files
+	,	witness = true
+	,	uploadData = {
+		ownerId: request.ownerId,
+		creatorId: request.userId,
+		path: params[1] ? params[1] + '/' : '/',
+		data: files.file
+	};
 
+	for(var i in uploadData)
+		witness = typeof uploadData[i] == 'undefined' ? false : witness;
 
+	if(!witness)
+		response.send({'information': 'An error has occurred - missing information', 'data' : uploadData });
+	else {
+
+		uploadData.fullPath = uploadData.ownerId + uploadData.path + uploadData.data.originalFilename;
+
+		var path = uploadData.path
+		,	logicPath = typeof path != 'undefined' && path != '/' ? path : '/'
+
+		subscribeProvider.get.actualSubscription(uploadData.ownerId, function(error, subscribe) {
+			if(!error && subscribe && subscribe.id)
+				planProvider.get.byId(subscribe.planid, function(error, plan) {
+					if(!error && plan && plan.id)
+						directoryProvider.get.totalSize(uploadData.ownerId, function(error, totalSize) {
+							if(!error && totalSize)
+								if((totalSize.length == 0 && uploadData.data.size <= plan.storage) || (totalSize[0] && (totalSize[0].size + uploadData.data.size) <= plan.storage))
+									if(uploadData.creatorId == uploadData.ownerId)
+										uploadAuthorized();
+									else {
+										uploadData.fullPath = uploadData.fullPath.slice(-1) != '/' ? uploadData.fullPath : uploadData.fullPath.slice(0, -1);
+										sharingProvider.checkRight({fullPath: uploadData.fullPath, targetId: uploadData.creatorId}, function(error, data) {
+											if(!error && data && data.right == 'W')
+												uploadAuthorized();
+											else
+												response.send({'information': 'An error has occured - method not allowed', 'data' : uploadData });
+										})
+									}
+								else
+									response.send({'information': 'An error has occurred - your cubbyhole is full', 'data' : uploadData });
+							else
+								response.send({'information': 'An error has occurred - error getting the current used space', 'data' : uploadData });
+						})
+					else
+						response.send({'information': 'An error has occurred - error getting your actual plan', 'data' : uploadData });
+				})
+			else
+				response.send({'information': 'An error has occurred - error getting your actual subscription', 'data' : uploadData });
+		})
+	}
+
+	function uploadAuthorized() {
+
+		userProvider.bandwidth(uploadData.creatorId, function(error, user) {
+			var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';upload\n';
+			if(config.limit_file && !error && user.id)
+				fs.appendFile(config.limit_file, row, function (error) {
+					if(error)
+						throw 'an error occured';
+				});
+		})
+
+        userProvider.get.byId(uploadData.creatorId, function(error, data) {
+        	if(!error && data) {
+        		uploadData.creatorName = data.firstname + ' ' + data.lastname;
+        		uploadData.name = uploadData.data.originalFilename;
+        		uploadData.size = uploadData.data.size;
+        		uploadData.type = uploadData.data.type;
+
+        		directoryProvider.create.file(uploadData, function(error, data) {
+        			delete uploadData.data.ws;
+		            if(!error) {
+						historicProvider.create.event({
+							ownerId: uploadData.creatorId,
+							targetOwner: uploadData.fullPath.split('/')[0],
+							fullPath: uploadData.fullPath,
+							action: 'create',
+							name: uploadData.name,
+							itemType: 'file'
+						});
+
+						storageProvider.update.value(uploadData.ownerId, uploadData.data.size, function(error, updated) {
+							if(error) console.log(error);
+						});
+
+						sharingProvider.isShared(uploadData.fullPath, function(data) {
+							if(data.length > 0)
+								for(var i = 0; i<data.length; i++)
+									socket.send(data[i]._id, 'create_file', uploadData);
+						});
+
+						socket.send('user_'+uploadData.ownerId, 'create_file', uploadData);
+
+						response.send({'information': 'file uploaded', 'data' : uploadData });
+		            }
+		            else
+		                response.send({'information': 'An error has occured - error creating directory file - ' + error, 'data' : uploadData });
+		        })
+        	}
+        	else
+        		response.send({'information': 'An error has occured - error getting creator name - ' + error, 'data' : uploadData });
+        })
+	}
 }
 
 file.post.zip = function(request, response) {
