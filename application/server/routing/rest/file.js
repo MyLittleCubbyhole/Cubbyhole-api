@@ -38,7 +38,7 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	userProvider.bandwidth(data.userId, function(error, user) {
-		var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';download\n';
+		var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';download\n';
 		if(config.limit_file && !error && user.id)
 			fs.appendFile(config.limit_file, row, function (error) {
 				if(error)
@@ -316,7 +316,7 @@ file.post.upload = function(request, response) {
 	function uploadAuthorized() {
 
 		userProvider.bandwidth(uploadData.creatorId, function(error, user) {
-			var row = user.id + ';' + user.upload + ';' + useer.download + ';' + request.client.remotePort + ';upload\n';
+			var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';upload\n';
 			if(config.limit_file && !error && user.id)
 				fs.appendFile(config.limit_file, row, function (error) {
 					if(error)

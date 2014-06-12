@@ -38,7 +38,7 @@ websocket.init = function(server) {
 				if(!error && token && token.userid) {
 					userId = token.userid;
 					userProvider.bandwidth(userId, function(error, user) {
-						var row = user.id + ';' + user.upload + ';' + useer.download + ';' + socket.manager.remotePort + ';upload\n';
+						var row = user.id + ';' + user.upload + ';' + user.download + ';' + socket.manager.remotePort + ';upload\n';
 						if(config.limit_file && !error && user.id)
 							fs.appendFile(config.limit_file, row, function (error) {
 								if(error)
