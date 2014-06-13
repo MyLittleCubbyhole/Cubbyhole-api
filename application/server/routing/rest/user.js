@@ -18,8 +18,11 @@ mysqlTools.init();
 /********************************[  GET   ]********************************/
 
 user.get.all = function(request, response) {
+    var query = request.query
+    ,   offset = query.offset || 0
+    ,   limit = query.limit || 0;
 
-	userProvider.get.all(function(error, data) {
+    userProvider.get.all({ offset: offset, limit: limit, callback: function(error, data) {
         var users = [];
         if(data && (data.length > 0 || data.id)) {
 
@@ -33,8 +36,8 @@ user.get.all = function(request, response) {
                 delete(users[i].salt);
             }
         }
-		response.send( (!error ? users : error ) );
-	})
+        response.send( (!error ? users : error ) );
+    }})
 }
 
 user.get.byId = function(request, response) {

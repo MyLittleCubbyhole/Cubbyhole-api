@@ -7,8 +7,20 @@ tools.init();
 
 /********************************[  GET   ]********************************/
 
-provider.get.all = function(callback) {
-	Mysql.query('select * from `user` where id >1;', callback);
+provider.get.all = function(options) {
+	var temp = 0;
+	options = options || {};
+	options.offset = options.offset || 0;
+	options.limit = options.limit || 100;
+
+
+	if(options.limit < options.offset) {
+		temp = options.limit;
+		options.limit = options.offset;
+		options.offset = temp;
+	}
+	options.callback = options.callback || function() {};
+	Mysql.query('select * from `user` where id>1 LIMIT ' + options.offset + ',' + options.limit + ';', options.callback);
 }
 
 provider.get.byId = function(id, callback) {
