@@ -20,9 +20,11 @@ mysqlTools.init();
 user.get.all = function(request, response) {
     var query = request.query
     ,   offset = query.offset || 0
-    ,   limit = query.limit || 0;
+    ,   limit = query.limit || 0
+    ,   role = query.role || false
+    ,   email = query.email || false;
 
-    userProvider.get.all({ offset: offset, limit: limit, callback: function(error, data) {
+    function callback(error, data) {
         var users = [];
         if(data && (data.length > 0 || data.id)) {
 
@@ -37,7 +39,21 @@ user.get.all = function(request, response) {
             }
         }
         response.send( (!error ? users : error ) );
-    }})
+    }
+
+    if(!role && !email)
+        userProvider.get.all({ offset: offset, limit: limit, callback: callback});
+    else {
+        if(!!role && !!email)
+            userProvider.get.byEmailAndRole(email, role, callback, { offset: offset, limit: limit});
+        else {
+            if(!!role)
+                userProvider.get.byRole(role, callback, { offset: offset, limit: limit});
+            else
+                userProvider.get.byEmailLike(email, callback, { offset: offset, limit: limit});
+        }
+    }
+        
 }
 
 user.get.byId = function(request, response) {

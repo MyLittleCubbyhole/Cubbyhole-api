@@ -31,6 +31,51 @@ provider.get.byEmail = function(email, callback) {
 	Mysql.query('select * from `user` where `email`="'+ email + '";', callback);
 }
 
+provider.get.byEmailLike = function(email, callback, options) {
+	var temp = 0;
+	options = options || {};
+	options.offset = options.offset || 0;
+	options.limit = options.limit || 100;
+
+
+	if(options.limit < options.offset) {
+		temp = options.limit;
+		options.limit = options.offset;
+		options.offset = temp;
+	}
+	Mysql.query('select * from `user` where `email` LIKE "%'+ email + '%" and id>1 LIMIT ' + options.offset + ',' + options.limit + ';', callback);
+}
+
+provider.get.byEmailAndRole = function(email, role, callback, options) {
+	var temp = 0;
+	options = options || {};
+	options.offset = options.offset || 0;
+	options.limit = options.limit || 100;
+
+
+	if(options.limit < options.offset) {
+		temp = options.limit;
+		options.limit = options.offset;
+		options.offset = temp;
+	}
+	Mysql.query('select * from `user` where `email` LIKE "%'+ email + '%" and `roleid`='+ role +' and id>1 LIMIT ' + options.offset + ',' + options.limit + ';', callback);
+}
+
+provider.get.byRole = function(role, callback, options) {
+	var temp = 0;
+	options = options || {};
+	options.offset = options.offset || 0;
+	options.limit = options.limit || 100;
+
+
+	if(options.limit < options.offset) {
+		temp = options.limit;
+		options.limit = options.offset;
+		options.offset = temp;
+	}
+	Mysql.query('select * from `user` where `roleid`='+ role +' and id>1 LIMIT ' + options.offset + ',' + options.limit + ';', callback);
+}
+
 provider.get.namesByIds = function(ids, callback) {
 
 	var query = 'select id, concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');'
