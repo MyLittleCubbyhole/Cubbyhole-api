@@ -34,18 +34,32 @@ provider.init = function() {
 
 provider.get.objectId = ObjectID;
 
+/**
+ * Get all objects in directory collection
+ * @param  {Function} callback
+ */
 provider.get.directory = function(callback){
 	mongo.collection('directories', function(error, collection) {
 		collection.find().toArray(callback);
     });
 }
 
+/**
+ * Get all directory objects of an user
+ * @param  {int}   ownerId  user id used to find all directories
+ * @param  {Function} callback
+ */
 provider.get.byOwner = function(ownerId, callback){
 	mongo.collection('directories', function(error, collection) {
         collection.find({"ownerId":parseInt(ownerId,10)}).toArray(callback);
     });
 };
 
+/**
+ * Get a directory object by it's id
+ * @param  {string}   id    id of the directory to find
+ * @param  {Function} callback
+ */
 provider.get.byId = function(id, callback) {
 
     mongo.collection('directories', function(error, collection) {
@@ -53,18 +67,34 @@ provider.get.byId = function(id, callback) {
     })
 }
 
+/**
+ * Get a directory object by it's item id
+ * @param  {string}   itemId   item id to get the corresponding directory object
+ * @param  {Function} callback
+ */
 provider.get.byItemId = function(itemId, callback){
     mongo.collection('directories', function(error, collection) {
         collection.find({"itemId": ObjectID(itemId)}).toArray(callback);
     })
 }
 
+/**
+ * Get a directory object by it's path and ownerId
+ * @param  {int}   ownerId  user id used to find the directory
+ * @param  {string}   path     path used to find the directory
+ * @param  {Function} callback
+ */
 provider.get.byPath = function(ownerId, path, callback){
 	mongo.collection('directories', function(error, collection) {
         collection.find({"ownerId": parseInt(ownerId,10), "path": path}).toArray(callback);
 	})
 }
 
+/**
+ * Get all children of a directory
+ * @param  {string}   fullPath fullpath of the parent directory
+ * @param  {Function} callback
+ */
 provider.get.childrenByFullPath = function(fullPath, callback) {
     var started = 0;
     fullPath = fullPath.slice(0, -1) == '/' ? fullPath.slice(0, -1) : fullPath;
@@ -91,18 +121,33 @@ provider.get.childrenByFullPath = function(fullPath, callback) {
     })
 }
 
+/**
+ * Get a directory object by it's fullPath
+ * @param  {string}   fullPath  fullPath of the directory to find
+ * @param  {Function} callback
+ */
 provider.get.byFullPath = function(fullPath, callback){
     mongo.collection('directories', function(error, collection) {
         collection.findOne({"_id":fullPath}, callback);
     })
 }
 
+/**
+ * Get the size used per file type by an user
+ * @param  {int}   ownerId  user id used to get the sizes
+ * @param  {Function} callback
+ */
 provider.get.size = function(ownerId, callback) {
     mongo.collection('directories', function(error, collection) {
         collection.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$contentType', size: {$sum: '$size'} } }], callback);
     })
 }
 
+/**
+ * Get the total size used by an user
+ * @param  {int}   ownerId  user id used to get the total size
+ * @param  {Function} callback
+ */
 provider.get.totalSize = function(ownerId, callback) {
     mongo.collection('directories', function(error, collection) {
         collection.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }], callback);
@@ -113,6 +158,21 @@ provider.get.totalSize = function(ownerId, callback) {
 
 /**
  * Create a folder
+ *
+ *ex: provider.create.folder({
+ *  ownerId: xx,
+ *  creatorId: xx,
+ *  fullPath: "x/x",
+ *  path: "/xx/",
+ *  name: "xx",
+ *  size: 0,
+ *  creatorName: "xx",
+ *  undeletable: true | false
+ *}, function() {...})
+ *
+ * provider.create.folder({ownerId: 1, creatorId: 2, fullPath: "1/folder", path: '/', name: "folder", size: 0, creatorName: "John Doe", undeletable: false}, function() {...})
+ * provider.create.folder({ownerId: 1, creatorId: 2, fullPath: "1/folder1/folder2", path: '/folder1/', name: "folder2", size: 0, creatorName: "John Doe", undeletable: false}, function() {...})
+ *
  * @param  {object}   params   params needed to create the folder
  * @param  {Function} callback
  */
@@ -161,6 +221,23 @@ provider.create.folder = function(params, callback){
 
 /**
  * Create a file
+ *
+ *ex: provider.create.file({
+ *  ownerId: xx,
+ *  creatorId: xx,
+ *  fullPath: "x/x",
+ *  path: "/xx/",
+ *  name: "xx",
+ *  size: 1024,
+ *  creatorName: "xx",
+ *  downloads: 0,
+ *  type: "xx",
+ *  data: multipart
+ *}, function() {...})
+ *
+ *  provider.create.file({ownerId: 1, creatorId: 2, fullPath: "1/file", path: "/", name: "file", size: 1024, creatorName: "John Doe", downloads: 0, type: "application/json", data: {...}}, function() {...})
+ *  provider.create.file({ownerId: 1, creatorId: 2, fullPath: "1/folder/file", path: "/folder/", name: "file", size: 1024, creatorName: "John Doe", downloads: 0, type: "application/json", data: {...}}, function() {...})
+ *
  * @param  {object}   params   params needed to create the file
  * @param  {Function} callback
  */
@@ -254,12 +331,24 @@ provider.create.file = function(params, callback){
 
 /********************************[ DELETE ]********************************/
 
+/**
+ * Delete all directory objects of an user
+ * @param  {int}   ownerId  user id used to delete directories
+ * @param  {Function} callback
+ */
 provider.delete.byOwner = function(ownerId, callback) {
 	mongo.collection('directories', function(error, collection) {
         collection.remove({"ownerId":parseInt(ownerId,10)}, {safe:true}, callback);
     });
 }
 
+/**
+ * [RECURSION] Delete a directory and all it's children
+ * @param  {object} collection mongodb directory collection
+ * @param  {string} fullPath   fullPath of the directory to delete
+ * @param  {int} start      used for recursion
+ * @param  {int} stop       used for recursion
+ */
 provider.delete.item = function(collection, fullPath, start, stop) {
     var myPath = fullPath;
 	collection.findOne({"_id":fullPath}, function(error, data) {
@@ -294,7 +383,7 @@ provider.delete.item = function(collection, fullPath, start, stop) {
 /**
  * Delete an item and update corresponding sizes and children of the folders
  * @param  {string}     fullPath    fullPath of the item to delete
- * @param  {string}     userName    name of the user who make the update
+ * @param  {string}     userName    name of the user who made the update
  * @param  {Function}   callback
  */
 provider.delete.byPath = function(fullPath, userName, callback){
@@ -315,6 +404,7 @@ provider.delete.byPath = function(fullPath, userName, callback){
 		};
 		function end() {
 			if(folderPath != '/')
+                // trick to avoid concurrency
                 setTimeout(function() {
 
                     provider.update.size(userId, folderPath, size, userName, function() {
@@ -354,9 +444,10 @@ provider.delete.byPath = function(fullPath, userName, callback){
 
 /**
  * Update the size of an item and all his parents
+ * @param  {integer}    userId          id of the owner of items updated
  * @param  {string}     fullFolderPath  path of the item to update (ownerId + path)
  * @param  {integer}    sizeUpdate      value to add to the curent size of the item
- * @param  {string}     userName        name of the user who make the update
+ * @param  {string}     userName        name of the user who made the update
  * @param  {Function}   callback
  */
 provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, callback) {
@@ -397,19 +488,56 @@ provider.update.size = function(userId, fullFolderPath, sizeUpdate, userName, ca
 
 /**
  * Update name of an item
- * @param  {object}     params   params needed
+ *
+ *ex: provider.update.name({
+ *  fullPath: "x/xx/xx",
+ *  path: "/xx/",
+ *  userId: xx,
+ *  creatorId: xx,
+ *  userName: "xx", // creator name
+ *  newName: "xx"
+ *}, function() {...})
+ *
+ * provider.update.name({fullPath: "1/folder1/file", path: "/folder1/", userId: 1, creatorId: 2, userName: "John Doe", newName: "file2"}, function() {...})
+ * provider.update.name({fullPath: "1/file", path: "/", userId: 1, creatorId: 2, userName: "John Doe", newName: "file2"}, function() {...})
+ *
+ * @param  {object}     params   params needed to update the name
  * @param  {Function}   callback
  */
 provider.update.name = function(params, callback){
     provider.copy(params.fullPath, {name: params.newName}, params.userId + "/" + (params.path.length ? params.path + "/" : ""), true, params.creatorId, params.userName, callback);
 };
 
+/**
+ * Update the md5 string of a file
+ *
+ * ex: provider.update.md5({
+ *  fullPath: "x/xx",
+ *  md5: "xxxxxx"
+ * }, function() {...})
+ *
+ * @param  {object}   params   params needed to update the md5
+ * @param  {Function} callback
+ */
 provider.update.md5 = function(params, callback){
     mongo.collection('directories', function(error, collection) {
         collection.update({'_id': params.fullPath}, {$set: { md5: params.md5 }}, { safe : true }, callback);
     })
 };
 
+/**
+ * Update the photo of an user
+ *
+ * ex: provider.update.userPhoto({
+ *  id: xx,
+ *  photo: "xxx" // name of the photo in the directory collection
+ * }, function() {..})
+ *
+ * provider.update.userPhoto({id: 1, photo: "5397693987f72298248e5e23.jpg"}, function() {...})
+ *
+ * @param  {object}   user      user to update
+ * @param  {Function} callback
+ */
 provider.update.userPhoto = function(user, callback) {
     userProvider.get.byId(user.id, function(error, userData) {
         if(!error && userData)
@@ -423,6 +551,11 @@ provider.update.userPhoto = function(user, callback) {
     })
 }
 
+/**
+ * Increment download number of a file
+ * @param  {string}   fullPath fullPath of the file to update
+ * @param  {Function} callback
+ */
 provider.update.downloads = function(fullPath, callback) {
     mongo.collection('directories', function(error, collection) {
         collection.update({'_id': fullPath}, {$inc: { downloads: 1 }}, { safe : true }, callback);
@@ -432,7 +565,20 @@ provider.update.downloads = function(fullPath, callback) {
 
 /********************************[ UPDATE ]********************************/
 
-provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, creatorId, userName, start, stop) {
+/**
+ * [RECURSION] Copy or move an item to a folder
+ * @param  {document} collection  mongodb directory collection
+ * @param  {object} item           item to copy or move
+ * @param  {document} updatedItem new item to create if you want to process a rename
+ * @param  {[type]} targetPath  path where to copy or move the file
+ * @param  {[type]} targetItem  item copied or moved
+ * @param  {[type]} move        true to move the file
+ * @param  {[type]} creatorId   id of the creator
+ * @param  {[type]} creatorName name of the creator
+ * @param  {[type]} start       used for recursion
+ * @param  {[type]} stop        user for recursion
+ */
+provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, creatorId, creatorName, start, stop) {
     updatedItem = updatedItem || {};
 
     var newItem = {};
@@ -458,7 +604,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
                 path: newItem.path,
                 name: newItem.name,
                 creatorId: creatorId,
-                creatorName: userName,
+                creatorName: creatorName,
                 downloads: newItem.downloads || 0
             };
 
@@ -476,7 +622,7 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
                                     collection.findOne({'_id': item.children[i]}, function(error, data) {
                                         if(error)
                                             console.error('item not found');
-                                        provider.copyItem(collection, data, null, path, targetItem, move, creatorId, userName, start, stop);
+                                        provider.copyItem(collection, data, null, path, targetItem, move, creatorId, creatorName, start, stop);
                                     });
                                 }
                                 stop(error, targetItem);
@@ -521,10 +667,10 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
  * @param  {string}     targetPath  destination of the item (ex: 15/folder/)
  * @param  {boolean}    move        set to true if you want to move the item instead of a simple copy
  * @param  {boolean}    creatorId   id of the creator
- * @param  {string}     userName    name of the user who make the update
+ * @param  {string}     creatorName    name of the user who made the update
  * @param  {Function}   callback
  */
-provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, userName, callback) {
+provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, creatorName, callback) {
     var started = 0;
 
     if(fullPath + '/' != targetPath) {
@@ -544,7 +690,7 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, use
                     };
                     function end(error, data) {
                         if(move)
-                            provider.delete.byPath(fullPath, userName, function(error) {
+                            provider.delete.byPath(fullPath, creatorName, function(error) {
                                 callback.call(this, error, data);
                             });
                         else
@@ -557,7 +703,7 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, use
                                 var pathLength = targetPath.indexOf('/') != -1 ? targetPath.split('/').length : 0;
                                 if((!error && data) || pathLength <= 2) {
                                     start();
-                                    provider.copyItem(collection, item, updatedItem, targetPath, null, move, parseInt(creatorId, 10), userName, start, stop);
+                                    provider.copyItem(collection, item, updatedItem, targetPath, null, move, parseInt(creatorId, 10), creatorName, start, stop);
                                 } else
                                     callback.call(this, 'target path not found');
                             })
@@ -626,7 +772,7 @@ provider.checkExist = function(fullPath, callback) {
  *     ownerId: xx
  *     right: 'xx' { R (read) | W (write) | N (nothing) }
  *     targetEmail: "xxx@xxx.xx",
- *     fullPath: "/xx/xx/xx/"
+ *     fullPath: "xx/xx/xx"
  * }, function() {...})
  *
  * @param  {object}   params   params needed to share
@@ -672,7 +818,11 @@ provider.share = function(params, callback) {
     });
 }
 
-
+/**
+ * Unshare a folder for all users
+ * @param  {string}   fullPath fullPath of the item to unshare
+ * @param  {Function} callback
+ */
 provider.unshareAll = function(fullPath, callback) {
     provider.get.byFullPath(fullPath, function(error, directory) {
         if(!error && directory && directory._id) {
@@ -707,6 +857,18 @@ provider.unshareAll = function(fullPath, callback) {
     });
 }
 
+/**
+ * Unshare a folder for an user
+ *
+ * ex: provider.unshare({
+ *     targetEmail: "xxx@xxx.xx",
+ *     ownerId: xx,
+ *     fullPath: "xx/xx/x"
+ * }, function() {...})
+ *
+ * @param  {object}   params   params needed to unshare
+ * @param  {Function} callback
+ */
 provider.unshare = function(params, callback) {
     userProvider.get.byEmail(params.targetEmail, function(error, user) {
         if(!error && user) {
@@ -748,9 +910,9 @@ provider.unshare = function(params, callback) {
 }
 
 /**
- * share a file
+ * Share a file
  *
- * @param  {object}   fullPath   fullPath of the file
+ * @param  {object}   fullPath   fullPath of the file to unshare
  * @param  {Function} callback
  */
 provider.shareFile = function(fullPath, callback) {
@@ -796,6 +958,11 @@ provider.shareFile = function(fullPath, callback) {
     })
 }
 
+/**
+ * Unshare a file
+ * @param  {object}   fullPath   fullPath of the file to share
+ * @param  {Function} callback
+ */
 provider.unshareFile = function(fullPath, callback) {
     mongo.collection('directories', function(error, collection) {
 
@@ -828,3 +995,5 @@ provider.unshareFile = function(fullPath, callback) {
 }
 
 module.exports = provider;
+
+

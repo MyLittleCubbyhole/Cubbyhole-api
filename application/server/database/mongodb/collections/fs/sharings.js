@@ -11,20 +11,41 @@ var MongoProvider = require(global.paths.server + '/database/mongodb/core').get(
 provider.init = function() {}
 
 
-/********************************[  GET   ]********************************/
+/********************************[  GET  ]********************************/
 
+/**
+ * Get all sharing objects of a folder
+ * @param  {string}   fullPath fullPath used to find corresponding sharing objects
+ * @param  {Function} callback
+ */
 provider.get.byItemFullPath = function(fullPath, callback){
     mongo.collection('sharings', function(error, collection) {
         collection.find({'itemId':fullPath}).toArray(callback);
     })
 }
 
+/**
+ * Get a sharing object of a folder and a specific user
+ *
+ * ex: provider.get.byItemAndTarget({
+ *      fullPath: "xx/xx",
+ *      targetId: xx
+ * }, function() {...})
+ *
+ * @param  {object}   parameters params needed to find the object
+ * @param  {Function} callback
+ */
 provider.get.byItemAndTarget = function(parameters, callback){
     mongo.collection('sharings', function(error, collection) {
         collection.findOne({'itemId':parameters.fullPath, 'sharedWith':parameters.targetId}, callback);
     })
 }
 
+/**
+ * Get all sharings objects shared to an user
+ * @param  {integer}   userId   user id used to find objects
+ * @param  {Function} callback
+ */
 provider.get.bySharedWith = function(userId, callback) {
     mongo.collection('sharings', function(error, collection) {
 		collection.find({"sharedWith":userId}).toArray(callback);
@@ -35,7 +56,7 @@ provider.get.bySharedWith = function(userId, callback) {
 /********************************[ CREATE ]********************************/
 
 /**
- * create a sharing row
+ * Create a sharing row
  *
  *ex: provider.create.sharing({
  *	ownerId: xx
@@ -90,6 +111,11 @@ provider.update.right = function(params, callback) {
 
 /********************************[ DELETE ]********************************/
 
+/**
+ * Delete all sharing objects of a folder
+ * @param  {string}   fullPath fullPath of the folder used to delete objects
+ * @param  {Function} callback
+ */
 provider.delete.byItemFullPath = function(fullPath, callback) {
 	mongo.collection('sharings', function(error, collection) {
 		provider.get.byItemFullPath(fullPath, function(error, items) {
@@ -101,6 +127,17 @@ provider.delete.byItemFullPath = function(fullPath, callback) {
     });
 }
 
+/**
+ * Delete all sharing objects of a folder and a specific user
+ *
+ * ex: provider.delete.byItemAndTarget({
+ *     fullPath: "xx/xx",
+ *     targetId: xx
+ * }, function() {...})
+ *
+ * @param  {object}   parameters params needed to delete sharing objects
+ * @param  {Function} callback
+ */
 provider.delete.byItemAndTarget = function(parameters, callback) {
 	mongo.collection('sharings', function(error, collection) {
         collection.remove({'itemId': parameters.fullPath, 'sharedWith': parameters.targetId}, {safe:true}, function(error, data) {
@@ -112,6 +149,11 @@ provider.delete.byItemAndTarget = function(parameters, callback) {
 
 /********************************[ OTHER  ]********************************/
 
+/**
+ * Check if a folder is shared and return the corresponding sharing object if found
+ * @param  {string}   fullPath fullPath of the folder to check
+ * @param  {Function} callback
+ */
 provider.isShared = function(fullPath, callback) {
 
 	var splitPath = fullPath.split('/')
@@ -132,6 +174,17 @@ provider.isShared = function(fullPath, callback) {
 	}
 }
 
+/**
+ * [RECURSION] Check rights of a given user on a given folder. Return the sharing object found
+ *
+ * ex: provider.checkRight({
+ *     fullPath: "xx/xx/x",
+ *     targetId: xx
+ * }, function() {...})
+ *
+ * @param  {object}   parameters params needed to check rights
+ * @param  {Function} callback
+ */
 provider.checkRight = function(parameters, callback) {
 	var fullPath = parameters.fullPath;
 	provider.get.byItemAndTarget(parameters, function(error, data) {
@@ -152,9 +205,19 @@ provider.checkRight = function(parameters, callback) {
 
 	})
 
-
 }
 
+/**
+ * Duplicate a sharing object with a new item path
+ *
+ * ex: provider.duplicateWithNewItemPath({
+ *     fullPath: "xx/xx/xx",
+ *     newPath: "xx/xx"
+ * }, function() {...})
+ *
+ * @param  {object}   parameters params needed to duplicate
+ * @param  {Function} callback
+ */
 provider.duplicateWithNewItemPath = function(parameters, callback) {
 
 	var path = parameters.fullPath
@@ -173,7 +236,7 @@ provider.duplicateWithNewItemPath = function(parameters, callback) {
 					targetId: data[i].sharedWith
 				}, function(error, data) {
             		mongo.collection('directories', function(error, collection) {
-            			console.log('share',data[0].sharedWith + '/Shared', newPath)
+            			// console.log('share',data[0].sharedWith + '/Shared', newPath)
 						collection.update({'_id': data[0].sharedWith + '/Shared'}, {
 							$push: { children: newPath}
 						}, { safe : true },

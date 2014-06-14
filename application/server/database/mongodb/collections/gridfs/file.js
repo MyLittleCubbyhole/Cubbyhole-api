@@ -20,6 +20,17 @@ provider.init = function() {
 
 /********************************[  GET   ]********************************/
 
+/**
+ * Get a gridfs file by it's fullpath
+ *
+ * ex: provider.get.byPath({
+ * 	 fullPath: "xx/xx/xx",
+ *   range: 500
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to find the file
+ * @param  {Function} callback
+ */
 provider.get.byPath = function(data, callback){
 	var range = data.range;
 	directoryProvider.get.byFullPath(data.fullPath,function(error, data){
@@ -30,6 +41,11 @@ provider.get.byPath = function(data, callback){
 	})
 }
 
+/**
+ * Get a gridfs file by it's md5 and it's user
+ * @param  {object}   data     params needed to get the file
+ * @param  {Function} callback
+ */
 provider.get.byMD5 = function(data, callback){
 
 	mongo.collection('fs.files', function(error, collection){
@@ -37,6 +53,11 @@ provider.get.byMD5 = function(data, callback){
 	})
 }
 
+/**
+ * Get the md5 of a file
+ * @param {string}   id       id of the file used to get the md5
+ * @param {Function} callback
+ */
 provider.get.MD5 = function(id, callback){
 
 	mongo.collection('fs.files', function(error, collection){
@@ -46,6 +67,11 @@ provider.get.MD5 = function(id, callback){
 	})
 }
 
+/**
+ * Get metada of a file
+ * @param  {string}   id       id of the file used to get metada
+ * @param  {Function} callback
+ */
 provider.get.metadata = function(id, callback){
 
 	var gridFS = new GridStorage(mongo, id, 'r' );
@@ -60,6 +86,11 @@ provider.get.metadata = function(id, callback){
 
 /********************************[ DELETE ]********************************/
 
+/**
+ * Delete a gridfs file by it's id
+ * @param  {string}   id       id of the file to delete
+ * @param  {Function} callback
+ */
 provider.delete.file = function(id, callback){
 
 	var gridFS = new GridStorage(mongo, id, 'r' );
@@ -72,6 +103,17 @@ provider.delete.file = function(id, callback){
 
 /********************************[ UPDATE ]********************************/
 
+/**
+ * Update the name of a gridfs file
+ *
+ * ex: provider.update.fileName({
+ *     itemId: "xxx",
+ *     name: "xxx"
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to update the file
+ * @param  {Function} callback
+ */
 provider.update.fileName = function(data, callback) {
 	var id = data.itemId;
     mongo.collection('fs.files', function(error, collection) {
@@ -88,6 +130,21 @@ provider.update.fileName = function(data, callback) {
 
 /********************************[ OTHERS ]********************************/
 
+/**
+ * Upload a file. Create a gridfs file.
+ *
+ * ex: provider.upload({
+ *     mode: x (r | w),
+ *     id: "xxxx",
+ *     type: "xxxx",
+ *     name: "xxxx",
+ *     ownerId: xx,
+ *     data: {object}
+ * }, function() {...})
+ *
+ * @param  {object}   params   params needed to create the file
+ * @param  {Function} callback
+ */
 provider.upload = function(params, callback){
 	var mode = params.mode || 'w';
 
@@ -119,6 +176,20 @@ provider.upload = function(params, callback){
 
 }
 
+/**
+ * Upload a file from a client path. Create a gridfs file
+ *
+ * ex: provider.uploadFromPath({
+ *     id: "xxxx",
+ *     type: "xxxx",
+ *     name: "xxxx",
+ *     ownerId: xx,
+ *     data: multipart
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to create the file
+ * @param  {Function} callback
+ */
 provider.uploadFromPath = function(data, callback) {
 	var gridFS = new GridStorage(mongo, data.id, data.name, 'w', { content_type : data.data.type, metadata : { name : data.name, owner : parseInt(data.ownerId, 10) } } );
 
@@ -130,6 +201,17 @@ provider.uploadFromPath = function(data, callback) {
 	});
 }
 
+/**
+ * Download a file from gridfs storage
+ *
+ * ex: provider.download({
+ *     id: "xxxxx",
+ *     range: 1000
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to download the file
+ * @param  {Function} callback
+ */
 provider.download = function(data, callback){
 
 	var gridFS = new GridStorage(mongo, data.id, 'r' );
@@ -146,6 +228,17 @@ provider.download = function(data, callback){
 	});
 }
 
+/**
+ * Zip a folder
+ *
+ * ex: provider.zip({
+ *     path: ["xx", "xx", "xx"], (equivalent of xx/xx/xx in an array)
+ *     ownerId: xxx
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to zip a folder
+ * @param  {Function} callback
+ */
 provider.zip = function(data, callback) {
 
 	var name = data.path.length >  1 ? data.path[data.path.length - 2] : data.path[data.path.length - 1];
@@ -161,6 +254,17 @@ provider.zip = function(data, callback) {
 
 }
 
+/**
+ * Zip items
+ *
+ * ex: provider.zipItems({
+ *     ownerId: xx,
+ *     items: ["/xx", "/xxx/", ...]
+ * }, function() {...})
+ *
+ * @param  {object}   data     params needed to zip items
+ * @param  {Function} callback
+ */
 provider.zipItems = function(data, callback) {
 	var length = data.items.length
 	,	self = this

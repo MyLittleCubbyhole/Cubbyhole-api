@@ -1,6 +1,11 @@
 var db = require(global.paths.server + '/database/core').get().mysql
 ,	mysql = {};
 
+/**
+ * Utility class to make a SQL request
+ * @param  {string}   query    query to execute
+ * @param  {Function} callback
+ */
 mysql.query = function(query, callback) {
 	var data;
 	db.getConnection(function(error, self){
