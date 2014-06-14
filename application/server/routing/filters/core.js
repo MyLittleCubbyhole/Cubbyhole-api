@@ -31,7 +31,7 @@ filters.rightInterceptor = function(request, response, next) {
 
     request.ownerId = parseInt(ownerId, 10);
 
-    if(ownerId == 1) {
+    if(ownerId == 1 && userId != 1) {
         request.right = 'R';
         request.owner = false;
         next();
