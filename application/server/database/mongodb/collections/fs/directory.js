@@ -683,7 +683,7 @@ provider.copy = function(fullPath, updatedItem, targetPath, move, creatorId, cre
         fullPath = fullPath.slice(-1) == '/' ? fullPath.slice(0,-1) : fullPath;
         sharingProvider.get.byItemFullPath(fullPath, function(error, data) {
             if(!error && data && data.length > 0)
-                callback.call(this, 'An error has occurred - method not allowed');
+                callback.call(this, 'An error has occurred - you can\'t copy - move or rename a shared folder');
             else
                 mongo.collection('directories', function(error, collection) {
 
