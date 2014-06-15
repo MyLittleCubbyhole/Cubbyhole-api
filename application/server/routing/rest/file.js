@@ -16,14 +16,17 @@ var provider 	= require(global.paths.server + '/database/mongodb/collections/gri
 ,	file	 	= { get : {}, post : {}, put : {}, delete : {} };
 provider.init();
 
+/**
+ * Download a file normally or stream it
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.download = function(request, response){
 	var params 	= request.params
 	,	query 	= request.query
 	,	range 	= request.headers.range
 	,	data 	= {}
 	,	header 	= {};
-
-	//console.log('client : ' + request.client.remoteAddress + ':' + request.client.remotePort);
 
 	if(typeof request.headers.range !== 'undefined')
 	{
@@ -37,6 +40,7 @@ file.get.download = function(request, response){
 	data.range 	= partialstart && typeof query.nostream === 'undefined' ? parseInt(partialstart,10) : 0;
 	data.fullPath = data.userId + '/' + data.path;
 
+	// Write some informations in a file to manage bandwidth limitations thanks to a call to a QOS daemon
 	userProvider.bandwidth(data.userId, function(error, user) {
 		var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';download\n';
 		if(config.limit_file && !error && user.id)
@@ -72,7 +76,7 @@ file.get.download = function(request, response){
 					response.write(download.data, "binary");
 
 					if(request.quotaId !== undefined && request.quotaAvailable !== undefined)
-						file.put.updateDailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
+						dailyQuotaProvider.update.dailyQuota(request.quotaId, request.quotaAvailable - total, request.planQuota);
 				}
 
 			} else {
@@ -87,6 +91,11 @@ file.get.download = function(request, response){
 
 }
 
+/**
+ * Share a file publicly
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.share 	= function(request, response) {
 	var params 	= request.params
 	,	parameters 	= {};
@@ -107,6 +116,11 @@ file.get.share 	= function(request, response) {
 	})
 }
 
+/**
+ * Unshare a public file
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.unshare 	= function(request, response) {
 	var params 	= request.params
 	,	parameters 	= {};
@@ -127,6 +141,11 @@ file.get.unshare 	= function(request, response) {
 	})
 }
 
+/**
+ * Get a file shared publicly
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.shared 	= function(request, response) {
 	var params 	= request.params
 	,	parameters 	= {};
@@ -221,11 +240,21 @@ file.get.shared 	= function(request, response) {
 	});
 }
 
+/**
+ * Preview a file shared publicly
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.sharedPreview 	= function(request, response) {
 	request.preview = true;
 	file.get.shared(request, response);
 }
 
+/**
+ * Get a zip of a folder
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.get.zip = function(request, response) {
 	var params 	= request.params
 	,	header = {}
@@ -257,6 +286,11 @@ file.get.zip = function(request, response) {
 
 }
 
+/**
+ * Upload a file from a post multipart form
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.post.upload = function(request, response) {
 	var params = request.params
     ,   query = request.query
@@ -367,6 +401,14 @@ file.post.upload = function(request, response) {
 	}
 }
 
+/**
+ * Get a zip of files. You must specify an array of fullpaths without ids in the body.
+ *
+ * ex: ["/xxx", "/xxx/xx", .. ]
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 file.post.zip = function(request, response) {
 	var params 	= request.params
 	,	body = request.body
@@ -400,18 +442,6 @@ file.post.zip = function(request, response) {
 		response.end();
 	}
 
-}
-
-file.put.updateDailyQuota = function(quotaId, quotaAvailable, planQuota) {
-	dailyQuotaProvider.get.byId(quotaId, function(error, dailyQuota) {
-		if(!error && dailyQuota && dailyQuota.id) {
-			dailyQuota.quotaUsed = planQuota - quotaAvailable;
-			dailyQuotaProvider.update.quotaUsed(dailyQuota, function(error, data) {
-				if(error)
-					console.log(error);
-			})
-		}
-	})
 }
 
 module.exports = file;

@@ -8,7 +8,6 @@ var file = require(global.paths.server + '/routing/rest/file')
 
 routing.init = function(app) {
 
-	//app.get('/api/browse', filters.tokenInterceptor, directory.get.all);
 	app.get(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, filters.rightInterceptor, directory.get.byOwner);
 	app.get(/^\/api\/browse\/([0-9]+)\/size$/, filters.tokenInterceptor, filters.rightInterceptor, directory.get.size);
 	app.get(/^\/api\/browse\/([0-9]+)\/(\/?.+)*/, filters.tokenInterceptor,filters.rightInterceptor, directory.get.byPath);
@@ -21,7 +20,6 @@ routing.init = function(app) {
 	app.get(/^\/api\/shared\/(.+)+/, file.get.shared);
 	app.get('/api/users', filters.tokenInterceptor, filters.adminInterceptor, user.get.all);
 	app.get(/^\/api\/users\/shared\/(\/?.+)+\/$/, filters.tokenInterceptor, user.get.usersBySharing);
-	//app.get('/api/users/:id', filters.tokenInterceptor, user.get.byId);
 	app.get('/api/users/:email', filters.tokenInterceptor, user.get.byEmail);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
 	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
@@ -33,7 +31,6 @@ routing.init = function(app) {
 	app.get('/api/plans', plan.get.all);
 	app.get('/api/plans/images', plan.get.images);
 
-	//app.post(/^\/api\/browse\/([0-9]+)$/, filters.tokenInterceptor, directory.post.init);
 	app.post(/^\/api\/download\/([0-9]+)\/$/, filters.tokenInterceptor, filters.rightInterceptor, file.post.zip);
 	app.post(/^\/api\/share\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.share);
 	app.post(/^\/api\/unshare\/([0-9]+)(\/?.+)*\/$/, filters.tokenInterceptor, filters.rightInterceptor, directory.post.unshare);

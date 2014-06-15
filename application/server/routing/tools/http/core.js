@@ -2,6 +2,12 @@ var https = require('https')
 ,   qs = require('querystring')
 ,   httpTools = {};
 
+/**
+ * Process the Paypal request to process a payment
+ * @param  {object}   request
+ * @param  {object}   response
+ * @param  {Function} callback
+ */
 httpTools.processPaypalIpn = function(request, response, callback) {
 
     var headers = request.headers

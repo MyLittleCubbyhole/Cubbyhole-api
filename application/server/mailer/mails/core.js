@@ -3,6 +3,12 @@ var mailer = {}
 ,   config = require(global.paths.server + '/config/core').get()
 ,   fs = require('fs');
 
+/**
+ * Send an activation mail to an user
+ * @param  {string} receiverAddress email address of the user
+ * @param  {string} firstname       firstname of the user
+ * @param  {string} token           activation token
+ */
 mailer.sendActivationMail = function(receiverAddress, firstname, token) {
 
     var webserverUrl = config["webserver"].protocol + '//' + config["webserver"].host + ':' + config["webserver"].port;

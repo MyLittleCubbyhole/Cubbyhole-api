@@ -98,5 +98,23 @@ provider.update.quotaUsed = function(dailyQuota, callback) {
 	Mysql.query('update `daily_quota` set `quotaused`=' + parseInt(dailyQuota.quotaUsed, 10) + ' where `id`=' + parseInt(dailyQuota.id, 10) + ';', callback);
 }
 
+/**
+ * Update a daily quota
+ * @param  {integer} quotaId        id of the quota to update
+ * @param  {integer} quotaAvailable available quota
+ * @param  {inter} planQuota        max usable quota
+ */
+provider.update.dailyQuota = function(quotaId, quotaAvailable, planQuota) {
+    provider.get.byId(quotaId, function(error, dailyQuota) {
+        if(!error && dailyQuota && dailyQuota.id) {
+            dailyQuota.quotaUsed = planQuota - quotaAvailable;
+            provider.update.quotaUsed(dailyQuota, function(error, data) {
+                if(error)
+                    console.log(error);
+            })
+        }
+    })
+}
+
 
 module.exports = provider;

@@ -18,6 +18,7 @@ server.setTimeout(21600000);
 
 module.exports = { app: app, server: server };
 
+// Allow web clients to make request to the webservice
 var allowCrossDomain = function(request, response, next) {
 
     response.setHeader('Access-Control-Allow-Origin', '*');

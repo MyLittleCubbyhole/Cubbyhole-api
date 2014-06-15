@@ -30,6 +30,12 @@ mongoTools.browse = function(path, root, targetOnly){
 	return root;
 }
 
+/**
+ * [RECURSION] Browse and get properties of passed paramaters
+ * @param  {json object} root
+ * @param  {object} data       object to update
+ * @param  {array} properties properties to get
+ */
 mongoTools.browseAndGetProperties = function(root, data, properties){
 	properties 	= properties || ['name'];
 	var property;
@@ -48,6 +54,11 @@ mongoTools.browseAndGetProperties = function(root, data, properties){
 		}
 }
 
+/**
+ * Format the parameter. Transform the paramater to a hierarchical structure.
+ * @param  {array} rows array to format
+ * @return {array}      formatted array
+ */
 mongoTools.format = function(rows) {
 
 	var formatedObject = []
@@ -103,6 +114,11 @@ mongoTools.format = function(rows) {
 
 }
 
+/**
+ * Zip some items
+ * @param  {array}   itemsToZip items to zip
+ * @param  {Function} callback
+ */
 mongoTools.zipItems = function(itemsToZip, callback) {
 	var itemsCounter = itemsToZip.length
 	,	self = this
@@ -145,11 +161,16 @@ mongoTools.zipItems = function(itemsToZip, callback) {
 				archiver.file(download.metadata.name, download.data);
 				--itemsCounter <= 0 && success.call(self);
 			});
-		else 
+		else
 			zip(itemsToZip[i]);
 
 }
 
+/**
+ * Zip a folder
+ * @param  {object} folder  folder item to zip
+ * @param  {object} options some options
+ */
 mongoTools.zipFolder = function(folder, options) {
 	options = options || {};
 	var filesCounter = 0
@@ -169,6 +190,13 @@ mongoTools.zipFolder = function(folder, options) {
 
 }
 
+/**
+ * Browse files from root and start archive on each file
+ * @param  {array} root     root to browse
+ * @param  {object} archiver
+ * @param  {Function} start    called when started
+ * @param  {Function} stop     called when finish
+ */
 mongoTools.dirtyBrowse = function(root, archiver, start, stop){
 
 	start()

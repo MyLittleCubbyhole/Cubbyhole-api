@@ -2,6 +2,10 @@ var sender = {}
 ,   config = require(global.paths.server + '/config/core').get()
 ,   nodemailer = require("nodemailer");
 
+/**
+ * Send a mail
+ * @param  {[type]} mailOptions options to send the email
+ */
 sender.sendMail = function(mailOptions) {
 
     var smtpTransport = nodemailer.createTransport("SMTP",{

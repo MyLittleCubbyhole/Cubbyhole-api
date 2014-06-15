@@ -10,6 +10,11 @@ mysqlTools.init();
 
 /********************************[  GET   ]********************************/
 
+/**
+ * Get all items of all users
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.get.all = function(request, response){
 	provider.get.directory(function(error, data){
 		response.send( (!error ? data : error ) );
@@ -17,6 +22,11 @@ directory.get.all = function(request, response){
 	})
 };
 
+/**
+ * Get all items of an user
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.get.byOwner = function(request, response){
 	var params = request.params;
 	if(!request.owner) {
@@ -30,6 +40,11 @@ directory.get.byOwner = function(request, response){
 	})
 };
 
+/**
+ * Get an item by his path
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.get.byPath = function(request, response){
 	var params 	= request.params
 	,	parameters 	= {};
@@ -97,6 +112,11 @@ directory.get.byPath = function(request, response){
 	}
 }
 
+/**
+ * Get the size of an item
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.get.size = function(request, response) {
 	var params = request.params
 	,	parameters 	= {};
@@ -113,13 +133,17 @@ directory.get.size = function(request, response) {
 
 /********************************[  POST  ]********************************/
 
-// directory.post.init	= function(request, response){
-// 	var userId = request.params[0];
-// 	provider.create.directory(userId, function(error, data){
-// 		response.send({'information': (!error ? 'directory created' : 'An error has occurred - ' + error) });
-// 	})
-// }
-
+/**
+ * Create a folder
+ *
+ *  needed parameters in the body:
+ *  {
+ *      name: "xxx"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.post.create = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
@@ -167,6 +191,17 @@ directory.post.create = function(request, response){
 
 }
 
+/**
+ * Copy an item to a folder
+ *
+ *  needed parameters in the body:
+ *  {
+ *      path: "xx/xxx/"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.post.copy = function(request, response){
 	var params 		= request.params
 	,	body 		= request.body
@@ -262,6 +297,12 @@ directory.post.copy = function(request, response){
 
 }
 
+/**
+ * Move an item to a folder. Call the copy method with a move parameter
+ * @param  {[type]} request  [description]
+ * @param  {[type]} response [description]
+ * @return {[type]}          [description]
+ */
 directory.post.move = function(request, response) {
 
 	if(request.right != 'W') {
@@ -272,6 +313,18 @@ directory.post.move = function(request, response) {
 	directory.post.copy(request, response);
 }
 
+/**
+ * Share a folder with another user
+ *
+ *  needed parameters in the body:
+ *  {
+ *      target: "xxx@xxx.xx",
+ *      right: "x" (R | W)
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.post.share = function(request, response) {
 	var params = request.params
 	,	body = request.body
@@ -302,6 +355,17 @@ directory.post.share = function(request, response) {
 	});
 }
 
+/**
+ * Unshare a folder with an user
+ *
+ *  needed parameters in the body:
+ *  {
+ *      target: "xxx@xxx.xx"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.post.unshare = function(request, response) {
 	var params = request.params
 	,	body = request.body
@@ -324,6 +388,17 @@ directory.post.unshare = function(request, response) {
 
 /********************************[  PUT   ]********************************/
 
+/**
+ * Rename an item
+ *
+ *  needed parameters in the body:
+ *  {
+ *      name: "xxx"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.put.rename = function(request, response){
 
     var params 	= request.params
@@ -375,6 +450,11 @@ directory.put.rename = function(request, response){
 
 /********************************[ DELETE ]********************************/
 
+/**
+ * Delete an item
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.delete.byOwner 	= function(request, response){
 	var userId = request.params[0];
 
@@ -397,6 +477,11 @@ directory.delete.byOwner 	= function(request, response){
 	})
 }
 
+/**
+ * Delete an item by his path
+ * @param  {object} request
+ * @param  {object} response
+ */
 directory.delete.byPath		= function(request, response){
 	var params 		= request.params
 	,	body 		= request.body

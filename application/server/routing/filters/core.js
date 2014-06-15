@@ -3,6 +3,12 @@ var filters = {}
 ,   tokenProvider = require(global.paths.server + '/database/mysql/tables/token')
 ,   userProvider = require(global.paths.server + '/database/mysql/tables/user');
 
+/**
+ * Filter to check if a given token is valid for authentication
+ * @param  {object}   request
+ * @param  {object}   response
+ * @param  {Function} next
+ */
 filters.tokenInterceptor = function(request, response, next) {
 	var query = request.query
     ,   witness = false;
@@ -24,6 +30,12 @@ filters.tokenInterceptor = function(request, response, next) {
     });
 };
 
+/**
+ * Filter to check the rights of an user on the requested element
+ * @param  {object}   request
+ * @param  {object}   response
+ * @param  {Function} next
+ */
 filters.rightInterceptor = function(request, response, next) {
     var ownerId = request.params[0]
     ,   userId = request.userId
@@ -61,6 +73,12 @@ filters.rightInterceptor = function(request, response, next) {
     }
 }
 
+/**
+ * Check if the user who made the request is an administrator
+ * @param  {object}   request
+ * @param  {object}   response
+ * @param  {Function} next
+ */
 filters.adminInterceptor = function(request, response, next) {
 
     userProvider.get.byId(request.userId, function(error, user) {
@@ -74,6 +92,12 @@ filters.adminInterceptor = function(request, response, next) {
     })
 }
 
+/**
+ * Check if the request was made from a mobile device
+ * @param  {object}   request
+ * @param  {object}   response
+ * @param  {Function} next
+ */
 filters.mobileInterceptor = function(request, response, next) {
     if(request.origin.match(/CubbyHole/i))
         next();

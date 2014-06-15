@@ -5,6 +5,11 @@ var planProvider = require(global.paths.server + '/database/mysql/tables/plan')
 
 /********************************[  GET   ]********************************/
 
+/**
+ * Get all plans
+ * @param  {object} request
+ * @param  {object} response
+ */
 plan.get.all = function(request, response) {
     planProvider.get.all(function(error, data){
         var plans = [];
@@ -16,6 +21,11 @@ plan.get.all = function(request, response) {
     })
 }
 
+/**
+ * Get all available images for plans
+ * @param  {object} request
+ * @param  {object} response
+ */
 plan.get.images = function(request, response) {
     directoryProvider.get.byPath(1, '/admin/', function(error, data) {
         if(!error && data) {
@@ -31,6 +41,25 @@ plan.get.images = function(request, response) {
 
 /********************************[  POST  ]********************************/
 
+/**
+ * Create a new plan
+ *
+ *  needed parameters in the body:
+ *  {
+ *      price: xxx,
+ *      name: "xxx",
+ *      photo: "xxxxx",
+ *      description: "xxxx",
+ *      storage: xxx,
+ *      duration: xx,
+ *      uploadBandWidth: xxxxx,
+ *      downloadBandWidth: xxxx,
+ *      quota: xxx
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 plan.post.create = function(request, response) {
     var params = request.params
     ,   body = request.body
@@ -55,6 +84,25 @@ plan.post.create = function(request, response) {
 
 /********************************[  PUT   ]********************************/
 
+/**
+ * Update a plan
+ *
+ *  needed parameters in the body:
+ *  {
+ *      price: xxx,
+ *      name: "xxx",
+ *      photo: "xxxxx",
+ *      description: "xxxx",
+ *      storage: xxx,
+ *      duration: xx,
+ *      uploadBandWidth: xxxxx,
+ *      downloadBandWidth: xxxx,
+ *      quota: xxx
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 plan.put.byId = function(request, response) {
     var params = request.params
     ,   body = request.body
@@ -92,6 +140,11 @@ plan.put.byId = function(request, response) {
 
 /********************************[ DELETE ]********************************/
 
+/**
+ * Delete a plan
+ * @param  {object} request
+ * @param  {object} response
+ */
 plan.delete.byId = function(request, response) {
     var params = request.params
     , planId = params.id;

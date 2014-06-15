@@ -9,6 +9,10 @@ var socketIO = require('socket.io')
 ,	IO
 ,	sockets;
 
+/**
+ * Initialize webesockets. Manage connections, deconnections et re-authentication to receive all events in a sharing context
+ * @param  {object} server
+ */
 websocket.init = function(server) {
 
 	uploader = require(global.paths.server + '/websockets/dataTransfer/uploader');
@@ -18,7 +22,6 @@ websocket.init = function(server) {
 
 	IO = socketIO.listen(server, { log: false });
 	sockets = IO.of('/cubbyhole');
-	//sockets = IO;
 
 	sockets.on('connection', function(socket) {
 		var roomSubscribe = new Array()
@@ -37,6 +40,7 @@ websocket.init = function(server) {
 			tokenProvider.isValidForAuthentication(data.token, function(error, token) {
 				if(!error && token && token.userid) {
 					userId = token.userid;
+					// Write some informations in a file to manage bandwidth limitations thanks to a call to a QOS daemon
 					userProvider.bandwidth(userId, function(error, user) {
 						var row = user.id + ';' + user.upload + ';' + user.download + ';' + socket.manager.remotePort + ';upload\n';
 						if(config.limit_file && !error && user.id)
@@ -55,8 +59,6 @@ websocket.init = function(server) {
 								roomSubscribe.push(sharings[i]._id);
 								socket.join(sharings[i]._id);
 							}
-						//else
-						//	console.log('no sharing found');
 					})
 				}
 				else
@@ -79,6 +81,12 @@ websocket.get = function() {
 	return sockets;
 }
 
+/**
+ * Send a socket event to a client
+ * @param  {string} roomId room id used to send the event
+ * @param  {string} type   event type (create_file, delete, ...)
+ * @param  {object} data   data to send
+ */
 websocket.send = function(roomId, type, data) {
 	type = type || 'message';
 	sockets.in(roomId).emit(type, data);

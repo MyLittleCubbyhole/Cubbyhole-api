@@ -7,6 +7,12 @@ mysqlTools.init = function() {
         userProvider = require(global.paths.server + '/database/mysql/tables/user');
 }
 
+/**
+ * Hash a string with a salt
+ * @param  {string} string string to hash
+ * @param  {string} salt   salt used to hash the string
+ * @return {string}        hashed string
+ */
 function encrypt(string, salt) {
     var hash = crypto.createHash('sha512');
 
@@ -16,6 +22,11 @@ function encrypt(string, salt) {
     return hash.digest('base64');
 };
 
+/**
+ * Generate randomly a certain amount of bytes
+ * @param  {integer}   numberOfBytes number of bytes to generate
+ * @param  {Function} callback
+ */
 mysqlTools.generateRandomBytes = function(numberOfBytes, callback) {
     crypto.randomBytes(numberOfBytes, function(exception, bytes) {
         if(exception)
@@ -25,6 +36,11 @@ mysqlTools.generateRandomBytes = function(numberOfBytes, callback) {
     });
 }
 
+/**
+ * Generate a hashed password from a string
+ * @param  {string}   password password to hash
+ * @param  {Function} callback
+ */
 mysqlTools.generatePassword = function(password, callback){
     var data = {};
 
@@ -40,11 +56,23 @@ mysqlTools.generatePassword = function(password, callback){
     });
 }
 
+/**
+ * Check if a given password is equal to the stored one
+ * @param  {string} userPassword password to compare
+ * @param  {string} bddPassword  good password to compare
+ * @param  {string} salt         used for hash the userPassword
+ * @return {boolean}              true if passwords are equals
+ */
 mysqlTools.checkPassword = function(userPassword, bddPassword, salt){
     var encryptedPassword = encrypt(userPassword, salt);
     return encryptedPassword === bddPassword;
 }
 
+/**
+ * Set names on a list of files
+ * @param {array}   files    files to set
+ * @param {Function} callback
+ */
 mysqlTools.setCreatorsNames = function(files, callback) {
     if(files && files.length > 0) {
         var creatorIds = [];
