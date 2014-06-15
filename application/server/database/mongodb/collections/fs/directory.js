@@ -570,13 +570,13 @@ provider.update.downloads = function(fullPath, callback) {
  * @param  {document} collection  mongodb directory collection
  * @param  {object} item           item to copy or move
  * @param  {document} updatedItem new item to create if you want to process a rename
- * @param  {[type]} targetPath  path where to copy or move the file
- * @param  {[type]} targetItem  item copied or moved
- * @param  {[type]} move        true to move the file
- * @param  {[type]} creatorId   id of the creator
- * @param  {[type]} creatorName name of the creator
- * @param  {[type]} start       used for recursion
- * @param  {[type]} stop        user for recursion
+ * @param  {string} targetPath  path where to copy or move the file
+ * @param  {object} targetItem  item copied or moved
+ * @param  {boolean} move        true to move the file
+ * @param  {integer} creatorId   id of the creator
+ * @param  {string} creatorName name of the creator
+ * @param  {Function} start       used for recursion
+ * @param  {Function} stop        user for recursion
  */
 provider.copyItem = function(collection, item, updatedItem, targetPath, targetItem, move, creatorId, creatorName, start, stop) {
     updatedItem = updatedItem || {};
@@ -642,6 +642,12 @@ provider.copyItem = function(collection, item, updatedItem, targetPath, targetIt
                 fileProvider.get.byPath({fullPath: oldFullPath, range: 0}, function(error, data) {
                     if(error)
                         console.error('error getting old file - ' + error);
+
+                    if(move)
+                        tokenProvider.delete.byFileId(data.fileId, function(error, data) {
+                            if(error)
+                                console.log(error);
+                        });
 
                     params.type = data.type;
                     params.data = data.data;

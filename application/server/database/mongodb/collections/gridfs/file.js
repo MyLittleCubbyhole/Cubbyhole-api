@@ -220,7 +220,7 @@ provider.download = function(data, callback){
 		if(collection && !error)
 			collection.seek(data.range, function() {
 				collection.read(function(error, data) {
-					callback(error, { "type": collection.metadata.type, "data": data, "metadata" : collection.metadata, "length" : collection.length })
+					callback(error, { "type": collection.metadata.type, "data": data, "metadata" : collection.metadata, "length" : collection.length, "fileId": collection.fileId})
 				});
 			});
 		else

@@ -93,6 +93,15 @@ provider.delete.byId = function(id, callback) {
 	Mysql.query('delete from `token` where `id`= "'+ id + '";', callback);
 }
 
+/**
+ * Delete a token object
+ * @param  {integer}   fileId       fileId of the object to delete
+ * @param  {Function} callback
+ */
+provider.delete.byFileId = function(fileId, callback) {
+    Mysql.query('delete from `token` where `fileid`= "'+ fileId + '";', callback);
+}
+
 /********************************[  UPDATE   ]********************************/
 
 
