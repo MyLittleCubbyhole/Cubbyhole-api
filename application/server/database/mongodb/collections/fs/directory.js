@@ -291,12 +291,14 @@ provider.create.file = function(params, callback){
                                             throw 'error updating children - ';
                                         }
                                         provider.update.size(userId, folderPath, directoryFile.size, directoryFile.lastUpdateName, function(error) {
-                                            callback.call(this, error);
+                                            callback.call(this, error, fileMd5);
                                         });
 
                                     });
                                 else
-                                    storageProvider.update.value(userId, directoryFile.size, callback);
+                                    storageProvider.update.value(userId, directoryFile.size, function(error, data) {
+                                        callback.call(this, error, fileMd5);
+                                    });
 
                             });
                         });
