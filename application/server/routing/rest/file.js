@@ -287,7 +287,7 @@ file.get.zip = function(request, response) {
 }
 
 /**
- * Upload a file from a post multipart form
+ * Upload a file from a post multipart form. His field name must be file.
  * @param  {object} request
  * @param  {object} response
  */

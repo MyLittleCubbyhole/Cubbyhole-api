@@ -17,6 +17,11 @@ mysqlTools.init();
 
 /********************************[  GET   ]********************************/
 
+/**
+ * Get all users. Possibility to specify a limit, offset, role and email to do a research
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.all = function(request, response) {
     var query = request.query
     ,   offset = query.offset || 0
@@ -53,9 +58,14 @@ user.get.all = function(request, response) {
                 userProvider.get.byEmailLike(email, callback, { offset: offset, limit: limit});
         }
     }
-        
+
 }
 
+/**
+ * Get an user by his id
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.byId = function(request, response) {
 	var params 	= request.params;
 	userProvider.get.byId(params.id, function(error, data){
@@ -68,6 +78,11 @@ user.get.byId = function(request, response) {
 	})
 }
 
+/**
+ * Get an user by his email
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.byEmail = function(request, response) {
     var params  = request.params;
     userProvider.get.byEmail(params.email, function(error, data){
@@ -81,6 +96,11 @@ user.get.byEmail = function(request, response) {
     })
 }
 
+/**
+ * Get the current plan of an user
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.currentPlan = function(request, response) {
     var params  = request.params;
     userProvider.get.byId(params.id, function(error, user){
@@ -104,6 +124,11 @@ user.get.currentPlan = function(request, response) {
     })
 }
 
+/**
+ * Get the amount of daily quota used by an user
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.usedQuota = function(request, response) {
     var params  = request.params;
     userProvider.get.byId(params.id, function(error, user){
@@ -128,12 +153,21 @@ user.get.usedQuota = function(request, response) {
     })
 }
 
-
+/**
+ * This do nothing special, but if the request came up here, the token is valid
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.checkToken = function(request, response) {
     response.writeHead(200);
     response.end();
 };
 
+/**
+ * Activate an user account
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.activateAccount = function(request, response) {
     var query = request.query
     ,   witness = false;
@@ -186,6 +220,11 @@ user.get.activateAccount = function(request, response) {
     });
 };
 
+/**
+ * Disconnect an user. Delete his authentication token.
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.logout = function(request, response) {
     var query  = request.query;
     if(query.token) {
@@ -206,6 +245,11 @@ user.get.logout = function(request, response) {
 
 };
 
+/**
+ * Get users of a sharing folder
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.usersBySharing = function(request, response) {
     var params  = request.params
     ,   fullPath  = params[0];
@@ -220,13 +264,18 @@ user.get.usersBySharing = function(request, response) {
     });
 }
 
+/**
+ * Get the historic of and user. Possibility to specify a limit and an offset.
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.get.historic = function(request, response) {
     var params  = request.params
     ,   query = request.query
     ,   parameters = {};
     parameters.userId = parseInt(params.id);
-    parameters.offset = params.offset;
-    parameters.limit = params.limit;
+    parameters.offset = query.offset;
+    parameters.limit = query.limit;
 
     if(parameters.userId != request.userId) {
         response.send({'information': 'An error has occurred - method not allowed'}, 401);
@@ -246,6 +295,25 @@ user.get.historic = function(request, response) {
 
 /********************************[  POST  ]********************************/
 
+/**
+ * Create an user
+ *
+ *  needed parameters in the body:
+ *  {
+ *      password: "xxx",
+ *      firstname: "xxx",
+ *      lastname: "xxxxx",
+ *      email: "xxxx@xxx.xx",
+ *      birthdate: "dd-mm-yyyy",
+ *      country: "xxxxx",
+ *      countryCode: "XX"
+ *  }
+ *
+ * You can also send a photo in a multipart form. His field name must be photo.
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.post.create = function(request, response){
 	var params = request.params
     ,   query = request.query
@@ -370,6 +438,18 @@ user.post.create = function(request, response){
 
 }
 
+/**
+ * Authenticate an user
+ *
+ *  needed parameters in the body:
+ *  {
+ *      password: "xxx",
+ *      email: "xxxx@xxx.xx"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.post.authenticate = function(request, response) {
 	var params = request.params
 	,	body = request.body
@@ -409,6 +489,18 @@ user.post.authenticate = function(request, response) {
 
 }
 
+/**
+ * Subscribe an user to a plan
+ *
+ *  needed parameters in the body:
+ *  {
+ *      dateStart: "DD-MM-YYYY HH:mm:ss",
+ *      dateEnd: "DD-MM-YYYY HH:mm:ss"
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.post.subscribe = function(request, response) {
     var params = request.params
     ,   body = request.body
@@ -454,6 +546,11 @@ user.post.subscribe = function(request, response) {
             response.send({'information' : 'An error has occurred - you can\'t subscribe to the free plan'});
 }
 
+/**
+ * Paypal endpoint. This method is called only by Paypal and process the request to subscribe an user to a plan
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.post.paypalNotify = function(request, response) {
 
     var body = request.body;
@@ -550,6 +647,23 @@ user.post.paypalNotify = function(request, response) {
 
 /********************************[  PUT   ]********************************/
 
+/**
+ * Update informations of an user
+ *
+ *  needed parameters in the body:
+ *  {
+ *      password: "xxx",
+ *      firstname: "xxx",
+ *      lastname: "xxxxx",
+ *      birthdate: "dd-mm-yyyy",
+ *      country: "xxxxx",
+ *      countryCode: "XX",
+ *      newPassword: "xxxx" // optionnal
+ *  }
+ *
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.put.byId = function(request, response){
     var params = request.params
     ,   body = request.body
@@ -606,6 +720,11 @@ user.put.byId = function(request, response){
         })
 }
 
+/**
+ * Change the role of an user to administrator
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.put.promote = function(request, response) {
     var params = request.params;
 
@@ -629,6 +748,11 @@ user.put.promote = function(request, response) {
 
 }
 
+/**
+ * Change the role of an user to simple user
+ * @param  {object} request
+ * @param  {object} response
+ */
 user.put.demote = function(request, response) {
     var params = request.params;
 
