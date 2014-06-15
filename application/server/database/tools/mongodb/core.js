@@ -1,5 +1,4 @@
 var mongoTools = {}
-,	nodeZip = new require('node-zip')
 ,	JSZip = new require('jszip')
 ,	providerFile
 ,	providerDirectory;
