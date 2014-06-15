@@ -15,19 +15,21 @@ filters.tokenInterceptor = function(request, response, next) {
 
     var token = query.token || 0;
     token = encodeURIComponent(token);
-
-    tokenProvider.isValidForAuthentication(token, function(error, data) {
-        if(!error && data && data.userid) {
-            request.userId = data.userid;
-            request.userName = data.firstname + ' ' + data.lastname;
-            request.origin = data.origin;
-            next();
-        } else {
-            response.writeHead(401);
-            response.write('You must be authentified to request the API');
-            response.end();
-        }
-    });
+    if(request.method == 'GET' && (request.url.substring(0, 30).indexOf('/api/download/1/admin') > -1 || request.url.substring(0, 30).indexOf('/api/download/1/userPhotos') > -1))
+        next()
+    else
+        tokenProvider.isValidForAuthentication(token, function(error, data) {
+            if(!error && data && data.userid) {
+                request.userId = data.userid;
+                request.userName = data.firstname + ' ' + data.lastname;
+                request.origin = data.origin;
+                next();
+            } else {
+                response.writeHead(401);
+                response.write('You must be authentified to request the API');
+                response.end();
+            }
+        });
 };
 
 /**
