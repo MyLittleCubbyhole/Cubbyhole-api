@@ -302,6 +302,7 @@ file.post.upload = function(request, response) {
 		ownerId: request.ownerId,
 		creatorId: request.userId,
 		path: params[1] ? params[1] + '/' : '/',
+		logicPath: params[1] ? params[1] + '/' : '/',
 		data: files.file
 	};
 
