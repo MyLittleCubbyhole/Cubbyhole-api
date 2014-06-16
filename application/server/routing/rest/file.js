@@ -17,7 +17,7 @@ var provider 	= require(global.paths.server + '/database/mongodb/collections/gri
 provider.init();
 
 /**
- * Download a file normally or stream it
+ * Download a file normally or stream it by passing the query parameter run
  * @param  {object} request
  * @param  {object} response
  */
