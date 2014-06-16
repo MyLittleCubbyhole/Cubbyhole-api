@@ -41,14 +41,15 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	// Write some informations in a file to manage bandwidth limitations thanks to a call to a QOS daemon
-	userProvider.bandwidth(data.userId, function(error, user) {
-		var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';download\n';
-		if(config.limit_file && !error && user.id)
-			fs.appendFile(config.limit_file, row, function (error) {
-				if(error)
-					throw 'an error occured';
-			});
-	})
+	if(userId != 1)
+		userProvider.bandwidth(data.userId, function(error, user) {
+			var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';download\n';
+			if(config.limit_file && !error && user.id)
+				fs.appendFile(config.limit_file, row, function (error) {
+					if(error)
+						throw 'an error occured';
+				});
+		})
 
 	provider.get.byPath(data, function(error, download) {
 		if(!error && download) {

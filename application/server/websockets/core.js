@@ -41,14 +41,15 @@ websocket.init = function(server) {
 				if(!error && token && token.userid) {
 					userId = token.userid;
 					// Write some informations in a file to manage bandwidth limitations thanks to a call to a QOS daemon
-					userProvider.bandwidth(userId, function(error, user) {
-						var row = user.id + ';' + user.upload + ';' + user.download + ';' + socket.manager.remotePort + ';upload\n';
-						if(config.limit_file && !error && user.id)
-							fs.appendFile(config.limit_file, row, function (error) {
-								if(error)
-									throw 'an error occured';
-							});
-					})
+					if(userId != 1)
+						userProvider.bandwidth(userId, function(error, user) {
+							var row = user.id + ';' + user.upload + ';' + user.download + ';' + socket.manager.remotePort + ';upload\n';
+							if(config.limit_file && !error && user.id)
+								fs.appendFile(config.limit_file, row, function (error) {
+									if(error)
+										throw 'an error occured';
+								});
+						})
 
 					clean();
 					roomSubscribe.push('user_' + token.userid);
