@@ -41,7 +41,7 @@ file.get.download = function(request, response){
 	data.fullPath = data.userId + '/' + data.path;
 
 	// Write some informations in a file to manage bandwidth limitations thanks to a call to a QOS daemon
-	if(userId != 1)
+	if(data.userId != 1)
 		userProvider.bandwidth(data.userId, function(error, user) {
 			var row = user.id + ';' + user.upload + ';' + user.download + ';' + request.client.remotePort + ';download\n';
 			if(config.limit_file && !error && user.id)

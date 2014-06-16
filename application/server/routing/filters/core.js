@@ -16,7 +16,7 @@ filters.tokenInterceptor = function(request, response, next) {
     var token = query.token || 0;
     token = encodeURIComponent(token);
     if(request.method == 'GET' && (request.url.substring(0, 30).indexOf('/api/download/1/admin') > -1 || request.url.substring(0, 30).indexOf('/api/download/1/userPhotos') > -1))
-        next()
+        next();
     else
         tokenProvider.isValidForAuthentication(token, function(error, data) {
             if(!error && data && data.userid) {
