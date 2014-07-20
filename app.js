@@ -54,6 +54,6 @@ if(app.settings.env == 'prod')
 
 require(global.paths.server + '/dependencies')(server, app);
 if (!module.parent)
-    server.listen(config['node_config'].port, function () {
+    server.listen(config['node_config'].port, '127.0.0.1', function () {
         console.log('WebService server listening on port %d in %s mode - [%s] - [%s]', this.address().port, app.settings.env, environment, developer);
     });
