@@ -8,7 +8,6 @@
 		compress = require('compression'),
 		jade = require('jade'),
 		express = require('express'),
-		i18n = require('kanto-i18n'),
 		errorHandler = require('kanto-error-handler');
 
 /*Kernel methods overriding*/
@@ -29,13 +28,10 @@ module.exports = Kernel;
 		app.use(bodyParser.urlencoded({ extended: true, inflate: true }));
 		app.use(bodyParser.json());
 		app.use(express.static(global.paths.assets));
-		app.use(i18n.tools.get().handle);
 	}
 
 	function afterAll(app) {
 		errorHandler.set(app);
 	}
 
-	function onDbLoaded(app) {
-		i18n.tools.config(app);
-	}
+	function onDbLoaded(app) {}
