@@ -1,0 +1,1 @@
+// exports.vendorName = require(__dirname + '/vendorName/vendor');
