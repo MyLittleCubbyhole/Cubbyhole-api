@@ -23,6 +23,17 @@
 			"server_options": {
 				"auto_reconnect": true
 			}
+		},
+		"mysql": {
+			"path": "/drivers/mysql.js",
+			"module": false,
+			"auth": {
+				"host": "localhost",
+				"port": 3306,
+				"database": "cubbyholedb",
+				"user": "cubbyholeuser",
+				"password": "cubbyholepassword"
+			}
 		}
 	},
 	"websocket": {
