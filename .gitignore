@@ -1,0 +1,17 @@
+/.sass*
+/app/**/*.js
+/server/**/*.js
+/app/logs/*.log*
+/node_modules
+/doc
+/application/server/dist
+/web/src/assets/javascripts/modules/_templates
+/web/src/assets/javascripts/modules/**/*.js
+/web/src/assets/javascripts/spec/**/*.js
+/web/src/assets/styles/**/*.css
+/web/src/assets/styles/imgConsts.scss
+/web/dist
+/**/Thumbs.db
+npm-debug.log
+/**/.sublime*
+/**/config.*.json
