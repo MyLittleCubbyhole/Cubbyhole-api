@@ -21,7 +21,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git://gitlab@gitlab.pillowrc.com:pillowteam/cubbyhole-api.git"
+		"url": ""
 	},
 	"dependencies": {
 		"6to5": "^1.12.20",
