@@ -17,8 +17,8 @@
 		"Seed",
 		"Project"
 	],
-	"author": "Polochon, Jul13nt",
-	"license": "ISC",
+	"author": "PillowPillow, Jul13nt",
+	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git://gitlab@gitlab.pillowrc.com:pillowteam/cubbyhole-api.git"
