@@ -1,7 +1,7 @@
 {
-	"name": "Chikorita",
-	"version": "0.3.0",
-	"description": "Seed - project",
+	"name": "Cubbyhole",
+	"version": "0.1.0",
+	"description": "Cubbyhole - api",
 	"main": "app.js",
 	"config": {
 		"env": "dev",
@@ -17,14 +17,14 @@
 		"Seed",
 		"Project"
 	],
-	"author": "Polochon",
+	"author": "Polochon, Jul13nt",
 	"license": "ISC",
 	"repository": {
 		"type": "git",
-		"url": "git://gitlab.pillowrc.com:pillowteam/chikorita-project.git"
+		"url": "git://gitlab@gitlab.pillowrc.com:pillowteam/cubbyhole-api.git"
 	},
 	"dependencies": {
-		"6to5": "^1.10.7",
+		"6to5": "^1.12.20",
 		"kanto-error-handler": "latest",
 		"body-parser": "^1.9.2",
 		"compression": "^1.2.0",
@@ -46,7 +46,7 @@
 	},
 	"devDependencies": {
 		"grunt": "^0.4.5",
-		"grunt-6to5": "^1.0.0",
+		"grunt-6to5": "^1.0.1",
 		"grunt-add-comment": "^1.1.1",
 		"grunt-apidoc": "^0.7.0",
 		"grunt-contrib-clean": "^0.5.0",
