@@ -47,6 +47,13 @@
 	MysqlFactory.get.usersBySharding = getUsersBySharing;
 	MysqlFactory.get.historic = getHistoric;
 
+	MysqlFactory.update.password = updatePassword;
+	MysqlFactory.update.informations = updateInformations;
+	MysqlFactory.update.activated = updateActivated;
+	MysqlFactory.update.role = updateRole;
+	MysqlFactory.update.photo = updatePhoto;
+	MysqlFactory.update.storage = updateStorage;
+
 	MysqlFactory.create = createUser;
 
 module.exports = MysqlFactory;
@@ -235,4 +242,28 @@ module.exports = MysqlFactory;
 
 				return MysqlFactory.query(query);
 			}); 
+	}
+
+	function updatePassword(model) {
+		return MysqlFactory.query('update `user` set `password`="' + model.password + '", `salt`="' + model.salt + '" where `id`=' + parseInt(model.id, 10) + ';');
+	}
+
+	function updateInformations(model) {
+		return MysqlFactory.query('update `user` set `firstname`="' + model.firstname + '", `lastname`="' + model.lastname + '", `birthdate`="' + model.birthdate + '", `country`="' + model.country + '", `countrycode`="' + model.countryCode + '" where `id`=' + parseInt(model.id, 10) + ';');
+	}
+
+	function updateActivated(model) {
+		return MysqlFactory.query('update `user` set `activated`=' + (model.activated ? 1 : 0) + ' where `id`=' + parseInt(model.id, 10) + ';');
+	}
+
+	function updateRole(model) {
+		return MysqlFactory.query('update `user` set `roleid`=' + parseInt(model.roleId, 10) + ' where `id`=' + parseInt(model.id, 10) + ';');
+	}
+
+	function updatePhoto(model) {
+		return MysqlFactory.query('update `user` set `photo`="' + model.photo + '" where `id`=' + parseInt(model.id, 10) + ';');
+	}
+
+	function updateStorage(id, value) {
+		return MysqlFactory.query('update `user` set `storage`=`storage`+' + parseInt(value, 10) + ' where `id`=' + parseInt(id, 10) + ';');
 	}

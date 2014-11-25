@@ -41,6 +41,7 @@
     "kanto-patterns-mongodb": "latest",
     "kanto-patterns-mysql": "^0.1.2",
     "kanto-tools-fs": "latest",
+    "kanto-tools-security": "^0.2.0",
     "lodash": "^2.4.1",
     "mysql": "^2.5.3",
     "socket.io": "^1.2.0",
