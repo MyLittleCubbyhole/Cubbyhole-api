@@ -27,10 +27,10 @@
 		"mysql": {
 			"path": "/drivers/mysql.js",
 			"module": false,
-			"auth": {
-				"host": "localhost",
-				"port": 3306,
-				"database": "cubbyholedb",
+			"host": "localhost",
+			"port": 3306,
+			"schema": {
+				"name": "cubbyholedb",
 				"user": "cubbyholeuser",
 				"password": "cubbyholepassword"
 			}
