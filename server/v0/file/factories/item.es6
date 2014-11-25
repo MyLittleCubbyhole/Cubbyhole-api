@@ -15,6 +15,14 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.get.byOwner = getByOwner;
+	MongoFactory.get.byItemId = getByItemId;
+	MongoFactory.get.byPath = getByPath;
+	MongoFactory.get.size = getSize;
+	MongoFactory.get.totalSize = getTotalSize;
+	MongoFactory.get.byOwner = deleteByOwner;
+	MongoFactory.get.md5 = updateMD5;
+
 module.exports = MongoFactory;
 
 /*Overridden methods definitions*/
@@ -43,7 +51,7 @@ module.exports = MongoFactory;
 		return MongoFactory.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }]);
 	}
 
-	function getByOwner(ownerId) {
+	function deleteByOwner(ownerId) {
 		return MongoFactory.delete({'ownerId':parseInt(ownerId,10)});
 	}
 
