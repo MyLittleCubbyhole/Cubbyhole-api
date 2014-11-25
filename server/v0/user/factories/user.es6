@@ -15,13 +15,13 @@
 	MysqlFactory.model.storage = 0;
 	MysqlFactory.model.firstname = '';
 	MysqlFactory.model.lastname = '';
-	MysqlFactory.model.inscriptiondate = new Date();
+	MysqlFactory.model.inscriptionDate = new Date();
 	MysqlFactory.model.birthdate = new Date();
 	MysqlFactory.model.email = '';
 	MysqlFactory.model.country = '';
-	MysqlFactory.model.countrycode = '';
+	MysqlFactory.model.countryCode = '';
 	MysqlFactory.model.activated = false;
-	MysqlFactory.model.roleid = 0;
+	MysqlFactory.model.roleId = null;
 
 /*Overridden methods declarations*/
 
