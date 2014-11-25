@@ -33,6 +33,8 @@
 	MysqlFactory.get.byId = getById;
 	MysqlFactory.get.byEmail = getByEmail;
 	MysqlFactory.get.byEmailLike = getByEmailLike;
+	MysqlFactory.get.byEmailAndRole = getByEmailAndRole;
+	MysqlFactory.get.byRole = getByRole;
 
 module.exports = MysqlFactory;
 
@@ -74,4 +76,28 @@ module.exports = MysqlFactory;
 		}
 
 		return MysqlFactory.query('select * from `user` where `email` LIKE "%'+ email + '%" and id>1 LIMIT ' + offset + ',' + limit + ';');
+	}
+
+	function getByEmailAndRole(email, role, offset = 0, limit = 100) {
+
+		var temp;
+		if(limit < offset) {
+			temp = limit;
+			limit = offset;
+			offset = temp;
+		}
+		
+		return MysqlFactory.query('select * from `user` where `email` LIKE "%'+ email + '%" and `roleid`='+ parseInt(role, 10) +' and id>1 LIMIT ' + offset + ',' + limit + ';');
+	}
+
+	function getByRole(role, offset = 0, limit = 100) {
+
+		var temp;
+		if(limit < offset) {
+			temp = limit;
+			limit = offset;
+			offset = temp;
+		}
+		
+		return MysqlFactory.query('select * from `user` where `roleid`='+ parseInt(role, 10) +' and id>1 LIMIT ' + offset + ',' + limit + ';');
 	}
