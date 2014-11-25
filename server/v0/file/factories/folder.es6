@@ -28,8 +28,6 @@
 
 /*Public methods declarations*/
 
-		MongoFactory.get.methodName = method;
-
 module.exports = MongoFactory;
 
 /*Overridden methods definitions*/
@@ -37,7 +35,3 @@ module.exports = MongoFactory;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
-
-		function method(/*arguments*/) {
-				/*content*/
-		}
