@@ -39,6 +39,7 @@
     "kanto-i18n": "latest",
     "kanto-patterns": "latest",
     "kanto-patterns-mongodb": "latest",
+    "kanto-patterns-mysql": "^0.1.0",
     "kanto-tools-fs": "latest",
     "lodash": "^2.4.1",
     "mysql": "^2.5.3",
