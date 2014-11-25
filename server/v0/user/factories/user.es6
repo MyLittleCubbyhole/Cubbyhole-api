@@ -2,6 +2,10 @@
 
 	var MysqlFactory = require('kanto-patterns-mysql').mysqlFactory.clone();
 
+/*Factory requiring*/
+
+	var SharingFactory = require('..todo..');
+
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'User';
@@ -137,7 +141,7 @@ module.exports = MysqlFactory;
 		,	users = {}
 		,	usersTab = [];
 
-		return sharingProvider.get.byItemFullPath(fullPath)
+		return SharingFactory.get.byItemFullPath(fullPath)
 			.then((items) => {
 				if(items.length === 0)
 					throw Error('EmpyReturn');
