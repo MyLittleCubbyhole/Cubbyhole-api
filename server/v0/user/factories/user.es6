@@ -35,6 +35,10 @@
 	MysqlFactory.get.byEmailLike = getByEmailLike;
 	MysqlFactory.get.byEmailAndRole = getByEmailAndRole;
 	MysqlFactory.get.byRole = getByRole;
+	MysqlFactory.get.namesByIds = getNamesByIds;
+	MysqlFactory.get.bandwidth = getBandwidth;
+	MysqlFactory.get.emailsbyIds = getEmailsbyIds;
+	MysqlFactory.get.usersBySharding = getUsersBySharing;
 
 module.exports = MysqlFactory;
 
@@ -100,4 +104,63 @@ module.exports = MysqlFactory;
 		}
 		
 		return MysqlFactory.query('select * from `user` where `roleid`='+ parseInt(role, 10) +' and id>1 LIMIT ' + offset + ',' + limit + ';');
+	}
+	
+	function getNamesByIds(ids = []) {
+	
+		return MysqlFactory.query('select id, concat(firstname, " ", lastname) as creator from `user` where `id` IN ('+ ids.join(',') +');');
+	}
+	
+	function getBandwidth(id = -1) {
+
+		return MysqlFactory.query('select u.id as id, p.downloadbandwidth as download, p.uploadbandwidth as upload \
+			from cubbyhole.plan p \
+			inner join cubbyhole.subscribe s on p.id = s.planid \
+			inner join cubbyhole.user u on u.id = s.userid \
+			where u.id = ' + id + ' \
+			and s.paused = 0 \
+			and NOW() between s.datestart \
+			and s.dateend;');
+	}
+	
+	function getEmailsbyIds(ids = []) {
+		return MysqlFactory.query('select id, photo, email, firstname, lastname from `user` where `id`in('+ ids.join(',') +');');
+	}
+
+	function getEmailsbyIds(ids = []) {
+		return MysqlFactory.query('select id, photo, email, firstname, lastname from `user` where `id`in('+ ids.join(',') +');');
+	}
+
+	function getUsersBySharing(fullPath) {
+
+		var userIds = []
+		,	users = {}
+		,	usersTab = [];
+
+		return sharingProvider.get.byItemFullPath(fullPath)
+			.then((items) => {
+				if(items.length === 0)
+					throw Error('EmpyReturn');
+
+				for(var i = 0; i<items.length; i++) {
+					users[items[i].sharedWith] = {right: items[i].right};
+					userIds.push(items[i].sharedWith);
+				}
+
+				return this.get.emailsbyIds(userIds);
+			})
+			.then((dbUsers) => {
+				if(dbUsers.length === 0)
+					throw Error('EmpyReturn');
+
+				for(var i = 0; i<dbUsers.length; i++) {
+					users[dbUsers[i].id].email = dbUsers[i].email;
+					users[dbUsers[i].id].photo = dbUsers[i].photo;
+					users[dbUsers[i].id].firstname = dbUsers[i].firstname;
+					users[dbUsers[i].id].lastname = dbUsers[i].lastname;
+					usersTab.push(users[dbUsers[i].id]);
+				}
+
+				return usersTab;
+			});
 	}
