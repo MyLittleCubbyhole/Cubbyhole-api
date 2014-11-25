@@ -6,7 +6,7 @@
 
 	var SharingFactory = require('..todo..'),
 		HistoricFactory = require('..todo..'),
-		UserFactory = require('/../factories/user');
+		UserFactory = require(__dirname + '/../factories/user');
 
 /*Service requiring*/
 
