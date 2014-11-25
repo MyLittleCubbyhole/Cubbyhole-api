@@ -35,7 +35,6 @@
 /*Public methods declarations*/
 
 	MysqlFactory.get.all = getAllUsers;
-	MysqlFactory.get.byId = getById;
 	MysqlFactory.get.byEmail = getByEmail;
 	MysqlFactory.get.byEmailLike = getByEmailLike;
 	MysqlFactory.get.byEmailAndRole = getByEmailAndRole;
@@ -64,11 +63,6 @@ module.exports = MysqlFactory;
 		}
 
 		return MysqlFactory.query('select * from `user` where id>1 LIMIT ' + offset + ',' + limit + ';');
-	}
-
-	function getById(id) {
-
-		return MysqlFactory.query('select * from `user` where `id` = ' + parseInt(id, 10) + ';');	
 	}
 
 	function getByEmail(email) {
