@@ -22,7 +22,7 @@
 
 /*Public methods declarations*/
 
-	Manager.get.usersBySharding = getUsersBySharing;
+	Manager.get.usersBySharing = getUsersBySharing;
 	Manager.get.historic = getHistoric;
 
 	Manager.create.user = createUser;
