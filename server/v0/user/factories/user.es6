@@ -2,13 +2,6 @@
 
 	var MysqlFactory = require('kanto-patterns-mysql').mysqlFactory.clone();
 
-/*Factory requiring*/
-
-	var SharingFactory = require('..todo..'),
-		HistoricFactory = require('..todo..');
-
-	var Security = require('kanto-tools-security');
-
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'User';
@@ -43,9 +36,7 @@
 	MysqlFactory.get.byRole = getByRole;
 	MysqlFactory.get.namesByIds = getNamesByIds;
 	MysqlFactory.get.bandwidth = getBandwidth;
-	MysqlFactory.get.emailsbyIds = getEmailsbyIds;
-	MysqlFactory.get.usersBySharding = getUsersBySharing;
-	MysqlFactory.get.historic = getHistoric;
+	MysqlFactory.get.emailsByIds = getEmailsbyIds;
 
 	MysqlFactory.update.password = updatePassword;
 	MysqlFactory.update.informations = updateInformations;
@@ -140,83 +131,6 @@ module.exports = MysqlFactory;
 
 	function getEmailsbyIds(ids = []) {
 		return MysqlFactory.query('select id, photo, email, firstname, lastname from `user` where `id`in('+ ids.join(',') +');');
-	}
-
-	function getUsersBySharing(fullPath) {
-
-		var userIds = []
-		,	users = {}
-		,	usersTab = [];
-
-		return SharingFactory.get.byItemFullPath(fullPath)
-			.then((items) => {
-				if(items.length === 0)
-					throw Error('EmpyReturn');
-
-				for(var i = 0; i<items.length; i++) {
-					users[items[i].sharedWith] = {right: items[i].right};
-					userIds.push(items[i].sharedWith);
-				}
-
-				return this.get.emailsbyIds(userIds);
-			})
-			.then((dbUsers) => {
-				if(dbUsers.length === 0)
-					throw Error('EmptyReturn');
-
-				for(var i = 0; i<dbUsers.length; i++) {
-					users[dbUsers[i].id].email = dbUsers[i].email;
-					users[dbUsers[i].id].photo = dbUsers[i].photo;
-					users[dbUsers[i].id].firstname = dbUsers[i].firstname;
-					users[dbUsers[i].id].lastname = dbUsers[i].lastname;
-					usersTab.push(users[dbUsers[i].id]);
-				}
-
-				return usersTab;
-			});
-	}
-
-
-	function getHistoric(id, offset = 0, limit = 50) {
-
-		var userIds = [],
-			users = {},
-			historic;
-
-		return HistoricFactory.get.byUser(offset, limit)
-			.then((dbHistoric) => {
-				if(dbHistoric.length === 0)
-					throw Error('EmptyReturn');
-
-				historic = dbHistoric;
-				for(var i = 0; i<dbHistoric.length; i++) {
-					userIds.push(dbHistoric[i].ownerId);
-					userIds.push(dbHistoric[i].targetOwner);
-				}
-
-				return this.get.namesByIds(userIds);
-			})
-			.then((dbUsers) => {
-				if(dbUsers.length === 0)
-					throw Error('EmptyReturn');
-
-				var i;
-
-				for(i = 0; i<dbUsers.length; i++)
-					users[dbUsers[i].id] = dbUsers[i].creator;
-
-				for(i = 0; i<historic.length; i++) {
-					let isOwner = historic[i].ownerId === id;
-					let isTargetOwner = historic[i].targetOwner === id;
-					//PillowTag : a check
-					historic[i] = HistoricFactory.reduce(historic[i]);
-
-					historic[i].owner = isOwner ? 'You' : users[historic[i].ownerId];
-					historic[i].targetOwner = isTargetOwner ? 'You' : users[historic[i].targetOwner];
-				}
-
-				return historic;
-			});
 	}
 
 	function createUser(model) {
