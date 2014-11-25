@@ -7,6 +7,8 @@
 	var SharingFactory = require('..todo..'),
 		HistoricFactory = require('..todo..');
 
+	var Security = require('kanto-tools-security');
+
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'User';
@@ -44,6 +46,8 @@
 	MysqlFactory.get.emailsbyIds = getEmailsbyIds;
 	MysqlFactory.get.usersBySharding = getUsersBySharing;
 	MysqlFactory.get.historic = getHistoric;
+
+	MysqlFactory.create = createUser;
 
 module.exports = MysqlFactory;
 
@@ -206,4 +210,29 @@ module.exports = MysqlFactory;
 
 				return historic;
 			});
+	}
+
+	function createUser(model) {
+		return this.get.byEmail(model.email)
+			.then(() => { throw Error('UserAlreadyExist'); },
+			() => Security.generateHash(model.password))
+			.then((result) => {
+
+				var query = 'INSERT INTO `user` (`password`, `salt`, `photo`, `storage`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `countrycode`, `activated`, `roleid`)\
+					VALUES ("' + result.hash + '",\
+					"' + result.salt + '",\
+					"' + model.photo + '",\
+					0,\
+					"' +model.firstname + '",\
+					"' + model.lastname + '",\
+					NOW(),\
+					"' + model.birthdate + '",\
+					"' + model.email + '",\
+					"' + model.country + '",\
+					"' + model.countryCode + '",\
+					' + (model.activated ? 1 : 0) + ',\
+					' + model.roleId + ')';
+
+				return MysqlFactory.query(query);
+			}); 
 	}
