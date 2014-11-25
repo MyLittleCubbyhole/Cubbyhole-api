@@ -4,7 +4,8 @@
 
 /*Factory requiring*/
 
-	var SharingFactory = require('..todo..');
+	var SharingFactory = require('..todo..'),
+		HistoricFactory = require('..todo..');
 
 /*Attributes definitions*/
 
@@ -43,6 +44,7 @@
 	MysqlFactory.get.bandwidth = getBandwidth;
 	MysqlFactory.get.emailsbyIds = getEmailsbyIds;
 	MysqlFactory.get.usersBySharding = getUsersBySharing;
+	MysqlFactory.get.historic = getHistoric;
 
 module.exports = MysqlFactory;
 
@@ -155,7 +157,7 @@ module.exports = MysqlFactory;
 			})
 			.then((dbUsers) => {
 				if(dbUsers.length === 0)
-					throw Error('EmpyReturn');
+					throw Error('EmptyReturn');
 
 				for(var i = 0; i<dbUsers.length; i++) {
 					users[dbUsers[i].id].email = dbUsers[i].email;
@@ -166,5 +168,48 @@ module.exports = MysqlFactory;
 				}
 
 				return usersTab;
+			});
+	}
+
+
+	function getHistoric(id, offset = 0, limit = 50) {
+
+		var userIds = [],
+			users = {},
+			historic;
+
+		return HistoricFactory.get.byUser(offset, limit)
+			.then((dbHistoric) => {
+				if(dbHistoric.length === 0)
+					throw Error('EmptyReturn');
+
+				historic = dbHistoric;
+				for(var i = 0; i<dbHistoric.length; i++) {
+					userIds.push(dbHistoric[i].ownerId);
+					userIds.push(dbHistoric[i].targetOwner);
+				}
+
+				return this.get.namesByIds(userIds);
+			})
+			.then((dbUsers) => {
+				if(dbUsers.length === 0)
+					throw Error('EmptyReturn');
+
+				var i;
+
+				for(i = 0; i<dbUsers.length; i++)
+					users[dbUsers[i].id] = dbUsers[i].creator;
+
+				for(i = 0; i<historic.length; i++) {
+					let isOwner = historic[i].ownerId === id;
+					let isTargetOwner = historic[i].targetOwner === id;
+					//PillowTag : a check
+					historic[i] = HistoricFactory.reduce(historic[i]);
+
+					historic[i].owner = isOwner ? 'You' : users[historic[i].ownerId];
+					historic[i].targetOwner = isTargetOwner ? 'You' : users[historic[i].targetOwner];
+				}
+
+				return historic;
 			});
 	}
