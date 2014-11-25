@@ -244,26 +244,26 @@ module.exports = MysqlFactory;
 			}); 
 	}
 
-	function updatePassword(model) {
-		return MysqlFactory.query('update `user` set `password`="' + model.password + '", `salt`="' + model.salt + '" where `id`=' + parseInt(model.id, 10) + ';');
+	function updatePassword(id, hash, salt) {
+		return MysqlFactory.query('update `user` set `password`="' + hash + '", `salt`="' + salt + '" where `id`=' + parseInt(id, 10) + ';');
 	}
 
-	function updateInformations(model) {
-		return MysqlFactory.query('update `user` set `firstname`="' + model.firstname + '", `lastname`="' + model.lastname + '", `birthdate`="' + model.birthdate + '", `country`="' + model.country + '", `countrycode`="' + model.countryCode + '" where `id`=' + parseInt(model.id, 10) + ';');
+	function updateInformations(id, model) {
+		return MysqlFactory.query('update `user` set `firstname`="' + model.firstname + '", `lastname`="' + model.lastname + '", `birthdate`="' + model.birthdate + '", `country`="' + model.country + '", `countrycode`="' + model.countryCode + '" where `id`=' + parseInt(id, 10) + ';');
 	}
 
-	function updateActivated(model) {
-		return MysqlFactory.query('update `user` set `activated`=' + (model.activated ? 1 : 0) + ' where `id`=' + parseInt(model.id, 10) + ';');
+	function updateActivated(id, activated = false) {
+		return MysqlFactory.query('update `user` set `activated`=' + (activated ? 1 : 0) + ' where `id`=' + parseInt(id, 10) + ';');
 	}
 
-	function updateRole(model) {
-		return MysqlFactory.query('update `user` set `roleid`=' + parseInt(model.roleId, 10) + ' where `id`=' + parseInt(model.id, 10) + ';');
+	function updateRole(id, roleId=-1) {
+		return MysqlFactory.query('update `user` set `roleid`=' + parseInt(roleId, 10) + ' where `id`=' + parseInt(id, 10) + ';');
 	}
 
-	function updatePhoto(model) {
-		return MysqlFactory.query('update `user` set `photo`="' + model.photo + '" where `id`=' + parseInt(model.id, 10) + ';');
+	function updatePhoto(id, photo) {
+		return MysqlFactory.query('update `user` set `photo`="' + photo + '" where `id`=' + parseInt(id, 10) + ';');
 	}
 
-	function updateStorage(id, value) {
-		return MysqlFactory.query('update `user` set `storage`=`storage`+' + parseInt(value, 10) + ' where `id`=' + parseInt(id, 10) + ';');
+	function updateStorage(id, storage) {
+		return MysqlFactory.query('update `user` set `storage`=`storage`+' + parseInt(storage, 10) + ' where `id`=' + parseInt(id, 10) + ';');
 	}
