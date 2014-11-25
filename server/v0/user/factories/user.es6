@@ -220,28 +220,23 @@ module.exports = MysqlFactory;
 	}
 
 	function createUser(model) {
-		return this.get.byEmail(model.email)
-			.then(() => { throw Error('UserAlreadyExist'); },
-			() => Security.generateHash(model.password))
-			.then((result) => {
 
-				var query = 'INSERT INTO `user` (`password`, `salt`, `photo`, `storage`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `countrycode`, `activated`, `roleid`)\
-					VALUES ("' + result.hash + '",\
-					"' + result.salt + '",\
-					"' + model.photo + '",\
-					0,\
-					"' +model.firstname + '",\
-					"' + model.lastname + '",\
-					NOW(),\
-					"' + model.birthdate + '",\
-					"' + model.email + '",\
-					"' + model.country + '",\
-					"' + model.countryCode + '",\
-					' + (model.activated ? 1 : 0) + ',\
-					' + model.roleId + ')';
+		var query = 'INSERT INTO `user` (`password`, `salt`, `photo`, `storage`, `firstname`, `lastname`, `inscriptiondate`, `birthdate`, `email`, `country`, `countrycode`, `activated`, `roleid`)\
+			VALUES ("' + model.hash + '",\
+			"' + model.salt + '",\
+			"' + model.photo + '",\
+			0,\
+			"' +model.firstname + '",\
+			"' + model.lastname + '",\
+			NOW(),\
+			"' + model.birthdate + '",\
+			"' + model.email + '",\
+			"' + model.country + '",\
+			"' + model.countryCode + '",\
+			' + (model.activated ? 1 : 0) + ',\
+			' + model.roleId + ')';
 
-				return MysqlFactory.query(query);
-			}); 
+		return MysqlFactory.query(query);
 	}
 
 	function updatePassword(id, hash, salt) {
