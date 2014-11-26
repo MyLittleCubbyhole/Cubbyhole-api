@@ -46,14 +46,13 @@ module.exports = Manager;
 			creatorId: parseInt(model.creatorId, 10),
 			path: model.path,
 			name: model.name,
-			type: 'file',
 			lastUpdate: new Date(),
 			lastUpdateName: model.creatorName,
 			downloads: model.downloads ? parseInt(model.downloads, 10) : 0,
 			size: model.size ? parseInt(model.size, 10) : 0,
 			shared: false,
-			itemId: model.id,
-			contentType: model.type
+			itemId: model.itemId,
+			contentType: model.contentType
 		}, true);
 
 
