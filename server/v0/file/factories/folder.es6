@@ -28,6 +28,8 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.update.addChildren = addChildren;
+
 module.exports = MongoFactory;
 
 /*Overridden methods definitions*/
@@ -35,3 +37,8 @@ module.exports = MongoFactory;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
+
+	function addChildren(childrenId) {
+		MongoFactory.prepare()
+			.then((collection) => collection.update({$push: childrenId}, {safe:true}));
+	}
