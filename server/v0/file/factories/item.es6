@@ -21,7 +21,6 @@
 	MongoFactory.get.size = getSize;
 	MongoFactory.get.totalSize = getTotalSize;
 	MongoFactory.delete.byOwner = deleteByOwner;
-	MongoFactory.update.md5 = updateMD5;
 
 module.exports = MongoFactory;
 
@@ -53,8 +52,4 @@ module.exports = MongoFactory;
 
 	function deleteByOwner(ownerId) {
 		return MongoFactory.delete({'ownerId':parseInt(ownerId,10)});
-	}
-
-	function updateMD5(id, md5) {
-		return MongoFactory.update(id, {md5: md5});
 	}

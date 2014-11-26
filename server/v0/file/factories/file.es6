@@ -30,6 +30,8 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.update.md5 = updateMD5;
+
 module.exports = MongoFactory;
 
 /*Overridden methods definitions*/
@@ -37,3 +39,7 @@ module.exports = MongoFactory;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
+
+	function updateMD5(id, md5) {
+		return MongoFactory.update(id, {md5: md5});
+	}
