@@ -76,7 +76,7 @@ module.exports = Manager;
 					promise = FolderFactory.update.addChildren(model.fullPath)
 						.then(() => ItemManager.update.size(userId, path, fileModel.size, fileModel.lastUpdateName));
 				else
-					promise = StorageManager.update.value(userId, path, fileModel.size, fileModel.lastUpdateName);
+					promise = StorageManager.update.value(userId, fileModel.size);
 				return promise;
 			})
 			.then(() => fileModel.md5);
