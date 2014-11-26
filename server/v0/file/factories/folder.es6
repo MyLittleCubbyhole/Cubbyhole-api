@@ -39,7 +39,15 @@ module.exports = MongoFactory;
 
 /*Public methods definitions*/
 
-	function addChildren(childrenId) {
+	function addChildren(id, childrenId) {
 		return MongoFactory.prepare()
-			.then((collection) => collection.update({$push: childrenId}, {safe:true}));
+			.then((collection) => collection.update({_id: id}, {$push: childrenId}, {safe:true}));
 	}
+
+	// function removeChildren(index) {
+	// 	var index = directory.children.indexOf(fullPath);
+
+	// 	if(index != -1)
+	// 		directory.children.splice(index);
+	// 	collection.save(directory, { safe : true }, callback);
+	// }
