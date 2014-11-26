@@ -26,9 +26,7 @@
 /*Public methods declarations*/
 
 	Manager.exist = exist;
-
 	Manager.update.size = updateSize;
-
 	Manager.delete.byPath = deleteByPath;
 
 module.exports = Manager;
