@@ -29,6 +29,7 @@
 /*Public methods declarations*/
 
 	MongoFactory.update.addChildren = addChildren;
+	MongoFactory.update.removeChildren = removeChildren;
 
 module.exports = MongoFactory;
 
@@ -39,6 +40,6 @@ module.exports = MongoFactory;
 /*Public methods definitions*/
 
 	function addChildren(childrenId) {
-		MongoFactory.prepare()
+		return MongoFactory.prepare()
 			.then((collection) => collection.update({$push: childrenId}, {safe:true}));
 	}
