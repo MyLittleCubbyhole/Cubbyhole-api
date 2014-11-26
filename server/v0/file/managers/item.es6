@@ -26,6 +26,9 @@
 /*Public methods declarations*/
 
 	Manager.exist = exist;
+
+	Manager.update.size = updateSize;
+
 	Manager.delete.byPath = deleteByPath;
 
 module.exports = Manager;
@@ -69,4 +72,25 @@ module.exports = Manager;
 					promise = StorageManager.update.value(userId, size);
 				return promise;
 			});
+	}
+
+	function updateSize(userId, folderId, size, username) {
+
+		StorageManager.update.value(userId, size);
+
+		var steps = folderId.split('/'),
+			nbFolders = steps.length -1,
+			paths = [];
+
+		for(var i = 0; i<nbFolders.length; i++) {
+			let path = '';
+
+			for(let j = 0; j<steps.length; j++)
+				path += '/' + steps[j];
+
+			paths.push(path.substring(1));
+			steps.pop();
+		}
+
+		return paths.map((path) => ItemFactory.update.byId(path, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }) );
 	}
