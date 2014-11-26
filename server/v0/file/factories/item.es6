@@ -20,6 +20,9 @@
 	MongoFactory.get.byPath = getByPath;
 	MongoFactory.get.size = getSize;
 	MongoFactory.get.totalSize = getTotalSize;
+
+	MongoFactory.update.size = updateSize;
+
 	MongoFactory.delete.byOwner = deleteByOwner;
 
 module.exports = MongoFactory;
@@ -52,4 +55,9 @@ module.exports = MongoFactory;
 
 	function deleteByOwner(ownerId) {
 		return MongoFactory.delete({'ownerId':parseInt(ownerId,10)});
+	}
+
+	function updateSize(id, size, username) {
+		return MongoFactory.prepare()
+			.then((collection) => collection.update({_id: id}, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }, {safe:true}));
 	}
