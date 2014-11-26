@@ -23,6 +23,7 @@
 
 	Manager.get.childrenById = getChildrenById;
 	Manager.create.folder = createFolder;
+	Manager.delete.children = removeChildren;
 
 module.exports = Manager;
 
@@ -64,4 +65,16 @@ module.exports = Manager;
 				.then(() => path !== '/' ? FolderFactory.update.addChildren(path, model.fullPath) : Promise.resolve());
 
 		return promise;
+	}
+
+	function removeChildren(id, childrenId) {
+
+		return this.get.byId(id)
+			.then((folder) => {
+				var index = folder.children.indexOf(childrenId),
+					children;
+				if(~index)
+					children = folder.children.splice(index, 1);
+				return FolderFactory.update.children(id, children);
+			});
 	}
