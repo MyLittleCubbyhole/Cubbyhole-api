@@ -7,6 +7,10 @@
 	var FolderFactory = require(__dirname + '/../factories/folder'),
 		ItemFactory = require(__dirname + '/../factories/item');
 
+/*Managers requiring*/
+
+	var ItemManager = require(__dirname + '/item');
+
 /*Attributes definitions*/
 
 	Manager._name = 'Folder';
@@ -18,6 +22,7 @@
 /*Public methods declarations*/
 
 	Manager.get.childrenById = getChildrenById;
+	Manager.create.folder = createFolder;
 
 module.exports = Manager;
 
@@ -31,4 +36,32 @@ module.exports = Manager;
 
 		return FolderFactory.get.byId(id.slice(0, -1) === '/' ? id.slice(0, -1) : id)
 			.then((folder) => Promise.all(folder.children.map((childrenId) => ItemFactory.get.byId(childrenId))));
+	}
+
+	function createFolder(model) {
+		
+		var path = model.path !== '/' ? model.ownerId + model.path.slice(0, -1) : model.path,
+			promise ;
+
+		if(model.ownerId + '/Shared' === path)
+			promise = Promise.reject(Error('Unable to create a new item in the Shared folder'));
+		else
+			promise = ItemManager.exist(path)
+				.then((exist) => exist ? FolderFactory.get.byId(model.fullPath) : Promise.reject(Error('Parent does not exist')))
+				.then(() => FolderFactory.create({
+					_id: model.fullPath,
+					ownerId: parseInt(model.ownerId, 10),
+					creatorId: model.creatorId,
+					path: model.path,
+					name: model.name,
+					type: 'folder',
+					size: model.size ? parseInt(model.size, 10) : 0,
+					lastUpdate: new Date(),
+					lastUpdateName: model.creatorName,
+					undeletable: typeof model.undeletable !== 'undefined' && model.undeletable === true,
+					children: []
+				}))
+				.then(() => path !== '/' ? FolderFactory.update.addChildren(path, model.fullPath) : Promise.resolve());
+
+		return promise;
 	}
