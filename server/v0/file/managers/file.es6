@@ -2,6 +2,17 @@
 
 	var Manager = require('kanto-patterns').manager.clone();
 
+/*Managers requiring*/
+
+	var ItemManager = require(__dirname + '/item'),
+		StorageManager = require(__dirname + '..todo..');
+
+/*Factories requiring*/
+
+	var BinaryFileFactory = require('..todo..'),
+		FileFactory = require(__dirname + '/../factories/file'),
+		FolderFactory = require(__dirname + '/../factories/folder');
+
 /*Attributes definitions*/
 
 	Manager._name = 'File';
@@ -22,93 +33,51 @@ module.exports = Manager;
 
 /*Public methods definitions*/
 
-	function createFile() {}
+	function createFile(model) {
+		
+		var path = model.path === '/' ? model.path : (model.ownerId + model.path).slice(0, -1),
+			userId = model.ownerId;
 
-// 	provider.create.file = function(params, callback){
-// 	mongo.collection('directories', function(error, collection){
-// 		collection.findOne({"_id":params.fullPath}, function(error, data){
-// 			if(!data) {
+		model.id = new ItemManager.ObjectID();
 
-// 				var folderPath = params.path == '/' ? params.path : (params.ownerId + params.path).slice(0, -1);
-// 				var userId = params.ownerId;
+		var fileModel = FileFactory.extendModel({
+			_id: model.fullPath,
+			ownerId: parseInt(model.ownerId, 10),
+			creatorId: parseInt(model.creatorId, 10),
+			path: model.path,
+			name: model.name,
+			type: 'file',
+			lastUpdate: new Date(),
+			lastUpdateName: model.creatorName,
+			downloads: model.downloads ? parseInt(model.downloads, 10) : 0,
+			size: model.size ? parseInt(model.size, 10) : 0,
+			shared: false,
+			itemId: model.id,
+			contentType: model.type
+		}, true);
 
 
-// 				provider.checkExist(folderPath, function(error, exist) {
-// 					if(!exist)
-// 						callback.call(this, 'folder does not exist - ' + error);
+		return ItemManager.exist(model.fullPath)
+			.then((exist) => exist ? Promise.reject(Error('File already exist')) : ItemManager.exist(path))
+			.then((exist) => {
+				if(!exist)
+					throw 'Folder does not exist';
 
-// 					params.id = new ObjectID();
-
-// 					var directoryFile = {
-// 						_id: params.fullPath,
-// 						ownerId: parseInt(params.ownerId, 10),
-// 						creatorId: parseInt(params.creatorId, 10),
-// 						path: params.path,
-// 						name: params.name,
-// 						type: 'file',
-// 						lastUpdate: new Date(),
-// 						lastUpdateName: params.creatorName,
-// 						downloads: params.downloads ? parseInt(params.downloads, 10) : 0,
-// 						size: params.size ? parseInt(params.size, 10) : 0,
-// 						shared: false,
-// 						itemId: params.id,
-// 						contentType: params.type
-// 					};
-
-// 					var next = function() {
-// 						fileProvider.get.MD5(params.id, function(error, fileMd5) {
-// 							if(error)
-// 								throw 'error retrieving file created - ' + error;
-
-// 							directoryFile.md5 = fileMd5;
-
-// 							collection.insert(directoryFile, { safe : true }, function(error) {
-// 								if(error)
-// 									throw 'error creating collection - ' + error;
-
-// 								if(folderPath != "/")
-
-// 									collection.update({'_id': folderPath}, { $push: { children: params.fullPath} }, { safe : true }, function(error) {
-// 										if(error) {
-// 											console.error(error);
-// 											throw 'error updating children - ';
-// 										}
-// 										provider.update.size(userId, folderPath, directoryFile.size, directoryFile.lastUpdateName, function(error) {
-// 											callback.call(this, error, fileMd5);
-// 										});
-
-// 									});
-// 								else
-// 									storageProvider.update.value(userId, directoryFile.size, function(error, data) {
-// 										callback.call(this, error, fileMd5);
-// 									});
-
-// 							});
-// 						});
-// 					}
-
-// 					if(params.data && params.data.path) {
-// 						fileProvider.uploadFromPath(params, function(error, data) {
-// 							if(error) {
-// 								console.error(error);
-// 								throw 'Error during post upload - ';
-// 							}
-// 							next();
-// 						});
-// 					}
-// 					else {
-// 						fileProvider.upload(params, function(error){
-// 							if(error) {
-// 								console.error(error);
-// 								throw 'error during upload - ';
-// 							}
-// 							next();
-// 						});
-// 					}
-// 				});
-// 			}
-// 			else
-// 				callback.call(this, 'file already exist');
-// 		})
-// 	})
-// }
+				return !!model.data && !!model.data.path ? BinaryFileFactory.create.fromPath(model) : BinaryFileFactory.create.file();
+			})
+			.then(() => BinaryFileFactory.get.md5(model.id))
+			.then((md5) => {
+				fileModel.md5 = md5;
+				return FileFactory.create(fileModel);
+			})
+			.then(() => {
+				var promise;
+				if(path !== '/')
+					promise = FolderFactory.update.addChildren(model.fullPath)
+						.then(() => ItemManager.update.size(userId, path, fileModel.size, fileModel.lastUpdateName));
+				else
+					promise = StorageManager.update.value(userId, path, fileModel.size, fileModel.lastUpdateName);
+				return promise;
+			})
+			.then(() => fileModel.md5);
+	}
