@@ -29,7 +29,7 @@
 /*Public methods declarations*/
 
 	MongoFactory.update.addChildren = addChildren;
-	MongoFactory.update.removeChildren = removeChildren;
+	MongoFactory.update.children = updateChildren;
 
 module.exports = MongoFactory;
 
@@ -44,10 +44,7 @@ module.exports = MongoFactory;
 			.then((collection) => collection.update({_id: id}, {$push: childrenId}, {safe:true}));
 	}
 
-	// function removeChildren(index) {
-	// 	var index = directory.children.indexOf(fullPath);
-
-	// 	if(index != -1)
-	// 		directory.children.splice(index);
-	// 	collection.save(directory, { safe : true }, callback);
-	// }
+	function updateChildren(id, children) {
+		
+		return MongoFactory.update.byId(id, {children: children});
+	}
