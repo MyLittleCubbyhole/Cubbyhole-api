@@ -51,9 +51,9 @@ module.exports = Manager;
 			downloads: model.downloads ? parseInt(model.downloads, 10) : 0,
 			size: model.size ? parseInt(model.size, 10) : 0,
 			shared: false,
-			itemId: model.itemId,
-			contentType: model.contentType
-		}, true);
+			itemId: model.id,
+			contentType: model.type
+		});
 
 
 		return ItemManager.exist(model.fullPath)
