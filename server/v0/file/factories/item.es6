@@ -20,8 +20,8 @@
 	MongoFactory.get.byPath = getByPath;
 	MongoFactory.get.size = getSize;
 	MongoFactory.get.totalSize = getTotalSize;
-	MongoFactory.get.byOwner = deleteByOwner;
-	MongoFactory.get.md5 = updateMD5;
+	MongoFactory.delete.byOwner = deleteByOwner;
+	MongoFactory.update.md5 = updateMD5;
 
 module.exports = MongoFactory;
 
