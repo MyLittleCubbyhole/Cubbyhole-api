@@ -22,6 +22,7 @@
 	MongoFactory.model.shared = false;
 	MongoFactory.model.itemId = '';
 	MongoFactory.model.contentType = '';
+	MongoFactory.model.md5 = '';
 
 /*Overridden methods declarations*/
 
