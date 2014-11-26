@@ -92,5 +92,5 @@ module.exports = Manager;
 			steps.pop();
 		}
 
-		return paths.map((path) => ItemFactory.update.byId(path, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }) );
+		return Promise.all(paths.map((path) => ItemFactory.update.byId(path, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }) ));
 	}
