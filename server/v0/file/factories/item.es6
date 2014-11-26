@@ -59,5 +59,7 @@ module.exports = MongoFactory;
 
 	function updateSize(id, size, username) {
 		return MongoFactory.prepare()
-			.then((collection) => new Promise((resolve, reject) => collection.update( {'_id': id}, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }, { safe : true }, (error) => error ? resolve() : reject(error) ) ) );
+			.then((collection) => new Promise((resolve, reject) => 
+				collection.update( {'_id': id}, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }, { safe : true }, (error) => error ? resolve() : reject(error) ) ) 
+			);
 	}
