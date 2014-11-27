@@ -25,7 +25,6 @@
 
 /*Public methods declarations*/
 
-	Manager.exist = exist;
 	Manager.update.size = updateSize;
 	Manager.delete.byPath = deleteByPath;
 
@@ -36,10 +35,6 @@ module.exports = Manager;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
-
-	function exist(id) {
-		return id === '/' ? Promise.resolve(true) : ItemFactory.get.byId(id).then(() => true, () => false);
-	}
 
 	function _deleteItem(id) {
 

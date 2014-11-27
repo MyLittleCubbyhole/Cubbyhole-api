@@ -28,6 +28,7 @@
 
 	Service._move = _move;
 	Service.move = move;
+	Service.exist = exist;
 
 module.exports = Service;
 
@@ -48,7 +49,6 @@ module.exports = Service;
 
 		this.getNewItemName(item._id)
 			.then((name) => {
-
 				item.name = name;
 				item.fullPath = item._id = item.ownerId + item.path + item.name;
 
@@ -83,4 +83,8 @@ module.exports = Service;
 				.then(() => ItemFactory.get.byId(id))
 				.then((item) => this._move(item, path, creatorId, creatorName, copy))
 				.then(() => move ? ItemFactory.delete.byPath(path, creatorName) : Promise.resolve());
+	}
+	
+	function exist(id) {
+		return id === '/' ? Promise.resolve(true) : ItemFactory.get.byId(id).then(() => true, () => false);
 	}

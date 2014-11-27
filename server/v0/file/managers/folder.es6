@@ -7,9 +7,9 @@
 	var FolderFactory = require(__dirname + '/../factories/folder'),
 		ItemFactory = require(__dirname + '/../factories/item');
 
-/*Managers requiring*/
+/*Services requiring*/
 
-	var ItemManager = require(__dirname + '/item');
+	var ItemService = require(__dirname + '/../services/item');
 
 /*Attributes definitions*/
 
@@ -47,7 +47,7 @@ module.exports = Manager;
 		if(model.ownerId + '/Shared' === path)
 			promise = Promise.reject(Error('Unable to create a new item in the Shared folder'));
 		else
-			promise = ItemManager.exist(path)
+			promise = ItemService.exist(path)
 				.then((exist) => exist ? FolderFactory.get.byId(model.fullPath) : Promise.reject(Error('Parent does not exist')))
 				.then(() => FolderFactory.create({
 					_id: model.fullPath,
