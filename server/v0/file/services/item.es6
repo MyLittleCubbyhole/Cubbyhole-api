@@ -81,5 +81,6 @@ module.exports = Service;
 			SharingManager.get.byItemId(id)
 				.then(() => { throw Error('Unable to move or rename a shared folder'); }, () => ItemFactory.get.byId(path))
 				.then(() => ItemFactory.get.byId(id))
-				.then((item) => this._move(item, path, creatorId, creatorName, copy));
+				.then((item) => this._move(item, path, creatorId, creatorName, copy))
+				.then(() => move ? ItemFactory.delete.byPath(path, creatorName) : Promise.resolve());
 	}
