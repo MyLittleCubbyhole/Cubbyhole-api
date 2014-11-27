@@ -33,6 +33,8 @@
 	Service.move = move;
 	Service.exist = exist;
 	Service.share = share;
+	Service.unshare = unshare;
+	Service.unshareAll = unshareAll;
 
 module.exports = Service;
 
@@ -97,5 +99,20 @@ module.exports = Service;
 		return UserFactory.get.byEmail(target)
 			.then((user) => this.unshare(id, user.email, sharer).then(() => user) )
 			.then((user) => SharingFactory.create({ownerId: sharer, fullPath: id, targetId: user.id, right: right}).then(() => user))
-			.then((user) => HistoricFactory.create.event({ownerId: sharer, targetOwner: user.id, fullPath: id, action: 'share', name: target, itemType: right}));
+			.then((user) => HistoricFactory.create.event(sharer, user.id, id, 'share', target, right));
+	}
+
+	function unshare(id, target, sharer) {
+		return UserFactory.get.byEmail(target)
+			.then((user) => SharingFactory.delete.byItemAndTarget(id, user.id).then(() => user))
+			.then((user) => FolderFactory.delete.children(id + '/Shared', id).then(() => user))
+			.then((user) => HistoricFactory.create.event(sharer, user.id, id, 'unshare', target));
+	}
+
+	function unshareAll(id) {
+		return ItemFactory.get.byId(id)
+			.then((item) => SharingFactory.get.byItemId(item._id))
+			.then((sharings) => Promise.all(sharings.map( (sharing) => FolderFactory.delete.children(sharing.sharedWith + '/Shared', id) )))
+			.then(() => SharingFactory.delete.byItemId(id));
+
 	}
