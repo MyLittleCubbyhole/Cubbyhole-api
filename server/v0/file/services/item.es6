@@ -10,7 +10,8 @@
 		BinaryFileFactory = require('..todo..'),
 		UserFactory = require(__dirname + '/../../../user/factories/user'),
 		SharingFactory = require(__dirname + '/../factories/sharing'),
-		HistoricFactory = require('..todo..');
+		HistoricFactory = require('..todo..'),
+		TokenFactory = require('..todo..');
 
 /*Managers requiring*/
 
@@ -35,6 +36,8 @@
 	Service.share = share;
 	Service.unshare = unshare;
 	Service.unshareAll = unshareAll;
+	Service.shareFile = shareFile;
+	Service.unshareFile = unshareFile;
 
 module.exports = Service;
 
@@ -115,4 +118,21 @@ module.exports = Service;
 			.then((sharings) => Promise.all(sharings.map( (sharing) => FolderFactory.delete.children(sharing.sharedWith + '/Shared', id) )))
 			.then(() => SharingFactory.delete.byItemId(id));
 
+	}
+
+	function shareFile(id) {
+		var file;
+		return FileFactory.get.fileById(id)
+			.then((item) => {
+				file = item;
+				return TokenFactory.get.byFileId(file.itemId);
+			})
+			.then((tokens) => tokens.length === 0 ? TokenManager.create.token('SHARING', file.itemId, new Date()) : Promise.reject('No sharing found'))
+			.then(() => FileFactory.update.shared(id, true));
+	}
+
+	function unshareFile(id) {
+		return FileFactory.get.fileById(id)
+			.then((file) => TokenFactory.delete.byFileId(file.itemId))
+			.then(() => FileFactory.update.shared(id, false));
 	}
