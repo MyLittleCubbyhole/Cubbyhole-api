@@ -33,6 +33,7 @@
 	MongoFactory.get.fileById = getFileById;
 	MongoFactory.update.md5 = updateMD5;
 	MongoFactory.update.downloads = updateDownloads;
+	MongoFactory.update.shared = updateShared;
 
 module.exports = MongoFactory;
 
@@ -48,10 +49,14 @@ module.exports = MongoFactory;
 	}
 
 	function updateMD5(id, md5) {
-		return MongoFactory.update(id, {md5: md5});
+		return this.update(id, {md5: md5});
 	}
 
 	function updateDownloads(id) {
 		return this.prepare()
 			.then((collection) => new Promise((resolve, reject) => collection.update( {'_id': id}, {$inc: { downloads: 1 }}, { safe : true }, (error) => error ? resolve() : reject(error) ) ) );
+	}
+
+	function updateShared(id, shared) {
+		return this.update(id, {shared: !!shared});
 	}
