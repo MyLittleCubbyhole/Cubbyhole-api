@@ -30,6 +30,7 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.get.fileById = getFileById;
 	MongoFactory.update.md5 = updateMD5;
 	MongoFactory.update.downloads = updateDownloads;
 
@@ -41,11 +42,16 @@ module.exports = MongoFactory;
 
 /*Public methods definitions*/
 
+	function getFileById(id) {
+		return this.prepare()
+			.then((collection) => new Promise((resolve, reject) => collection.findOne({_id: id}, (error, result) => error ? reject(error) : resolve(result)) ));
+	}
+
 	function updateMD5(id, md5) {
 		return MongoFactory.update(id, {md5: md5});
 	}
 
 	function updateDownloads(id) {
-		return MongoFactory.prepare()
+		return this.prepare()
 			.then((collection) => new Promise((resolve, reject) => collection.update( {'_id': id}, {$inc: { downloads: 1 }}, { safe : true }, (error) => error ? resolve() : reject(error) ) ) );
 	}
