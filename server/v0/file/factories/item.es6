@@ -34,31 +34,31 @@ module.exports = MongoFactory;
 /*Public methods definitions*/
 
 	function getByOwner(ownerId){
-		return MongoFactory.get({'ownerId': parseInt(ownerId,10)});
+		return this.get({'ownerId': parseInt(ownerId,10)});
 	}
 
 	function getByItemId(itemId){
-		return MongoFactory.get({'itemId': MongoFactory.ObjectID(itemId)});
+		return this.get({'itemId': this.ObjectID(itemId)});
 	}
 
 	function getByPath(ownerId, path){
-		return MongoFactory.get({'ownerId': parseInt(ownerId,10), 'path': path});
+		return this.get({'ownerId': parseInt(ownerId,10), 'path': path});
 	}
 
 	function getSize(ownerId) {
-		return MongoFactory.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$contentType', size: {$sum: '$size'} } }]);
+		return this.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$contentType', size: {$sum: '$size'} } }]);
 	}
 
 	function getTotalSize(ownerId) {
-		return MongoFactory.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }]);
+		return this.aggregate([{$match: {ownerId: parseInt(ownerId, 10), type: 'file'} }, {$group: {_id: '$type', size: {$sum: '$size'} } }]);
 	}
 
 	function deleteByOwner(ownerId) {
-		return MongoFactory.delete({'ownerId':parseInt(ownerId,10)});
+		return this.delete({'ownerId':parseInt(ownerId,10)});
 	}
 
 	function updateSize(id, size, username) {
-		return MongoFactory.prepare()
+		return this.prepare()
 			.then((collection) => new Promise((resolve, reject) => 
 				collection.update( {'_id': id}, {$inc: { size: parseInt(size, 10) }, $set: {lastUpdate: new Date(), lastUpdateName: username} }, { safe : true }, (error) => error ? resolve() : reject(error) ) ) 
 			);

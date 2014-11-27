@@ -46,11 +46,11 @@ module.exports = MongoFactory;
 	}
 
 	function addChildren(id, childrenId) {
-		return MongoFactory.prepare()
+		return this.prepare()
 			.then((collection) => new Promise((resolve, reject) => collection.update( {'_id': id}, {$push: childrenId}, { safe : true }, (error) => error ? resolve() : reject(error) ) ) );
 	}
 
 	function updateChildren(id, children) {
 		
-		return MongoFactory.update.byId(id, {children: children});
+		return this.update.byId(id, {children: children});
 	}

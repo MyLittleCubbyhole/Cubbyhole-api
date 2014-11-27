@@ -56,7 +56,7 @@ module.exports = Service;
 		item.ownerId = path.substring(0, slashPathIndex);
 		item.lastUpdate = new Date();
 
-		this.getNewItemName(item._id)
+		return this.getNewItemName(item._id)
 			.then((name) => {
 				item.name = name;
 				item.fullPath = item._id = item.ownerId + item.path + item.name;
