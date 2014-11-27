@@ -28,6 +28,7 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.get.folderById = getFolderById;
 	MongoFactory.update.addChildren = addChildren;
 	MongoFactory.update.children = updateChildren;
 
@@ -38,6 +39,11 @@ module.exports = MongoFactory;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
+
+	function getFolderById(id) {
+		return this.prepare()
+			.then((collection) => new Promise((resolve, reject) => collection.findOne({_id: id, type: 'folder'}, (error, result) => error ? reject(error) : resolve(result)) ));
+	}
 
 	function addChildren(id, childrenId) {
 		return MongoFactory.prepare()
