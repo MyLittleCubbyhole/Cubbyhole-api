@@ -44,7 +44,7 @@ module.exports = MongoFactory;
 
 	function getFileById(id) {
 		return this.prepare()
-			.then((collection) => new Promise((resolve, reject) => collection.findOne({_id: id}, (error, result) => error ? reject(error) : resolve(result)) ));
+			.then((collection) => new Promise((resolve, reject) => collection.findOne({_id: id, type: 'file'}, (error, result) => error ? reject(error) : resolve(result)) ));
 	}
 
 	function updateMD5(id, md5) {
