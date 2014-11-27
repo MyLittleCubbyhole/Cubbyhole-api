@@ -7,7 +7,10 @@
 	var FileFactory = require(__dirname + '/../factories/file'),
 		FolderFactory = require(__dirname + '/../factories/folder'),
 		ItemFactory = require(__dirname + '/../factories/item'),
-		BinaryFileFactory = require('..todo..');
+		BinaryFileFactory = require('..todo..'),
+		UserFactory = require(__dirname + '/../../../user/factories/user'),
+		SharingFactory = require(__dirname + '/../factories/sharing'),
+		HistoricFactory = require('..todo..');
 
 /*Managers requiring*/
 
@@ -29,6 +32,7 @@
 	Service._move = _move;
 	Service.move = move;
 	Service.exist = exist;
+	Service.share = share;
 
 module.exports = Service;
 
@@ -84,7 +88,14 @@ module.exports = Service;
 				.then((item) => this._move(item, path, creatorId, creatorName, copy))
 				.then(() => move ? ItemFactory.delete.byPath(path, creatorName) : Promise.resolve());
 	}
-	
+
 	function exist(id) {
 		return id === '/' ? Promise.resolve(true) : ItemFactory.get.byId(id).then(() => true, () => false);
+	}
+
+	function share(id, target, sharer, right = 'R') {
+		return UserFactory.get.byEmail(target)
+			.then((user) => this.unshare(id, user.email, sharer).then(() => user) )
+			.then((user) => SharingFactory.create({ownerId: sharer, fullPath: id, targetId: user.id, right: right}).then(() => user))
+			.then((user) => HistoricFactory.create.event({ownerId: sharer, targetOwner: user.id, fullPath: id, action: 'share', name: target, itemType: right}));
 	}
