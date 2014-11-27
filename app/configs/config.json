@@ -1,0 +1,57 @@
+{
+	"server": {
+		"version": "v0",
+		"port": 6001,
+		"parallelizeInitialization": true
+	},
+	"databases": {
+		"mongodb": {
+			"path": "kanto-driver-mongodb",
+			"module": true,
+			"host": "localhost",
+			"port": 27017,
+			"schema": {
+				"name": "cubbyholdedb",
+				"user": "root",
+				"password": "root",
+				"options": {
+					"safe": true,
+					"numberOfRetries": 10,
+					"retryMilliSeconds": 5000
+				}
+			},
+			"server_options": {
+				"auto_reconnect": true
+			}
+		},
+		"mysql": {
+			"path": "/drivers/mysql.js",
+			"module": false,
+			"host": "localhost",
+			"port": 3306,
+			"schema": {
+				"name": "cubbyholedb",
+				"user": "cubbyholeuser",
+				"password": "cubbyholepassword"
+			}
+		}
+	},
+	"websocket": {
+		"name": "socket.io",
+		"enabled": true,
+		"path": "/socketServer/socketio.js",
+		"module": false
+	},
+	"session" : {
+		"name" : "Redis",
+		"enabled" : true,
+		"path" : "/sessionProvider/redis.js",
+		"module" : false,
+		"storeOptions" : {
+			"host" : "127.0.0.1",
+			"port" : 6379
+		},
+		"secret": "sid",
+		"key": "cubbyhole"
+	}
+}

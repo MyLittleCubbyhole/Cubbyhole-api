@@ -1,0 +1,33 @@
+{
+  "name": "CubbyHoleWebservice",
+  "version": "0.0.3",
+  "description": "WebService CubbyHole",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "polochon@ns353253.ip-91-121-93.eu:/var/repo/cubbyhole.git"
+  },
+  "keywords": [
+    "CubbyHole",
+    "box",
+    "storage",
+    "webservice",
+    "api",
+    "node",
+    "polochon"
+  ],
+  "author": "Polochon",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "mysql": "~2.1.1",
+    "express": "~3.5.1",
+    "mongodb": "~1.4.0",
+    "connect-multiparty": "~1.0.3",
+    "nodemailer": "~0.6.3",
+    "moment": "~2.6.0"
+  }
+}
