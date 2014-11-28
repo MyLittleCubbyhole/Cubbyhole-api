@@ -24,6 +24,7 @@
 
 	MongoFactory.get.byOwner = getByOwner;
 	MongoFactory.get.byTargetOwner = getByTargetOwner;
+	MongoFactory.get.byUser = getByUser;
 
 module.exports = MongoFactory;
 
@@ -39,4 +40,8 @@ module.exports = MongoFactory;
 
 	function getByTargetOwner(targetId = -1) {
 		return this.get({'targetOwner': targetId});
+	}
+
+	function getByUser(userId, offset = 0, limit = 50) {
+		return this.get({ $or: [ {'ownerId':userId}, {'targetOwner':userId} ] }, offset, limit, {data: -1});
 	}
