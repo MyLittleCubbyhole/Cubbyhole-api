@@ -2,6 +2,10 @@
 
 	var Manager = require('kanto-patterns').manager.clone();
 
+/*Services requiring*/
+
+	var ItemService = require(__dirname + '/../services/item');
+
 /*Factories requiring*/
 
 	var ItemFactory = require(__dirname + '/../factories/item'),
@@ -40,7 +44,7 @@ module.exports = Manager;
 
 		return ItemFactory.get.byId(id)
 			.then((item) => item.type === 'folder' ? Promise.all(item.children.map((childrenId) => ItemFactory._deleteItem(childrenId))) : BinaryFileFactory.delete.byId(id) )
-			.then(() => SharingManager.unshareAll())
+			.then(() => ItemService.unshareAll())
 			.then(() => ItemFactory.delete.byId(id));
 	}
 
