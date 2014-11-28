@@ -4,7 +4,8 @@
 
 /*Attributes definitions*/
 
-	MongoFactory._name = 'historic';
+	MongoFactory._name = 'Historic';
+	MongoFactory._collectionName = 'historic';
 
 /*Model definition*/
 
