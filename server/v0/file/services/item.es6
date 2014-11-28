@@ -11,14 +11,14 @@
 		UserFactory = require(__dirname + '/../../user/factories/user'),
 		SharingFactory = require(__dirname + '/../factories/sharing'),
 		HistoricFactory = require('..todo..'),
-		TokenFactory = require('..todo..');
+		TokenFactory = require(__dirname + '/../../factories/token');
 
 /*Managers requiring*/
 
 	var SharingManager = require('..todo..'),
 		FileManager = require(__dirname + '/../managers/file'),
 		FolderManager = require(__dirname + '/../managers/folder'),
-		TokenManager = require('..todo..');
+		TokenManager = require(__dirname + '/../../factories/token');
 
 /*Attributes definitions*/
 
