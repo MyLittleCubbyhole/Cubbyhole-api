@@ -8,7 +8,7 @@
 		FolderFactory = require(__dirname + '/../factories/folder'),
 		ItemFactory = require(__dirname + '/../factories/item'),
 		BinaryFileFactory = require('..todo..'),
-		UserFactory = require(__dirname + '/../../../user/factories/user'),
+		UserFactory = require(__dirname + '/../../user/factories/user'),
 		SharingFactory = require(__dirname + '/../factories/sharing'),
 		HistoricFactory = require('..todo..'),
 		TokenFactory = require('..todo..');
