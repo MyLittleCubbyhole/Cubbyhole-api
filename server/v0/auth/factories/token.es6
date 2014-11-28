@@ -35,11 +35,11 @@ module.exports = MysqlFactory;
 /*Public methods definitions*/
 
 	function getAll() {
-		return MysqlFactory.query('select * from `token`;');
+		return this.query('select * from `token`;');
 	}
 
 	function getByFileId(fileId) {
-		return MysqlFactory.query('select * from `token` where `fileid` = "'+ fileId +'";');
+		return this.query('select * from `token` where `fileid` = "'+ fileId +'";');
 	}
 
 	function createToken(model) {
@@ -51,9 +51,9 @@ module.exports = MysqlFactory;
 					"' + model.origin + '",' +
 					(model.userId ? parseInt(model.userId, 10) : null) + ',' +
         			'"' + (model.fileId || null) + '")';
-		return MysqlFactory.query(query);
+		return this.query(query);
 	}
 
 	function deleteByFileId(fileId) {
-		return MysqlFactory.query('delete from `token` where `fileid`= "'+ fileId + '";');
+		return this.query('delete from `token` where `fileid`= "'+ fileId + '";');
 	}
