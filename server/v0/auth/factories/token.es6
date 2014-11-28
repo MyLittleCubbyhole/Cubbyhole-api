@@ -5,7 +5,7 @@
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'Token';
-	MysqlFactory._table = 'Token';
+	MysqlFactory._table = 'token';
 
 /*Model definition*/
 
