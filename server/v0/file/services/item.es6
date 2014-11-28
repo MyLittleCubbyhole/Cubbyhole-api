@@ -115,7 +115,7 @@ module.exports = Service;
 	function unshareAll(id) {
 		return ItemFactory.get.byId(id)
 			.then((item) => SharingFactory.get.byItemId(item._id))
-			.then((sharings) => Promise.all(sharings.map( (sharing) => FolderFactory.delete.children(sharing.sharedWith + '/Shared', id) )))
+			.then((sharings) => Promise.all(sharings.map( (sharing) => /*debug a faire...*/FolderFactory.delete.children(sharing.sharedWith + '/Shared', id) )))
 			.then(() => SharingFactory.delete.byItemId(id));
 
 	}

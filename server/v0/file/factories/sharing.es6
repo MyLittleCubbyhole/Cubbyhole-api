@@ -25,6 +25,7 @@
 	MongoFactory.get.byTarget = getByTarget;
 	MongoFactory.update.right = updateRight;
 	MongoFactory.delete.byItemAndTarget = deleteByItemAndTarget;
+	MongoFactory.delete.byItem = deleteByItem;
 
 module.exports = MongoFactory;
 
@@ -52,4 +53,8 @@ module.exports = MongoFactory;
 
 	function deleteByItemAndTarget(itemId, targetId) {
 		return this.delete({'itemId': itemId, 'sharedWith': targetId});
+	}
+
+	function deleteByItem(itemId) {
+		return this.delete({'itemId': itemId});
 	}
