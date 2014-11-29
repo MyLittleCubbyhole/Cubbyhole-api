@@ -17,8 +17,6 @@
 /*Public methods declarations*/
 
 	Filter.verifyToken = verifyToken;
-	Filter.verifyToken = verifyToken;
-	Filter.verifyToken = verifyToken;
 
 module.exports = Filter;
 
