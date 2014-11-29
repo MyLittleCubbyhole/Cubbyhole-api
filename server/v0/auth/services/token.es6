@@ -92,7 +92,7 @@ module.exports = Service;
 	}
 
 	function generate(data = new Date().getTime()) {
-		return Security.aesEncryption(JSON.stringify(data), global.parameters.apiKey);
+		return this.uriEncode(Security.aesEncryption(JSON.stringify(data), global.parameters.apiKey));
 	}
 
 	function uriEncode(accessToken) {
