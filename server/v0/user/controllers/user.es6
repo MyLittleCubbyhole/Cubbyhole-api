@@ -61,6 +61,6 @@ module.exports = Controller;
 
 		Controller.isDefined({email: request.query.email})
 			.then((parameters) => UserFactory.get.byEmail(parameters.email))
-			.then((result) => result.length > 0 ? response.json({user: result[0]}) : Promise.reject(Error('User not found')))
+			.then((result) => result.length > 0 ? response.json({user: UserFactory.reduce(result[0])}) : Promise.reject(Error('User not found')))
 			.catch((error) => next(error));
 	}
