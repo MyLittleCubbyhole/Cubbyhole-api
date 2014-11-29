@@ -76,7 +76,8 @@ module.exports = Service;
 				if(tokenFetched.userId)
 					return {
 						userId: tokenFetched.userId,
-						userName: tokenFetched.firstname + ' ' + tokenFetched.lastname
+						userName: tokenFetched.firstname + ' ' + tokenFetched.lastname,
+						origin: tokenFetched.origin
 					};
 				else
 					throw Error('unauthorized token');
