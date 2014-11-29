@@ -4,7 +4,7 @@
 
 /*Attributes definitions*/
 
-	Routing._prefix = '/';
+	Routing._prefix = '/api';
 	Routing._versioning = true;
 
 /*Overridden methods declarations*/
@@ -21,14 +21,14 @@ module.exports = Routing;
 	}
 
 	function declare(router) {
-		router.get('/api/logout', this.controllers.auth.get.logout);
-		router.get('/api/checkToken', 
+		router.get('/logout', this.controllers.auth.get.logout);
+		router.get('/checkToken', 
 			this.filters.token.verifyToken,
 			this.controllers.auth.get.checkToken);
-		router.get('/api/checkAdminToken', 
+		router.get('/checkAdminToken', 
 			this.filters.token.verifyToken,
 			this.deps.user.filters.user.isAdministrator, 
 			this.controllers.auth.get.checkToken);
-		router.get('/api/activation', this.controllers.auth.get.activateAccount);
-		router.post('/api/auth', this.controllers.auth.post.authenticate);
+		router.get('/activation', this.controllers.auth.get.activateAccount);
+		router.post('/auth', this.controllers.auth.post.authenticate);
 	}
