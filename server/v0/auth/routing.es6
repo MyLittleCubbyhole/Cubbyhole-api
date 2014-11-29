@@ -10,7 +10,6 @@
 /*Overridden methods declarations*/
 
 	Routing.init = init;
-	//Routing.socketInit = socketInit;
 	Routing.declare = declare;
 
 module.exports = Routing;
@@ -20,10 +19,6 @@ module.exports = Routing;
 	function init() { 
 		this.loadDepsFilters('user');//load the user module filters
 	}
-
-	//function socketInit(sockets, socket) {
-	//	/*Do Something*/
-	//}
 
 	function declare(router) {
 		router.get('/api/logout', this.controllers.auth.get.logout);
