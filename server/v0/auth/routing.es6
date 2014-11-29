@@ -30,9 +30,10 @@ module.exports = Routing;
 		router.get('/api/checkToken', 
 			this.filters.token.verifyToken,
 			this.controllers.auth.get.checkToken);
-		router.post('/api/auth', this.controllers.auth.post.authenticate);
 		router.get('/api/checkAdminToken', 
 			this.filters.token.verifyToken,
 			this.deps.user.filters.user.isAdministrator, 
 			this.controllers.auth.get.checkToken);
+		router.post('/api/auth', this.controllers.auth.post.authenticate);
+		router.get('/api/activation', this.controllers.auth.get.activateAccount);
 	}
