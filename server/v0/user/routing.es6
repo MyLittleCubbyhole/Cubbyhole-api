@@ -4,7 +4,7 @@
 
 /*Attributes definitions*/
 
-	Routing._prefix = '/';
+	Routing._prefix = '/api';
 	Routing._versioning = true;
 
 /*Overridden methods declarations*/
@@ -28,4 +28,9 @@ module.exports = Routing;
 		router.get('/users/:email',
 			this.deps.auth.filters.token.verifyToken,
 			this.controllers.user.get.byEmail);
+
+		router.get('/users/:userId/historic',
+			this.deps.auth.filters.token.verifyToken,
+			this.filters.user.restrictUser,
+			this.controllers.historic.get.byUser);
 	}
