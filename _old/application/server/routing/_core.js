@@ -8,24 +8,24 @@ var file = require(global.paths.server + '/routing/rest/file')
 
 routing.init = function(app) {
 
-	app.get('/api/activation', user.get.activateAccount);
-	app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
-	app.get('/api/checkAdminToken', filters.tokenInterceptor, filters.adminInterceptor, user.get.checkToken);
-	app.get('/api/logout', user.get.logout);
-	app.post('/api/auth', user.post.authenticate);
+	// app.get('/api/activation', user.get.activateAccount);
+	// app.get('/api/checkToken', filters.tokenInterceptor, user.get.checkToken);
+	// app.get('/api/checkAdminToken', filters.tokenInterceptor, filters.adminInterceptor, user.get.checkToken);
+	// app.get('/api/logout', user.get.logout);
+	// app.post('/api/auth', user.post.authenticate);
 
 
-	app.get('/api/users', filters.tokenInterceptor, filters.adminInterceptor, user.get.all);
-	app.get(/^\/api\/users\/shared\/(\/?.+)+\/$/, filters.tokenInterceptor, user.get.usersBySharing);
-	app.get('/api/users/:email', filters.tokenInterceptor, user.get.byEmail);
+	// app.get('/api/users', filters.tokenInterceptor, filters.adminInterceptor, user.get.all);
+	// app.get('/api/users/:email', filters.tokenInterceptor, user.get.byEmail);
+	// app.get('/api/users/:id/historic', filters.tokenInterceptor, user.get.historic);
 	app.get('/api/users/:id/plan', filters.tokenInterceptor, user.get.currentPlan);
 	app.get('/api/users/:id/quota', filters.tokenInterceptor, user.get.usedQuota);
-	app.get('/api/users/:id/historic', filters.tokenInterceptor, user.get.historic);
 	app.post('/api/users', multipartDecoder, user.post.create);
 	app.post('/api/users/:userId/plans/:planId', filters.tokenInterceptor, user.post.subscribe);
     app.put('/api/users/:id', multipartDecoder, filters.tokenInterceptor, user.put.byId);
 	app.put('/api/users/:id/promote', filters.tokenInterceptor, filters.adminInterceptor, user.put.promote);
 	app.put('/api/users/:id/demote', filters.tokenInterceptor, filters.adminInterceptor, user.put.demote);
+	app.get(/^\/api\/users\/shared\/(\/?.+)+\/$/, filters.tokenInterceptor, user.get.usersBySharing);
 
 	app.get('/api/plans', plan.get.all);
 	app.get('/api/plans/images', plan.get.images);
