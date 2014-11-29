@@ -65,3 +65,7 @@ module.exports = Controller;
 			.then((user) => response.json({user: user}))
 			.catch((error) => next(error));
 	}
+
+	function getPlan(request, response, next) {
+		
+	}
