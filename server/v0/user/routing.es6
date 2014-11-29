@@ -9,17 +9,20 @@
 
 /*Overridden methods declarations*/
 
-	//Routing.init = init;
+	Routing.init = init;
 	Routing.declare = declare;
 
 module.exports = Routing;
 
 /*Overridden methods definitions*/
 
-	//function init(app) { 
-	//	/*Do Something*/ 
-	//}
+	function init() { 
+		this.loadDepsFilters('auth');
+	}
 
 	function declare(router) {
-		router.get('/users', this.controllers.user.get.all);
+		router.get('/users',
+			this.deps.auth.filters.token.verifyToken,
+			this.filters.user.isAdministrator,
+			this.controllers.user.get.all);
 	}
