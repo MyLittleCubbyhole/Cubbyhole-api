@@ -25,4 +25,7 @@ module.exports = Routing;
 			this.deps.auth.filters.token.verifyToken,
 			this.filters.user.isAdministrator,
 			this.controllers.user.get.all);
+		router.get('/users/:email',
+			this.deps.auth.filters.token.verifyToken,
+			this.controllers.user.get.byEmail);
 	}

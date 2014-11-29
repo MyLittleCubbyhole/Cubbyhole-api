@@ -17,6 +17,7 @@
 /*Public methods declarations*/
 
 	Controller.get.all = getAll;
+	Controller.get.byEmail = getByEmail;
 
 module.exports = Controller;
 
@@ -54,4 +55,12 @@ module.exports = Controller;
 			response.json({users: users});
 		})
 		.catch((error) => next(error));
+	}
+
+	function getByEmail(request, response, next) {
+
+		Controller.isDefined({email: request.query.email})
+			.then((parameters) => UserFactory.get.byEmail(parameters.email))
+			.then((result) => result.length > 0 ? response.json({user: result[0]}) : Promise.reject(Error('User not found')))
+			.catch((error) => next(error));
 	}
