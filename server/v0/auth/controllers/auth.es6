@@ -29,7 +29,7 @@ module.exports = Controller;
 	function authenticate(request, response, next) {
 		
 		Controller.isDefined({email: request.body.email, password: request.body.password})
-			.then((parameters) => AuthService.authenticate(parameters.email, parameters.password))
+			.then((parameters) => AuthService.authenticate(parameters.email, parameters.password, request.header('User-Agent')))
 			.then((token) => response.json({token: token}))
 			.catch((error) => next(error));
 	}

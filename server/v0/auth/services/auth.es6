@@ -32,7 +32,7 @@ module.exports = Service;
 
 /*Public methods definitions*/
 
-	function authenticate(email = '', password) {
+	function authenticate(email = '', password, origin) {
 		return UserFactory.get.byEmail(email)
 			.then((users) => {
 				if(users.length === 0)
