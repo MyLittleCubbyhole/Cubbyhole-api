@@ -9,8 +9,11 @@
 
 /*Factories requiring*/
 
-	var UserFactory = require(__dirname + '/../../user/factories/user'),
-		TokenFactory = require(__dirname + '/../factories/token');
+	var UserFactory = require(__dirname + '/../../user/factories/user');
+
+/*Managers requiring*/
+
+	var TokenManager = require(__dirname + '/../managers/token');
 
 /*Attributes definitions*/
 
@@ -32,17 +35,21 @@ module.exports = Service;
 
 /*Public methods definitions*/
 
-	function authenticate(email = '', password, origin) {
+	function authenticate(email = '', password = '', origin = '') {
+
+		var user;
 		return UserFactory.get.byEmail(email)
 			.then((users) => {
 				if(users.length === 0)
 					throw Error('Invalid email');
 
-				var user = users[0];
-
+				user = users[0];
 				return Security.verify(user.password, password, user.salt)
-					.then(() => user, Promise.reject(Error('Bad Credentials')));
+					.catch(() => Promise.reject(Error('Bad Credentials')));
 			})
 			.then(() => TokenService.generate())
-			.then();
+			.then((token) => {
+				TokenManager.create.authToken(user.id, token, origin);
+				return token;
+			});
 	}
