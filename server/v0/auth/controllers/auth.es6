@@ -22,6 +22,7 @@
 
 	Controller.post.auth = authenticate;
 	Controller.get.logout = logout;
+	Controller.get.checkToken = checkToken;
 
 module.exports = Controller;
 
@@ -44,4 +45,8 @@ module.exports = Controller;
 		Controller.isDefined({token: request.query.token})
 			.then((parameters) => TokenFactory.delete.byId(parameters.token))
 			.catch((error) => next(error));
+	}
+
+	function checkToken(request, response) {
+		response.status(200).json({message: 'the token is valid'});
 	}
