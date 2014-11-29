@@ -2,6 +2,10 @@
 
 	var Service = require('kanto-patterns').service.clone();
 
+/*Services requiring*/
+
+	var Security = require('kanto-tools-security');
+
 /*Factories requiring*/
 
 	var TokenFactory = require(__dirname + '/../factories/token'),
@@ -27,6 +31,9 @@
 
 	Service.verifyToken = verifyToken;
 	Service.isAdminToken = isAdminToken;
+	Service.generate = generate;
+	Service.uriEncode = uriEncode;
+	Service.uriDecode = uriDecode;
 
 module.exports = Service;
 
@@ -82,4 +89,16 @@ module.exports = Service;
 				if(users.length === 0 || users[0].roleId !== 2)
 					throw Error('unauthorized user');
 			});
+	}
+
+	function generate(data = new Date().getTime()) {
+		return Security.aesEncryption(JSON.stringify(data), global.parameters.apiKey);
+	}
+
+	function uriEncode(accessToken) {
+		return encodeURIComponent(accessToken);
+	}
+
+	function uriDecode(accessToken) {
+		return decodeURIComponent(accessToken);
 	}
