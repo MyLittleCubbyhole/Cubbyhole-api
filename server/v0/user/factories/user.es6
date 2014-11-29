@@ -9,8 +9,8 @@
 
 /*Model definition*/
 
-	MysqlFactory.model.password = '';
-	MysqlFactory.model.salt = '';
+	MysqlFactory.model._password = '';
+	MysqlFactory.model._salt = '';
 	MysqlFactory.model.photo = '';
 	MysqlFactory.model.storage = 0;
 	MysqlFactory.model.firstname = '';
