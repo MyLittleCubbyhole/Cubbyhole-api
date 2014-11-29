@@ -25,4 +25,9 @@ module.exports = Routing;
 	//	/*Do Something*/
 	//}
 
-	function declare(router) {	}
+	function declare(router) {
+		router.get('/api/logout', this.controllers.auth.get.logout);
+		router.get('/api/checkToken', this.controllers.auth.get.checkToken);
+		router.post('/api/auth', this.controllers.auth.post.authenticate);
+		router.get('/api/checkAdminToken', this.controllers.auth.get.checkToken);
+	}
