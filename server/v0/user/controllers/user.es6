@@ -39,13 +39,13 @@ module.exports = Controller;
 		if(!role && !email)
 			promise = UserFactory.get.all(offset, limit);
 		else
-		if(!!role && !!email)
-			promise = UserFactory.get.byEmailAndRole(email, role);
-		else
-		if(!!role)
-			promise = UserFactory.get.byRole(role);
-		else
-			promise = UserFactory.get.byEmailLike(email);
+			if(!!role && !!email)
+				promise = UserFactory.get.byEmailAndRole(email, role);
+			else
+				if(!!role)
+					promise = UserFactory.get.byRole(role);
+				else
+					promise = UserFactory.get.byEmailLike(email);
 
 		promise.then((users) => {
 			
@@ -61,6 +61,7 @@ module.exports = Controller;
 
 		Controller.isDefined({email: request.query.email})
 			.then((parameters) => UserFactory.get.byEmail(parameters.email))
-			.then((result) => result.length > 0 ? response.json({user: UserFactory.reduce(result[0])}) : Promise.reject(Error('User not found')))
+			.then((result) => result.length > 0 ? UserFactory.reduce(result[0]) : Promise.reject(Error('User not found')))
+			.then((user) => response.json({user: user}))
 			.catch((error) => next(error));
 	}
