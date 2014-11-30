@@ -27,7 +27,7 @@
 
 /*Public methods declarations*/
 
-	MysqlFactory.get.methodName = method;
+	MysqlFactory.create = create;
 
 module.exports = MysqlFactory;
 
@@ -37,6 +37,15 @@ module.exports = MysqlFactory;
 
 /*Public methods definitions*/
 
-	function method(/*arguments*/) {
-		/*content*/
+	function create(model) {
+		var query = 'INSERT INTO `subscribe` (`userid`,`planid`,`datestart`,`dateend`, `paused`, `remainingtime`, `renew`)\
+			VALUES (' + parseInt(model.userId, 10) + ',\
+					' + parseInt(model.planId, 10) + ',\
+					"' + model.dateStart + '",\
+					"' + model.dateEnd + '",\
+					0,\
+					0,\
+					' + (model.renew ? 1 : 0) + ');';
+
+		return this.query(query);
 	}
