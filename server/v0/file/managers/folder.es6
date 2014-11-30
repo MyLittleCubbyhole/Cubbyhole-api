@@ -2,6 +2,10 @@
 
 	var Manager = require('kanto-patterns').manager.clone();
 
+/*Service requiring*/
+
+	var moment = require('moment');
+
 /*Factories requiring*/
 
 	var FolderFactory = require(__dirname + '/../factories/folder'),
@@ -57,7 +61,7 @@ module.exports = Manager;
 					name: model.name,
 					type: 'folder',
 					size: model.size ? parseInt(model.size, 10) : 0,
-					lastUpdate: new Date(),
+					lastUpdate: moment().format('YYY-MM-DD'),
 					lastUpdateName: model.creatorName,
 					undeletable: typeof model.undeletable !== 'undefined' && model.undeletable === true,
 					children: []
