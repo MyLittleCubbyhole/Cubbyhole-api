@@ -2,6 +2,10 @@
 
 	var MongoFactory = require('kanto-patterns').factory.clone();
 
+/*Serivice requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MongoFactory._name = 'Historic';
@@ -15,7 +19,7 @@
 	MongoFactory.model.action = '';
 	MongoFactory.model.name = '';
 	MongoFactory.model.itemType = '';
-	MongoFactory.model.date = new Date();
+	MongoFactory.model.date = moment().format('YYY-MM-DD');
 
 /*Overridden methods declarations*/
 

@@ -2,6 +2,10 @@
 
 	var Manager = require('kanto-patterns').manager.clone();
 
+/*Services requiring*/
+
+	var moment = require('moment');
+
 /*Factories requiring*/
 
 	var historicFactory = require(__dirname + '/../factories/historic');
@@ -34,6 +38,6 @@ module.exports = Manager;
 			action: action,
 			name: name,
 			itemType: type,
-			date: new Date()
+			date: moment().format('YYY-MM-DD')
 		});
 	}
