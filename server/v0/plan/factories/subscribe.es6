@@ -2,6 +2,10 @@
 
 	var MysqlFactory = require('kanto-patterns-mysql').mysqlFactory.clone();
 
+/*Service requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'Subscribe';
@@ -11,8 +15,8 @@
 
 	MysqlFactory.model.userid = -1;
 	MysqlFactory.model.planid = -1;
-	MysqlFactory.model.datestart = new Date();
-	MysqlFactory.model.dateend = new Date();
+	MysqlFactory.model.datestart = moment().format('YYY-MM-DD');
+	MysqlFactory.model.dateend = moment().format('YYY-MM-DD');
 	MysqlFactory.model.paused = 0;
 	MysqlFactory.model.remainingtime = 0;
 	MysqlFactory.model.renew = 0;
