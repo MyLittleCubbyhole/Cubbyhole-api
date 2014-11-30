@@ -2,6 +2,10 @@
 
 	var MysqlFactory = require('kanto-patterns-mysql').mysqlFactory.clone();
 
+/*Services requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'User';
@@ -9,14 +13,14 @@
 
 /*Model definition*/
 
-	MysqlFactory.model.password = '';
-	MysqlFactory.model.salt = '';
+	MysqlFactory.model._password = '';
+	MysqlFactory.model._salt = '';
 	MysqlFactory.model.photo = '';
 	MysqlFactory.model.storage = 0;
 	MysqlFactory.model.firstname = '';
 	MysqlFactory.model.lastname = '';
-	MysqlFactory.model.inscriptionDate = new Date();
-	MysqlFactory.model.birthdate = new Date();
+	MysqlFactory.model.inscriptionDate = moment().format('YYY-MM-DD');
+	MysqlFactory.model.birthdate = moment().format('YYY-MM-DD');
 	MysqlFactory.model.email = '';
 	MysqlFactory.model.country = '';
 	MysqlFactory.model.countryCode = '';

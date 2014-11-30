@@ -2,6 +2,10 @@
 
 	var MongoFactory = require('kanto-patterns-mongodb').factory.clone();
 
+/*Service requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MongoFactory._name = 'Folder';
@@ -15,7 +19,7 @@
 	MongoFactory.model.path = '/';
 	MongoFactory.model.name = '';
 	MongoFactory.model.type = 'folder';
-	MongoFactory.model.lastUpdate = new Date();
+	MongoFactory.model.lastUpdate = moment().format('YYY-MM-DD');
 	MongoFactory.model.lastUpdateName = '';
 	MongoFactory.model.size = 0;
 	MongoFactory.model.itemId = '';
@@ -28,6 +32,7 @@
 
 /*Public methods declarations*/
 
+	MongoFactory.get.folderById = getFolderById;
 	MongoFactory.update.addChildren = addChildren;
 	MongoFactory.update.children = updateChildren;
 
@@ -39,12 +44,17 @@ module.exports = MongoFactory;
 
 /*Public methods definitions*/
 
+	function getFolderById(id) {
+		return this.prepare()
+			.then((collection) => new Promise((resolve, reject) => collection.findOne({_id: id, type: 'folder'}, (error, result) => error ? reject(error) : resolve(result)) ));
+	}
+
 	function addChildren(id, childrenId) {
-		return MongoFactory.prepare()
+		return this.prepare()
 			.then((collection) => new Promise((resolve, reject) => collection.update( {'_id': id}, {$push: childrenId}, { safe : true }, (error) => error ? resolve() : reject(error) ) ) );
 	}
 
 	function updateChildren(id, children) {
 		
-		return MongoFactory.update.byId(id, {children: children});
+		return this.update.byId(id, {children: children});
 	}

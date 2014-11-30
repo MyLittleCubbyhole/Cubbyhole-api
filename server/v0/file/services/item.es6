@@ -8,16 +8,17 @@
 		FolderFactory = require(__dirname + '/../factories/folder'),
 		ItemFactory = require(__dirname + '/../factories/item'),
 		BinaryFileFactory = require('..todo..'),
-		UserFactory = require(__dirname + '/../../../user/factories/user'),
+		UserFactory = require(__dirname + '/../../user/factories/user'),
 		SharingFactory = require(__dirname + '/../factories/sharing'),
-		HistoricFactory = require('..todo..');
+		HistoricFactory = require('..todo..'),
+		TokenFactory = require(__dirname + '/../../factories/token');
 
 /*Managers requiring*/
 
 	var SharingManager = require('..todo..'),
 		FileManager = require(__dirname + '/../managers/file'),
 		FolderManager = require(__dirname + '/../managers/folder'),
-		TokenManager = require('..todo..');
+		TokenManager = require(__dirname + '/../../factories/token');
 
 /*Attributes definitions*/
 
@@ -33,6 +34,10 @@
 	Service.move = move;
 	Service.exist = exist;
 	Service.share = share;
+	Service.unshare = unshare;
+	Service.unshareAll = unshareAll;
+	Service.shareFile = shareFile;
+	Service.unshareFile = unshareFile;
 
 module.exports = Service;
 
@@ -51,7 +56,7 @@ module.exports = Service;
 		item.ownerId = path.substring(0, slashPathIndex);
 		item.lastUpdate = new Date();
 
-		this.getNewItemName(item._id)
+		return this.getNewItemName(item._id)
 			.then((name) => {
 				item.name = name;
 				item.fullPath = item._id = item.ownerId + item.path + item.name;
@@ -97,5 +102,37 @@ module.exports = Service;
 		return UserFactory.get.byEmail(target)
 			.then((user) => this.unshare(id, user.email, sharer).then(() => user) )
 			.then((user) => SharingFactory.create({ownerId: sharer, fullPath: id, targetId: user.id, right: right}).then(() => user))
-			.then((user) => HistoricFactory.create.event({ownerId: sharer, targetOwner: user.id, fullPath: id, action: 'share', name: target, itemType: right}));
+			.then((user) => HistoricFactory.create.event(sharer, user.id, id, 'share', target, right));
+	}
+
+	function unshare(id, target, sharer) {
+		return UserFactory.get.byEmail(target)
+			.then((user) => SharingFactory.delete.byItemAndTarget(id, user.id).then(() => user))
+			.then((user) => FolderFactory.delete.children(id + '/Shared', id).then(() => user))
+			.then((user) => HistoricFactory.create.event(sharer, user.id, id, 'unshare', target));
+	}
+
+	function unshareAll(id) {
+		return ItemFactory.get.byId(id)
+			.then((item) => SharingFactory.get.byItemId(item._id))
+			.then((sharings) => Promise.all(sharings.map( (sharing) => /*debug a faire...*/FolderFactory.delete.children(sharing.sharedWith + '/Shared', id) )))
+			.then(() => SharingFactory.delete.byItemId(id));
+
+	}
+
+	function shareFile(id) {
+		var file;
+		return FileFactory.get.fileById(id)
+			.then((item) => {
+				file = item;
+				return TokenFactory.get.byFileId(file.itemId);
+			})
+			.then((tokens) => tokens.length === 0 ? TokenManager.create.token('SHARING', file.itemId, new Date()) : Promise.reject('No sharing found'))
+			.then(() => FileFactory.update.shared(id, true));
+	}
+
+	function unshareFile(id) {
+		return FileFactory.get.fileById(id)
+			.then((file) => TokenFactory.delete.byFileId(file.itemId))
+			.then(() => FileFactory.update.shared(id, false));
 	}

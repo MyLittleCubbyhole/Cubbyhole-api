@@ -17,11 +17,11 @@ module.exports = MysqlDriver;
 	function init() {
 		if(!pool)
 			pool  = Driver.createPool({
-				'host': global.configs.databases.mysql.host,
-				'port': global.configs.databases.mysql.port,
-				'database': global.configs.databases.mysql.schema.name,
-				'user': global.configs.databases.mysql.schema.user,
-				'password': global.configs.databases.mysql.schema.password
+				'host': global.config.databases.mysql.host,
+				'port': global.config.databases.mysql.port,
+				'database': global.config.databases.mysql.schema.name,
+				'user': global.config.databases.mysql.schema.user,
+				'password': global.config.databases.mysql.schema.password
 			});
 
 		return this;
