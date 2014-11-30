@@ -2,6 +2,10 @@
 
 	var Manager = require('kanto-patterns').manager.clone();
 
+/*Service requiring*/
+
+	var moment = require('moment');
+
 /*Managers requiring*/
 
 	var ItemManager = require(__dirname + '/item'),
@@ -46,7 +50,7 @@ module.exports = Manager;
 			creatorId: parseInt(model.creatorId, 10),
 			path: model.path,
 			name: model.name,
-			lastUpdate: new Date(),
+			lastUpdate: moment().format('YYY-MM-DD'),
 			lastUpdateName: model.creatorName,
 			downloads: model.downloads ? parseInt(model.downloads, 10) : 0,
 			size: model.size ? parseInt(model.size, 10) : 0,
