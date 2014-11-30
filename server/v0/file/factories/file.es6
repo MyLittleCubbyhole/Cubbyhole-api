@@ -2,6 +2,10 @@
 
 	var MongoFactory = require('kanto-patterns-mongodb').factory.clone();
 
+/*Service requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MongoFactory._name = 'File';
@@ -15,7 +19,7 @@
 	MongoFactory.model.path = '/';
 	MongoFactory.model.name = '';
 	MongoFactory.model.type = 'file';
-	MongoFactory.model.lastUpdate = new Date();
+	MongoFactory.model.lastUpdate = moment().format('YYY-MM-DD');
 	MongoFactory.model.lastUpdateName = '';
 	MongoFactory.model.downloads = 0;
 	MongoFactory.model.size = 0;
