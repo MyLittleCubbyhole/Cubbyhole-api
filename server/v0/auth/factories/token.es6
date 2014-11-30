@@ -2,6 +2,10 @@
 
 	var MysqlFactory = require('kanto-patterns-mysql').mysqlFactory.clone();
 
+/*Services requiring*/
+
+	var moment = require('moment');
+
 /*Attributes definitions*/
 
 	MysqlFactory._name = 'Token';
@@ -12,7 +16,7 @@
 	MysqlFactory.model.userId = null;
 	MysqlFactory.model.fileId = null;
 	MysqlFactory.model.type = '';
-	MysqlFactory.model.expirationDate = new Date();
+	MysqlFactory.model.expirationDate = moment().format('YYY-MM-DD');
 	MysqlFactory.model.origin = '';
 
 /*Overridden methods declarations*/
