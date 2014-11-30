@@ -27,6 +27,9 @@
 
 /*Public methods declarations*/
 
+	MysqlFactory.get.all = getAll;
+	MysqlFactory.get.currentByUser = getCurrentByUser;
+	MysqlFactory.get.paidSubscriptionsLastDays = getPaidSubscriptionsLastDays;
 	MysqlFactory.create = create;
 
 module.exports = MysqlFactory;
@@ -36,6 +39,29 @@ module.exports = MysqlFactory;
 /*Private methods definitions*/
 
 /*Public methods definitions*/
+
+	function getAll() {
+		return this.query('select * from `subscribe`;');
+	}
+
+	function getCurrentByUser(userId) {
+		var query = 'select * from `subscribe` where `userid` = '+ userId +' and `datestart` < NOW() and `dateend` > NOW();';
+		return this.query(query);
+	}
+
+	function getPaidSubscriptionsLastDays(userId) {
+		var query = 'SELECT count(*) AS COUNT\
+			FROM `subscribe`\
+			WHERE `userid` = ' + parseInt(userId, 10) + '\
+			  AND `planid` <> 1\
+			  AND\
+				(SELECT DATEDIFF(NOW(), MAX(`dateend`))\
+				 FROM `subscribe`\
+				 WHERE `userid` = ' + parseInt(userId, 10) + '\
+				   AND `planid` <> 1) <= 5;';
+
+		return this.query(query);
+	}
 
 	function create(model) {
 		var query = 'INSERT INTO `subscribe` (`userid`,`planid`,`datestart`,`dateend`, `paused`, `remainingtime`, `renew`)\
